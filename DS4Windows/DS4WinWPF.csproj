@@ -404,4 +404,11 @@
 	<ItemGroup>
 		<Folder Remove="extras\" />
 	</ItemGroup>
+	
+  <!-- 编译完成后执行 PowerShell 脚本移动语言文件夹 -->
+  <Target Name="MoveLangFoldersAfterBuild" AfterTargets="AfterBuild">
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Move-LangFolders.ps1&quot; -OutputPath &quot;$(OutDir.TrimEnd('\'))&quot;" 
+          Condition="Exists('$(MSBuildProjectDirectory)\Move-LangFolders.ps1')" 
+          IgnoreExitCode="false" />
+  </Target>
 </Project>

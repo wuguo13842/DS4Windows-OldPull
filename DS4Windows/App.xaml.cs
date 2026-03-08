@@ -32,6 +32,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using WPFLocalizeExtension.Engine;
+using System.Reflection;
 
 namespace DS4WinWPF
 {
@@ -86,6 +87,8 @@ namespace DS4WinWPF
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+			
             runShutdown = true;
             skipSave = true;
 
@@ -781,5 +784,41 @@ namespace DS4WinWPF
                 LogManager.Shutdown();
             }
         }
+		
+		private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+		{
+			// 检查是否是卫星资源程序集
+			if (args.Name.Contains(".resources"))
+			{
+				try
+				{
+					// 获取当前UI文化
+					string cultureName = System.Globalization.CultureInfo.CurrentUICulture.Name;
+					
+					// 构造 Lang 文件夹中的路径
+					string expectedPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Lang", cultureName, args.Name.Split(',')[0] + ".dll");
+					
+					if (System.IO.File.Exists(expectedPath))
+					{
+						return Assembly.LoadFrom(expectedPath);
+					}
+					
+					// 如果找不到特定文化，尝试使用中性文化（如 zh 而不是 zh-CN）
+					string neutralCulture = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+					string neutralPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Lang", neutralCulture, args.Name.Split(',')[0] + ".dll");
+					
+					if (System.IO.File.Exists(neutralPath))
+					{
+						return Assembly.LoadFrom(neutralPath);
+					}
+				}
+				catch (Exception)
+				{
+					// 忽略错误，让默认解析器处理
+				}
+			}
+			
+			return null;
+		}
     }
 }
