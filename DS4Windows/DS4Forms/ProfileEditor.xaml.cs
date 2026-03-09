@@ -108,21 +108,40 @@ namespace DS4WinWPF.DS4Forms
             inputTimer.Elapsed += InputDS4;
             SetupEvents();
         }
+		
+		private void GyroMouseStickToggleTrigBtn_Click(object sender, RoutedEventArgs e)
+		{
+			gyroMouseStickToggleTrigBtn.ContextMenu.IsOpen = true;
+		}
 
-        private void PopulateGyroActionsTriggersMenu()
-        {
-            profileSettingsVM.CreateGyroTriggerMenuItems(gyroControlsTrigBtn.ContextMenu,
-                GyroControlsMenuItem_Click);
+		private void PopulateGyroActionsTriggersMenu()
+		{
+			profileSettingsVM.CreateGyroTriggerMenuItems(gyroControlsTrigBtn.ContextMenu,
+				GyroControlsMenuItem_Click);
 
-            profileSettingsVM.CreateGyroTriggerMenuItems(gyroMouseTrigBtn.ContextMenu,
-                GyroMouseTrigMenuItem_Click);
+			profileSettingsVM.CreateGyroTriggerMenuItems(gyroMouseTrigBtn.ContextMenu,
+				GyroMouseTrigMenuItem_Click);
 
-            profileSettingsVM.CreateGyroTriggerMenuItems(gyroMouseStickTrigBtn.ContextMenu,
-                GyroMouseStickTrigMenuItem_Click);
+			// 为 Turn Behavior 按钮创建菜单
+			profileSettingsVM.CreateGyroTriggerMenuItems(gyroMouseStickTrigBtn.ContextMenu,
+				GyroMouseStickTrigMenuItem_Click);
 
-            profileSettingsVM.CreateGyroTriggerMenuItems(gyroSwipeTrigBtn.ContextMenu,
-                GyroSwipeTrigMenuItem_Click);
-        }
+			// 为 Toggle 按钮创建菜单
+			profileSettingsVM.CreateGyroTriggerMenuItems(gyroMouseStickToggleTrigBtn.ContextMenu,
+				GyroMouseStickToggleTrigMenuItem_Click);
+
+			profileSettingsVM.CreateGyroTriggerMenuItems(gyroSwipeTrigBtn.ContextMenu,
+				GyroSwipeTrigMenuItem_Click);
+		}
+
+		private void GyroMouseStickToggleTrigMenuItem_Click(object sender, RoutedEventArgs e)
+		{
+			ContextMenu menu = gyroMouseStickToggleTrigBtn.ContextMenu;
+			int itemCount = menu.Items.Count;
+			MenuItem alwaysOnItem = menu.Items[itemCount - 1] as MenuItem;
+
+			profileSettingsVM.UpdateGyroMouseStickToggleTrig(menu, e.OriginalSource == alwaysOnItem);
+		}
 
         private void SetupEvents()
         {
@@ -805,6 +824,7 @@ namespace DS4WinWPF.DS4Forms
             profileSettingsVM.PopulateTouchDisInver(touchDisInvertBtn.ContextMenu);
             profileSettingsVM.PopulateGyroMouseTrig(gyroMouseTrigBtn.ContextMenu);
             profileSettingsVM.PopulateGyroMouseStickTrig(gyroMouseStickTrigBtn.ContextMenu);
+			profileSettingsVM.PopulateGyroMouseStickToggleTrig(gyroMouseStickToggleTrigBtn.ContextMenu);
             profileSettingsVM.PopulateGyroSwipeTrig(gyroSwipeTrigBtn.ContextMenu);
             profileSettingsVM.PopulateGyroControlsTrig(gyroControlsTrigBtn.ContextMenu);
             profileSettingsTabCon.DataContext = profileSettingsVM;
@@ -883,6 +903,7 @@ namespace DS4WinWPF.DS4Forms
             profileSettingsVM.PopulateTouchDisInver(touchDisInvertBtn.ContextMenu);
             profileSettingsVM.PopulateGyroMouseTrig(gyroMouseTrigBtn.ContextMenu);
             profileSettingsVM.PopulateGyroMouseStickTrig(gyroMouseStickTrigBtn.ContextMenu);
+			profileSettingsVM.PopulateGyroMouseStickToggleTrig(gyroMouseStickToggleTrigBtn.ContextMenu);
             profileSettingsVM.PopulateGyroSwipeTrig(gyroSwipeTrigBtn.ContextMenu);
             profileSettingsVM.PopulateGyroControlsTrig(gyroControlsTrigBtn.ContextMenu);
             profileSettingsTabCon.DataContext = profileSettingsVM;

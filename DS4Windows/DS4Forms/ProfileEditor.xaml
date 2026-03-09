@@ -1807,23 +1807,40 @@
                                 </StackPanel>
                             </TabItem>
 
-                            <TabItem Header="{lex:Loc MouseJoystick}" Visibility="Collapsed">
-                                <StackPanel x:Name="gyroMouseJoystickPanel">
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <Label Content="Triggers" />
-                                        <Button x:Name="gyroMouseStickTrigBtn" Content="{Binding GyroMouseStickTrigDisplay,FallbackValue='Always On'}" MinWidth="160"
-                                    Margin="8,0,0,0" Click="GyroMouseStickTrigBtn_Click" >
-                                            <Button.ContextMenu>
-                                                <ContextMenu />
-                                            </Button.ContextMenu>
-                                        </Button>
-                                    </StackPanel>
+							<TabItem Header="{lex:Loc MouseJoystick}" Visibility="Collapsed">
+								<StackPanel x:Name="gyroMouseJoystickPanel">
+									<!-- Turn Behavior Trigger -->
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<CheckBox x:Name="gyroMouseStickTurnsCheckBox" 
+												  Content="Turn Behavior Trigger:" 
+												  IsChecked="{Binding GyroMouseStickTurns}" 
+												  ToolTip="{lex:Loc Resources:GyroTriggerBehavior}" 
+												  VerticalAlignment="Center"/>
+										<Button x:Name="gyroMouseStickTrigBtn" 
+												Content="{Binding GyroMouseStickTrigDisplay,FallbackValue='L2'}" 
+												MinWidth="160" Margin="8,0,0,0" 
+												Click="GyroMouseStickTrigBtn_Click">
+											<Button.ContextMenu>
+												<ContextMenu />
+											</Button.ContextMenu>
+										</Button>
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <CheckBox Content="Turn Behavior - Turns Gyro" IsChecked="{Binding GyroMouseStickTurns}"
-                                      ToolTip="{lex:Loc Resources:GyroTriggerBehavior}" />
-                                        <CheckBox Content="Toggle" Margin="8,0,0,0" IsChecked="{Binding GyroMouseStickToggle}" />
-                                    </StackPanel>
+									<!-- Toggle Trigger -->
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<CheckBox x:Name="gyroMouseStickToggleCheckBox" 
+												  Content="Toggle Trigger:" 
+												  IsChecked="{Binding GyroMouseStickToggle}" 
+												  VerticalAlignment="Center"/>
+										<Button x:Name="gyroMouseStickToggleTrigBtn" 
+												Content="{Binding GyroMouseStickToggleTrigDisplay,FallbackValue='L2'}" 
+												MinWidth="160" Margin="8,0,0,0" 
+												Click="GyroMouseStickToggleTrigBtn_Click">
+											<Button.ContextMenu>
+												<ContextMenu />
+											</Button.ContextMenu>
+										</Button>
+									</StackPanel>
 
                                     <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
                                         <Label Content="{lex:Loc DeadZone}" />

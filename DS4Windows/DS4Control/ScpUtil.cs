@@ -2098,6 +2098,12 @@ namespace DS4Windows
         {
             return m_Config.sAMouseStickTriggers[device];
         }
+		
+		public static string[] SAMousestickToggleTriggers => m_Config.sAMouseStickToggleTriggers;
+		public static string GetSAMouseStickToggleTriggers(int device)
+		{
+			return m_Config.sAMouseStickToggleTriggers[device];
+		}
 
         public static bool[] SAMouseStickTriggerCond => m_Config.sAMouseStickTriggerCond;
         public static bool GetSAMouseStickTriggerCond(int device)
@@ -3759,6 +3765,10 @@ namespace DS4Windows
         { BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS, BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS, BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS,
           BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS, BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS, BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS,
           BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS, BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS, BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS };
+		public string[] sAMouseStickToggleTriggers = new string[Global.TEST_PROFILE_ITEM_COUNT]
+		{BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS, BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS, BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS,
+		 BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS, BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS, BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS,
+		 BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS, BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS, BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS};
         public bool[] sATriggerCond = new bool[Global.TEST_PROFILE_ITEM_COUNT]
         { DEFAULT_SA_TRIGGER_COND, DEFAULT_SA_TRIGGER_COND, DEFAULT_SA_TRIGGER_COND,
           DEFAULT_SA_TRIGGER_COND, DEFAULT_SA_TRIGGER_COND, DEFAULT_SA_TRIGGER_COND,
