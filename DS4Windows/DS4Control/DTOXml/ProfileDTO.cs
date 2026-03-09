@@ -981,6 +981,14 @@ namespace DS4WinWPF.DS4Control.DTOXml
             get => BackingStore.SaTriggerCondString(_gyroMouseStickTriggerCond);
             set => _gyroMouseStickTriggerCond = BackingStore.SaTriggerCondValue(value);
         }
+		
+		private string _gyroMouseToggleTriggers = BackingStore.DEFAULT_SA_TRIGGERS;
+		[XmlElement("GyroMouseToggleTriggers")]
+		public string GyroMouseToggleTriggers
+		{
+			get => _gyroMouseToggleTriggers;
+			set => _gyroMouseToggleTriggers = value;
+		}
 
         private bool _gyroMouseStickTriggerTurns = BackingStore.DEFAULT_GYRO_MSTICK_TRIGGER_TURNS;
         [XmlElement("GyroMouseStickTriggerTurns")]
@@ -989,6 +997,14 @@ namespace DS4WinWPF.DS4Control.DTOXml
             get => _gyroMouseStickTriggerTurns.ToString();
             set => _gyroMouseStickTriggerTurns = XmlDataUtilities.StrToBool(value);
         }
+		
+		private string _gyroMouseStickToggleTriggers = BackingStore.DEFAULT_GYRO_MSTICK_TRIGGERS;
+		[XmlElement("GyroMouseStickToggleTriggers")]
+		public string GyroMouseStickToggleTriggers
+		{
+			get => _gyroMouseStickToggleTriggers;
+			set => _gyroMouseStickToggleTriggers = value;
+		}
 
 
         private int _gyroMouseStickHAxis;
@@ -1629,6 +1645,8 @@ namespace DS4WinWPF.DS4Control.DTOXml
             _gyroMouseStickTriggers = source.sAMouseStickTriggers[deviceIndex];
             _gyroMouseStickTriggerCond = source.sAMouseStickTriggerCond[deviceIndex];
             _gyroMouseStickTriggerTurns = source.gyroMouseStickTriggerTurns[deviceIndex];
+			_gyroMouseToggleTriggers = source.sAMouseToggleTriggers[deviceIndex];
+			_gyroMouseStickToggleTriggers = source.sAMouseStickToggleTriggers[deviceIndex];
             GyroMouseStickHAxis = source.gyroMouseStickHorizontalAxis[deviceIndex];
             GyroMouseStickDeadZone = source.gyroMStickInfo[deviceIndex].deadZone;
             GyroMouseStickMaxZone = source.gyroMStickInfo[deviceIndex].maxZone;
@@ -2223,6 +2241,8 @@ namespace DS4WinWPF.DS4Control.DTOXml
             destination.sAMouseStickTriggers[deviceIndex] = _gyroMouseStickTriggers;
             destination.sAMouseStickTriggerCond[deviceIndex] = _gyroMouseStickTriggerCond;
             destination.gyroMouseStickTriggerTurns[deviceIndex] = _gyroMouseStickTriggerTurns;
+			destination.sAMouseToggleTriggers[deviceIndex] = _gyroMouseToggleTriggers;
+			destination.sAMouseStickToggleTriggers[deviceIndex] = _gyroMouseStickToggleTriggers;
             destination.gyroMouseStickHorizontalAxis[deviceIndex] = GyroMouseStickHAxis;
             destination.gyroMStickInfo[deviceIndex].deadZone = GyroMouseStickDeadZone;
             destination.gyroMStickInfo[deviceIndex].maxZone = GyroMouseStickMaxZone;
