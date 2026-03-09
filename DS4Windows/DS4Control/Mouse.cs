@@ -321,162 +321,207 @@ namespace DS4Windows
             }
         }
 
-public bool IsGyroTriggerActive(GyroOutMode mode)
-{
-    string[] ss = [];
-    var andCond = false;
-    useReverseRatchet = Global.getGyroTriggerTurns(deviceNum);
-    
-    if (mode == GyroOutMode.Controls)
-    {
-        GyroControlsInfo controlsMapInfo = Global.GetGyroControlsInfo(deviceNum);
-        ss = controlsMapInfo.triggers.Split(',');
-        andCond = controlsMapInfo.triggerCond;
-    }
-    else if (mode == GyroOutMode.Mouse)
-    {
-        ss = Global.getSATriggers(deviceNum).Split(',');
-        andCond = Global.getSATriggerCond(deviceNum);
-    }
-    else if (mode == GyroOutMode.MouseJoystick)
-    {
-        useReverseRatchet = Global.GetGyroMouseStickTriggerTurns(deviceNum);
-        
-        // 获取 Turn Behavior 的触发器
-        string turnTriggers = Global.GetSAMouseStickTriggers(deviceNum);
-        // 获取 Toggle 的触发器
-        string toggleTriggers = Global.GetSAMouseStickToggleTriggers(deviceNum);
-        
-        andCond = Global.GetSAMouseStickTriggerCond(deviceNum);
-        
-        // 检查 Turn Behavior 触发器状态
-        var turnTriggerActive = CheckTriggers(turnTriggers, andCond);
-        
-        // 检查 Toggle 触发器状态
-        var toggleTriggerActive = CheckTriggers(toggleTriggers, true);
-        
-        // Toggle 逻辑：如果 Toggle 触发器被勾选，则当作总开关
-        if (toggleGyroStick)
-        {
-            // Toggle 模式：每次触发时切换状态
-            if (toggleTriggerActive && toggleTriggerActive != previousTriggerActivated)
-            {
-                currentToggleGyroStick = !currentToggleGyroStick;
-            }
-            previousTriggerActivated = toggleTriggerActive;
-            
-            // 只有当 Toggle 处于开启状态时，Turn Behavior 才生效
-            triggeractivated = currentToggleGyroStick && turnTriggerActive;
-        }
-        else
-        {
-            // Toggle 不勾选：默认开启状态，Turn Behavior 直接生效
-            previousTriggerActivated = toggleTriggerActive;
-            triggeractivated = turnTriggerActive;
-        }
-        
-        return triggeractivated;
-    }
-    
-    // 其他模式的原有逻辑保持不变
-    var i = 0;
-    triggeractivated = andCond;
-    if (!string.IsNullOrEmpty(ss[0]))
-    {
-        var str = string.Empty;
-        for (int index = 0, arlen = ss.Length; index < arlen; index++)
-        {
-            str = ss[index];
-            if (andCond && !(int.TryParse(str, out i) && getDS4ControlsByName(i)))
-            {
-                triggeractivated = false;
-                break;
-            }
-            else if (!andCond && int.TryParse(str, out i) && getDS4ControlsByName(i))
-            {
-                triggeractivated = true;
-                break;
-            }
-        }
-    }
+		public bool IsGyroTriggerActive(GyroOutMode mode)
+		{
+			string[] ss = [];
+			var andCond = false;
+			useReverseRatchet = Global.getGyroTriggerTurns(deviceNum);
+			
+			if (mode == GyroOutMode.Controls)
+			{
+				GyroControlsInfo controlsMapInfo = Global.GetGyroControlsInfo(deviceNum);
+				ss = controlsMapInfo.triggers.Split(',');
+				andCond = controlsMapInfo.triggerCond;
+				
+				var i = 0;
+				triggeractivated = andCond;
+				if (!string.IsNullOrEmpty(ss[0]))
+				{
+					var str = string.Empty;
+					for (int index = 0, arlen = ss.Length; index < arlen; index++)
+					{
+						str = ss[index];
+						if (andCond && !(int.TryParse(str, out i) && getDS4ControlsByName(i)))
+						{
+							triggeractivated = false;
+							break;
+						}
+						else if (!andCond && int.TryParse(str, out i) && getDS4ControlsByName(i))
+						{
+							triggeractivated = true;
+							break;
+						}
+					}
+				}
 
-    // 根据输出模式分别处理各自的 Toggle 逻辑
-    if (mode == GyroOutMode.Controls)
-    {
-        if (toggleGyroControls)
-        {
-            if (triggeractivated && triggeractivated != previousTriggerActivated)
-            {
-                currentToggleGyroControls = !currentToggleGyroControls;
-            }
-            previousTriggerActivated = triggeractivated;
-            triggeractivated = currentToggleGyroControls;
-        }
-        else
-        {
-            previousTriggerActivated = triggeractivated;
-        }
-    }
-    else if (mode == GyroOutMode.Mouse)
-    {
-        if (toggleGyroMouse)
-        {
-            if (triggeractivated && triggeractivated != previousTriggerActivated)
-            {
-                currentToggleGyroMouse = !currentToggleGyroMouse;
-            }
-            previousTriggerActivated = triggeractivated;
-            triggeractivated = currentToggleGyroMouse;
-        }
-        else
-        {
-            previousTriggerActivated = triggeractivated;
-        }
-    }
+				if (toggleGyroControls)
+				{
+					if (triggeractivated && triggeractivated != previousTriggerActivated)
+					{
+						currentToggleGyroControls = !currentToggleGyroControls;
+					}
+					previousTriggerActivated = triggeractivated;
+					triggeractivated = currentToggleGyroControls;
+				}
+				else
+				{
+					previousTriggerActivated = triggeractivated;
+				}
+				
+				return triggeractivated;
+			}
+			else if (mode == GyroOutMode.Mouse)
+			{
+				useReverseRatchet = Global.getGyroTriggerTurns(deviceNum);
+				
+				// 获取 Turn Behavior 的触发器 (原来的 SATriggers)
+				string turnTriggers = Global.getSATriggers(deviceNum);
+				// 获取 Toggle 的触发器 (新的 SAMouseToggleTriggers)
+				string toggleTriggers = Global.GetSAMouseToggleTriggers(deviceNum);
+				
+				andCond = Global.getSATriggerCond(deviceNum);
+				
+				// 检查 Turn Behavior 触发器状态（使用用户选择的 AND/OR 逻辑）
+				var turnTriggerActive = CheckTriggers(turnTriggers, andCond);
+				
+				// 检查 Toggle 触发器状态（总是使用 AND 逻辑）
+				var toggleTriggerActive = CheckTriggers(toggleTriggers, true);
+				
+				// Toggle 逻辑：如果 Toggle 触发器被勾选，则当作总开关
+				if (toggleGyroMouse)
+				{
+					// Toggle 模式：每次触发时切换状态
+					if (toggleTriggerActive && toggleTriggerActive != previousTriggerActivated)
+					{
+						currentToggleGyroMouse = !currentToggleGyroMouse;
+					}
+					previousTriggerActivated = toggleTriggerActive;
+					
+					// 只有当 Toggle 处于开启状态时，Turn Behavior 才生效
+					triggeractivated = currentToggleGyroMouse && turnTriggerActive;
+				}
+				else
+				{
+					// Toggle 不勾选：默认开启状态，Turn Behavior 直接生效
+					previousTriggerActivated = toggleTriggerActive;
+					triggeractivated = turnTriggerActive;
+				}
+				
+				return triggeractivated;
+			}
+			else if (mode == GyroOutMode.MouseJoystick)
+			{
+				useReverseRatchet = Global.GetGyroMouseStickTriggerTurns(deviceNum);
+				
+				// 获取 Turn Behavior 的触发器
+				string turnTriggers = Global.GetSAMouseStickTriggers(deviceNum);
+				// 获取 Toggle 的触发器
+				string toggleTriggers = Global.GetSAMouseStickToggleTriggers(deviceNum);
+				
+				andCond = Global.GetSAMouseStickTriggerCond(deviceNum);
+				
+				// 检查 Turn Behavior 触发器状态（使用用户选择的 AND/OR 逻辑）
+				var turnTriggerActive = CheckTriggers(turnTriggers, andCond);
+				
+				// 检查 Toggle 触发器状态（总是使用 AND 逻辑）
+				var toggleTriggerActive = CheckTriggers(toggleTriggers, true);
+				
+				// Toggle 逻辑：如果 Toggle 触发器被勾选，则当作总开关
+				if (toggleGyroStick)
+				{
+					// Toggle 模式：每次触发时切换状态
+					if (toggleTriggerActive && toggleTriggerActive != previousTriggerActivated)
+					{
+						currentToggleGyroStick = !currentToggleGyroStick;
+					}
+					previousTriggerActivated = toggleTriggerActive;
+					
+					// 只有当 Toggle 处于开启状态时，Turn Behavior 才生效
+					triggeractivated = currentToggleGyroStick && turnTriggerActive;
+				}
+				else
+				{
+					// Toggle 不勾选：默认开启状态，Turn Behavior 直接生效
+					previousTriggerActivated = toggleTriggerActive;
+					triggeractivated = turnTriggerActive;
+				}
+				
+				return triggeractivated;
+			}
+			else if (mode == GyroOutMode.DirectionalSwipe)
+			{
+				// DirectionalSwipe 保持原有逻辑
+				GyroDirectionalSwipeInfo swipeMapInfo = Global.GetGyroSwipeInfo(deviceNum);
+				ss = swipeMapInfo.triggers.Split(',');
+				andCond = swipeMapInfo.triggerCond;
+				
+				var i = 0;
+				triggeractivated = andCond ? true : false;
+				if (!string.IsNullOrEmpty(ss[0]))
+				{
+					string s = string.Empty;
+					for (int index = 0, arlen = ss.Length; index < arlen; index++)
+					{
+						s = ss[index];
+						if (andCond && !(int.TryParse(s, out i) && getDS4ControlsByName(i)))
+						{
+							triggeractivated = false;
+							break;
+						}
+						else if (!andCond && int.TryParse(s, out i) && getDS4ControlsByName(i))
+						{
+							triggeractivated = true;
+							break;
+						}
+					}
+				}
+				
+				return triggeractivated;
+			}
 
-    return triggeractivated;
-}
+			return false;
+		}
 
-// 添加辅助方法检查触发器状态
-private bool CheckTriggers(string triggerString, bool andCond)
-{
-    if (string.IsNullOrEmpty(triggerString)) return false;
-    
-    string[] triggers = triggerString.Split(',');
-    bool result = andCond;
-    
-    if (!string.IsNullOrEmpty(triggers[0]))
-    {
-        for (int index = 0, arlen = triggers.Length; index < arlen; index++)
-        {
-            if (int.TryParse(triggers[index], out int triggerId))
-            {
-                bool buttonState = getDS4ControlsByName(triggerId);
-                
-                if (andCond)
-                {
-                    // AND 条件：所有按钮必须按下
-                    if (!buttonState)
-                    {
-                        result = false;
-                        break;
-                    }
-                }
-                else
-                {
-                    // OR 条件：任一按钮按下即可
-                    if (buttonState)
-                    {
-                        result = true;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    
-    return result;
-}
+		// 添加辅助方法检查触发器状态
+		private bool CheckTriggers(string triggerString, bool andCond)
+		{
+			if (string.IsNullOrEmpty(triggerString) || triggerString == "-1") return false;
+			
+			string[] triggers = triggerString.Split(',');
+			bool result = andCond;
+			
+			if (!string.IsNullOrEmpty(triggers[0]))
+			{
+				for (int index = 0, arlen = triggers.Length; index < arlen; index++)
+				{
+					if (int.TryParse(triggers[index], out int triggerId))
+					{
+						bool buttonState = getDS4ControlsByName(triggerId);
+						
+						if (andCond)
+						{
+							// AND 条件：所有按钮必须按下
+							if (!buttonState)
+							{
+								result = false;
+								break;
+							}
+						}
+						else
+						{
+							// OR 条件：任一按钮按下即可
+							if (buttonState)
+							{
+								result = true;
+								break;
+							}
+						}
+					}
+				}
+			}
+			
+			return result;
+		}
 		
         private OneEuroFilterPair filterPair = new OneEuroFilterPair();
 

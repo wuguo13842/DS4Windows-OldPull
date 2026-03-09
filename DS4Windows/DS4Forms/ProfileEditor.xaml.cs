@@ -119,8 +119,13 @@ namespace DS4WinWPF.DS4Forms
 			profileSettingsVM.CreateGyroTriggerMenuItems(gyroControlsTrigBtn.ContextMenu,
 				GyroControlsMenuItem_Click);
 
+			// Mouse Turn Behavior 菜单
 			profileSettingsVM.CreateGyroTriggerMenuItems(gyroMouseTrigBtn.ContextMenu,
 				GyroMouseTrigMenuItem_Click);
+				
+			// Mouse Toggle 菜单
+			profileSettingsVM.CreateGyroTriggerMenuItems(gyroMouseToggleTrigBtn.ContextMenu,
+				GyroMouseToggleTrigMenuItem_Click);
 
 			// 为 Turn Behavior 按钮创建菜单
 			profileSettingsVM.CreateGyroTriggerMenuItems(gyroMouseStickTrigBtn.ContextMenu,
@@ -132,6 +137,20 @@ namespace DS4WinWPF.DS4Forms
 
 			profileSettingsVM.CreateGyroTriggerMenuItems(gyroSwipeTrigBtn.ContextMenu,
 				GyroSwipeTrigMenuItem_Click);
+		}
+		
+		private void GyroMouseToggleTrigBtn_Click(object sender, RoutedEventArgs e)
+		{
+			gyroMouseToggleTrigBtn.ContextMenu.IsOpen = true;
+		}
+
+		private void GyroMouseToggleTrigMenuItem_Click(object sender, RoutedEventArgs e)
+		{
+			ContextMenu menu = gyroMouseToggleTrigBtn.ContextMenu;
+			int itemCount = menu.Items.Count;
+			MenuItem alwaysOnItem = menu.Items[itemCount - 1] as MenuItem;
+
+			profileSettingsVM.UpdateGyroMouseToggleTrig(menu, e.OriginalSource == alwaysOnItem);
 		}
 
 		private void GyroMouseStickToggleTrigMenuItem_Click(object sender, RoutedEventArgs e)
@@ -823,6 +842,7 @@ namespace DS4WinWPF.DS4Forms
             profileSettingsVM.UpdateLateProperties();
             profileSettingsVM.PopulateTouchDisInver(touchDisInvertBtn.ContextMenu);
             profileSettingsVM.PopulateGyroMouseTrig(gyroMouseTrigBtn.ContextMenu);
+			profileSettingsVM.PopulateGyroMouseToggleTrig(gyroMouseToggleTrigBtn.ContextMenu);
             profileSettingsVM.PopulateGyroMouseStickTrig(gyroMouseStickTrigBtn.ContextMenu);
 			profileSettingsVM.PopulateGyroMouseStickToggleTrig(gyroMouseStickToggleTrigBtn.ContextMenu);
             profileSettingsVM.PopulateGyroSwipeTrig(gyroSwipeTrigBtn.ContextMenu);
@@ -902,6 +922,7 @@ namespace DS4WinWPF.DS4Forms
             profileSettingsVM.UpdateLateProperties();
             profileSettingsVM.PopulateTouchDisInver(touchDisInvertBtn.ContextMenu);
             profileSettingsVM.PopulateGyroMouseTrig(gyroMouseTrigBtn.ContextMenu);
+			profileSettingsVM.PopulateGyroMouseToggleTrig(gyroMouseToggleTrigBtn.ContextMenu);
             profileSettingsVM.PopulateGyroMouseStickTrig(gyroMouseStickTrigBtn.ContextMenu);
 			profileSettingsVM.PopulateGyroMouseStickToggleTrig(gyroMouseStickToggleTrigBtn.ContextMenu);
             profileSettingsVM.PopulateGyroSwipeTrig(gyroSwipeTrigBtn.ContextMenu);

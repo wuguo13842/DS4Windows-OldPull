@@ -1706,19 +1706,49 @@
                                 </StackPanel>
                             </TabItem>
 
-                            <TabItem Header="{lex:Loc Mouse}" Visibility="Collapsed">
-                                <StackPanel x:Name="gyroMousePanel" Margin="{StaticResource spaceMargin}">
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <Label Content="Triggers" />
-                                        <Button x:Name="gyroMouseTrigBtn" Content="{Binding GyroMouseTrigDisplay,FallbackValue=Always On}" MinWidth="160" Click="GyroMouseTrigBtn_Click" >
-                                            <Button.ContextMenu>
-                                                <ContextMenu />
-                                            </Button.ContextMenu>
-                                        </Button>
-                                    </StackPanel>
+							<TabItem Header="{lex:Loc Mouse}" Visibility="Collapsed">
+								<StackPanel x:Name="gyroMousePanel" Margin="{StaticResource spaceMargin}">
+									<!-- Turn Behavior Trigger -->
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<CheckBox x:Name="gyroMouseTurnsCheckBox" 
+												  Content="Turn Behavior Trigger:" 
+												  IsChecked="{Binding GyroMouseTurns}" 
+												  ToolTip="{lex:Loc Resources:GyroTriggerBehavior}" 
+												  VerticalAlignment="Center"/>
+										<Button x:Name="gyroMouseTrigBtn" 
+												Content="{Binding GyroMouseTrigDisplay,FallbackValue='L2'}" 
+												MinWidth="160" Margin="8,0,0,0" 
+												Click="GyroMouseTrigBtn_Click">
+											<Button.ContextMenu>
+												<ContextMenu />
+											</Button.ContextMenu>
+										</Button>
+									</StackPanel>
 
-                                    <CheckBox Content="Turn Behavior - Turns Gyro" Margin="{StaticResource spaceMargin}"
-                                  IsChecked="{Binding GyroMouseTurns}" ToolTip="{lex:Loc Resources:GyroTriggerBehavior}" />
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<Label Content="Eval Cond." Margin="20,0,0,0" />
+										<ComboBox SelectedIndex="{Binding GyroMouseEvalCondIndex,FallbackValue=0}">
+											<ComboBoxItem Content="And" />
+											<ComboBoxItem Content="Or" />
+										</ComboBox>
+									</StackPanel>
+
+									<!-- Toggle Trigger -->
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<CheckBox x:Name="gyroMouseToggleCheckBox" 
+												  Content="Toggle Trigger:" 
+												  IsChecked="{Binding GyroMouseToggle}" 
+												  VerticalAlignment="Center"/>
+										<Button x:Name="gyroMouseToggleTrigBtn" 
+												Content="{Binding GyroMouseToggleTrigDisplay,FallbackValue='L2'}" 
+												MinWidth="160" Margin="8,0,0,0" 
+												Click="GyroMouseToggleTrigBtn_Click">
+											<Button.ContextMenu>
+												<ContextMenu />
+											</Button.ContextMenu>
+										</Button>
+									</StackPanel>
+								  
                                     <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
                                         <Label Content="Gyro Sensitivity:" />
                                         <xctk:IntegerUpDown d:IsHidden="True" MinWidth="50" Margin="8,0,0,0" Value="{Binding GyroSensitivity}"
@@ -1733,21 +1763,11 @@
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <StackPanel>
-                                            <Label Content="Eval Cond." Margin="{StaticResource spaceMargin}" />
-                                            <ComboBox SelectedIndex="{Binding GyroMouseEvalCondIndex,FallbackValue=0}">
-                                                <ComboBoxItem Content="And" />
-                                                <ComboBoxItem Content="Or" />
-                                            </ComboBox>
-                                        </StackPanel>
-
-                                        <StackPanel Margin="20,0,0,0">
-                                            <Label Content="X Axis" Margin="{StaticResource spaceMargin}" />
-                                            <ComboBox SelectedIndex="{Binding GyroMouseXAxis,FallbackValue=0}">
-                                                <ComboBoxItem Content="Yaw" />
-                                                <ComboBoxItem Content="Roll" />
-                                            </ComboBox>
-                                        </StackPanel>
+										<Label Content="X Axis" Margin="{StaticResource spaceMargin}" />
+										<ComboBox SelectedIndex="{Binding GyroMouseXAxis,FallbackValue=0}">
+											<ComboBoxItem Content="Yaw" />
+											<ComboBoxItem Content="Roll" />
+										</ComboBox>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
@@ -1769,8 +1789,6 @@
                                         <Label Content="Min Threshold" ContentStringFormat="{}{0}:" />
                                         <xctk:DoubleUpDown d:IsHidden="True" MinWidth="80" Height="20" Minimum="1.0" Maximum="40.0" Increment="1.0" FormatString="F1" Value="{Binding GyroMouseMinThreshold,FallbackValue='1.0'}" Margin="8,0,0,0" />
                                     </StackPanel>
-
-                                    <CheckBox Content="Toggle" IsChecked="{Binding GyroMouseToggle}" Margin="{StaticResource spaceMargin}" />
 
                                     <CheckBox Content="Smoothing" IsChecked="{Binding GyroMouseSmooth,FallbackValue='False'}"  Margin="{StaticResource spaceMargin}" />
                                     <GroupBox Header="Smoothing Options" IsEnabled="{Binding GyroMouseSmooth,FallbackValue='False'}" Margin="{StaticResource spaceMargin}">
