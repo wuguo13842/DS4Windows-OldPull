@@ -321,66 +321,104 @@ namespace DS4Windows
             }
         }
 
-        public bool IsGyroTriggerActive(GyroOutMode mode)
-        {
-            string[] ss = [];
-            var andCond = false;
-            useReverseRatchet = Global.getGyroTriggerTurns(deviceNum);
-            if (mode == GyroOutMode.Controls)
-            {
-                GyroControlsInfo controlsMapInfo = Global.GetGyroControlsInfo(deviceNum);
-                ss = controlsMapInfo.triggers.Split(',');
-                andCond = controlsMapInfo.triggerCond;
-            }
-            else if (mode == GyroOutMode.Mouse)
-            {
-                ss = Global.getSATriggers(deviceNum).Split(',');
-                andCond = Global.getSATriggerCond(deviceNum);
-            }
-            else if (mode == GyroOutMode.MouseJoystick)
-            {
-                useReverseRatchet = Global.GetGyroMouseStickTriggerTurns(deviceNum);
-                ss = Global.GetSAMouseStickTriggers(deviceNum).Split(',');
-                andCond = Global.GetSAMouseStickTriggerCond(deviceNum);
-            }
-            var i = 0;
-            triggeractivated = andCond;
-            if (!string.IsNullOrEmpty(ss[0]))
-            {
-                var str = string.Empty;
-                for (int index = 0, arlen = ss.Length; index < arlen; index++)
-                {
-                    str = ss[index];
-                    if (andCond && !(int.TryParse(str, out i) && getDS4ControlsByName(i)))
-                    {
-                        triggeractivated = false;
-                        break;
-                    }
-                    else if (!andCond && int.TryParse(str, out i) && getDS4ControlsByName(i))
-                    {
-                        triggeractivated = true;
-                        break;
-                    }
-                }
-            }
-            if (toggleGyroControls)
-            {
-                if (triggeractivated && triggeractivated != previousTriggerActivated)
-                {
-                    currentToggleGyroControls = !currentToggleGyroControls;
-                }
+		public bool IsGyroTriggerActive(GyroOutMode mode)
+		{
+			string[] ss = [];
+			var andCond = false;
+			useReverseRatchet = Global.getGyroTriggerTurns(deviceNum);
+			
+			if (mode == GyroOutMode.Controls)
+			{
+				GyroControlsInfo controlsMapInfo = Global.GetGyroControlsInfo(deviceNum);
+				ss = controlsMapInfo.triggers.Split(',');
+				andCond = controlsMapInfo.triggerCond;
+			}
+			else if (mode == GyroOutMode.Mouse)
+			{
+				ss = Global.getSATriggers(deviceNum).Split(',');
+				andCond = Global.getSATriggerCond(deviceNum);
+			}
+			else if (mode == GyroOutMode.MouseJoystick)
+			{
+				useReverseRatchet = Global.GetGyroMouseStickTriggerTurns(deviceNum);
+				ss = Global.GetSAMouseStickTriggers(deviceNum).Split(',');
+				andCond = Global.GetSAMouseStickTriggerCond(deviceNum);
+			}
+			
+			var i = 0;
+			triggeractivated = andCond;
+			if (!string.IsNullOrEmpty(ss[0]))
+			{
+				var str = string.Empty;
+				for (int index = 0, arlen = ss.Length; index < arlen; index++)
+				{
+					str = ss[index];
+					if (andCond && !(int.TryParse(str, out i) && getDS4ControlsByName(i)))
+					{
+						triggeractivated = false;
+						break;
+					}
+					else if (!andCond && int.TryParse(str, out i) && getDS4ControlsByName(i))
+					{
+						triggeractivated = true;
+						break;
+					}
+				}
+			}
 
-                previousTriggerActivated = triggeractivated;
-                triggeractivated = currentToggleGyroControls;
-            }
-            else
-            {
-                previousTriggerActivated = triggeractivated;
-            }
+			// 根据输出模式分别处理各自的 Toggle 逻辑
+			if (mode == GyroOutMode.Controls)
+			{
+				if (toggleGyroControls)
+				{
+					if (triggeractivated && triggeractivated != previousTriggerActivated)
+					{
+						currentToggleGyroControls = !currentToggleGyroControls;
+					}
+					previousTriggerActivated = triggeractivated;
+					triggeractivated = currentToggleGyroControls;
+				}
+				else
+				{
+					previousTriggerActivated = triggeractivated;
+				}
+			}
+			else if (mode == GyroOutMode.Mouse)
+			{
+				if (toggleGyroMouse)
+				{
+					if (triggeractivated && triggeractivated != previousTriggerActivated)
+					{
+						currentToggleGyroMouse = !currentToggleGyroMouse;
+					}
+					previousTriggerActivated = triggeractivated;
+					triggeractivated = currentToggleGyroMouse;
+				}
+				else
+				{
+					previousTriggerActivated = triggeractivated;
+				}
+			}
+			else if (mode == GyroOutMode.MouseJoystick)
+			{
+				if (toggleGyroStick)
+				{
+					if (triggeractivated && triggeractivated != previousTriggerActivated)
+					{
+						currentToggleGyroStick = !currentToggleGyroStick;
+					}
+					previousTriggerActivated = triggeractivated;
+					triggeractivated = currentToggleGyroStick;
+				}
+				else
+				{
+					previousTriggerActivated = triggeractivated;
+				}
+			}
 
-            return triggeractivated;
-        }
-
+			return triggeractivated;
+		}
+		
         private OneEuroFilterPair filterPair = new OneEuroFilterPair();
 
         public void ReplaceOneEuroFilterPair()
