@@ -1148,21 +1148,20 @@
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="{lex:Loc Lightbar}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="{lex:Loc OutputMode}" ContentStringFormat="{}{0}:" />
-                        <ComboBox x:Name="lightbarModeCombo" Width="160" SelectedIndex="{Binding LightbarModeIndex, FallbackValue='0'}"
-                                  VerticalContentAlignment="Center" Margin="10,0,0,0">
-                            <ComboBoxItem Content="{lex:Loc Normal}" />
-                            <ComboBoxItem Content="{lex:Loc Passthru}" />
-                        </ComboBox>
-                    </StackPanel>
+			<TabItem Header="{lex:Loc Lightbar}">
+				<StackPanel>
+					<StackPanel Orientation="Horizontal">
+						<Label Content="{lex:Loc OutputMode}" ContentStringFormat="{}{0}:" />
+						<ComboBox x:Name="lightbarModeCombo" Width="160" SelectedIndex="{Binding LightbarModeIndex, FallbackValue='0'}"
+								  VerticalContentAlignment="Center" Margin="10,0,0,0">
+							<ComboBoxItem Content="{lex:Loc Normal}" />
+							<ComboBoxItem Content="{lex:Loc Passthru}" />
+						</ComboBox>
+					</StackPanel>
 
-                    <TabControl SelectedIndex="{Binding LightbarModeIndex, FallbackValue='0'}" BorderBrush="{x:Null}" Margin="{StaticResource spaceMargin}">
-                        <TabItem Header="{lex:Loc Normal}" Visibility="Collapsed">
-
-                            <StackPanel>
+					<TabControl SelectedIndex="{Binding LightbarModeIndex, FallbackValue='0'}" BorderBrush="{x:Null}" Margin="{StaticResource spaceMargin}">
+						<TabItem Header="{lex:Loc Normal}" Visibility="Collapsed">
+							<StackPanel>
 								<StackPanel Orientation="Horizontal">
 									<GroupBox x:Name="colorGB" Header="{lex:Loc Color}" Padding="4">
 										<StackPanel>
@@ -1200,10 +1199,9 @@
 											</Grid>
 										</StackPanel>
 									</GroupBox>
-																					
-									<GroupBox x:Name="emptyColorGB" Header="Empty" Padding="4">
+
+									<GroupBox x:Name="emptyColorGB" Header="{lex:Loc EmptyColor}" Padding="4">
 										<StackPanel>
-											<!-- 三行滑块统一放在一个 Grid 中 -->
 											<Grid>
 												<Grid.RowDefinitions>
 													<RowDefinition Height="Auto"/>
@@ -1240,7 +1238,6 @@
 														VerticalAlignment="Center"/>
 											</Grid>
 
-											<!-- 按钮保持原样，位于三行下方 -->
 											<Button x:Name="lowColorBtn" Width="10" Height="10"
 													Background="{Binding LowColor}"
 													HorizontalAlignment="Right" Margin="0,6,0,0"
@@ -1248,18 +1245,20 @@
 										</StackPanel>
 									</GroupBox>
 								</StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                    <ComboBox x:Name="flashTypeCombo" SelectedIndex="{Binding FlashTypeIndex,FallbackValue=0}">
-                                        <ComboBoxItem Content="Flash at"/>
-                                        <ComboBoxItem Content="Pulse at"/>
-                                    </ComboBox>
-                                    <xctk:IntegerUpDown d:IsHidden="True" Value="{Binding FlashAt,FallbackValue=0}" MinWidth="50"
-                                            Minimum="-10" Maximum="100" Increment="10" />
-                                    <Label Content="%" />
-                                    <Button x:Name="flashColorBtn" Width="20" Height="20" Background="{Binding FlashColor,FallbackValue=Blue}"
-                                ToolTip="{lex:Loc Resources:FlashAtTip}" Click="FlashColorBtn_Click" />
-                                </StackPanel>
-								<!-- 添加的新控件 Profile default 》 Lightbar 低电量系统通知-->
+
+								<StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+									<ComboBox x:Name="flashTypeCombo" SelectedIndex="{Binding FlashTypeIndex,FallbackValue=0}">
+										<ComboBoxItem Content="{lex:Loc FlashAtOption}"/>
+										<ComboBoxItem Content="{lex:Loc PulseAtOption}"/>
+									</ComboBox>
+									<xctk:IntegerUpDown d:IsHidden="True" Value="{Binding FlashAt,FallbackValue=0}" MinWidth="50"
+											Minimum="-10" Maximum="100" Increment="10" />
+									<Label Content="{lex:Loc PercentSign}" />
+									<Button x:Name="flashColorBtn" Width="20" Height="20" Background="{Binding FlashColor,FallbackValue=Blue}"
+											ToolTip="{lex:Loc FlashAtTip}" Click="FlashColorBtn_Click" />
+								</StackPanel>
+
+								<!-- 低电量通知控件 -->
 								<StackPanel Orientation="Horizontal" Margin="0,10,0,0">
 									<CheckBox Content="{lex:Loc LowBatteryNotify}" 
 											  IsChecked="{Binding EnableLowBatteryNotification}"
@@ -1269,35 +1268,39 @@
 									<TextBlock Text="{lex:Loc ThresholdSuffix}" VerticalAlignment="Center"/>
 								</StackPanel>
 
-                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                    <Label Content="While Charging:"/>
-                                    <ComboBox Margin="8,0,0,0" SelectedIndex="{Binding ChargingType,FallbackValue=0}">
-                                        <ComboBoxItem Content="Normal" />
-                                        <ComboBoxItem Content="Pulse" />
-                                        <ComboBoxItem Content="Rainbow" />
-                                        <ComboBoxItem Content="Color" />
-                                    </ComboBox>
-                                    <Button x:Name="chargingColorBtn" Width="20" Height="20" Background="{Binding ChargingColor,FallbackValue=Blue}"
-                                Visibility="{Binding ChargingColorVisible}" Click="ChargingColorBtn_Click" Margin="20,0,0,0" />
-                                </StackPanel>
+								<StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+									<Label Content="{lex:Loc WhileChargingLabel}"/>
+									<ComboBox Margin="8,0,0,0" SelectedIndex="{Binding ChargingType,FallbackValue=0}">
+										<ComboBoxItem Content="{lex:Loc ChargingNormal}" />
+										<ComboBoxItem Content="{lex:Loc ChargingPulse}" />
+										<ComboBoxItem Content="{lex:Loc ChargingRainbow}" />
+										<ComboBoxItem Content="{lex:Loc ChargingColor}" />
+									</ComboBox>
+									<Button x:Name="chargingColorBtn" Width="20" Height="20" Background="{Binding ChargingColor,FallbackValue=Blue}"
+											Visibility="{Binding ChargingColorVisible}" Click="ChargingColorBtn_Click" Margin="20,0,0,0" />
+								</StackPanel>
 
-                                <CheckBox x:Name="colorByBatteryPerCk" Content="Color by Battery %" IsChecked="{Binding ColorBatteryPercent}"
-                              ToolTip="{lex:Loc Resources:LightByBatteryTip}" Click="ColorByBatteryPerCk_Click" Margin="0,10,0,0" />
+								<CheckBox x:Name="colorByBatteryPerCk" Content="{lex:Loc ColorByBattery}" IsChecked="{Binding ColorBatteryPercent}"
+										  ToolTip="{lex:Loc LightByBatteryTip}" Click="ColorByBatteryPerCk_Click" Margin="0,10,0,0" />
 
                                 <StackPanel Orientation="Horizontal" Height="60" Margin="0,10,0,0">
-                                    <Button x:Name="rainbowBtn" Height="20" Width="20"
-                                ToolTip="{lex:Loc Resources:AlwaysRainbow}" Click="RainbowBtn_Click">
+                                    <Button x:Name="rainbowBtn" Height="20" Width="20" ToolTip="{lex:Loc Resources:AlwaysRainbow}" Click="RainbowBtn_Click">
                                         <Button.Content>
                                             <Image Source="{Binding Source={StaticResource resourcesPaths}, Path=DS4LightbarPNG}" />
                                         </Button.Content>
                                     </Button>
                                     <xctk:IntegerUpDown MinWidth="30" Height="30" Minimum="0" Maximum="60" Increment="1" Margin="8,0,0,0"
                                             Value="{Binding Rainbow,FallbackValue=5}" IsEnabled="{Binding RainbowExists}" />
-                                    <Label Content="secs/cycle" Padding="0" Margin="8,0,0,0" VerticalContentAlignment="Center" />
-                                    <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding MaxSatRainbow,FallbackValue=100,StringFormat=Max Light {0:N2}%}" Margin="0,0,0,5" />
-                                        <Slider Value="{Binding MaxSatRainbow,FallbackValue=100}" Minimum="0" Maximum="100" Width="100" IsEnabled="{Binding RainbowExists}" />
-                                    </StackPanel>
+                                    <Label Content="{lex:Loc SecsPerCycle}" Padding="0" Margin="8,0,0,0" VerticalContentAlignment="Center" />
+									<StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
+										<!-- 水平排列的两个TextBlock，保持在上方 -->
+										<StackPanel Orientation="Horizontal">
+											<TextBlock Text="{lex:Loc MaxLightPrefix}" Margin="0,0,0,5" />
+											<TextBlock Text="{Binding MaxSatRainbow, FallbackValue=100, StringFormat={}{0:N2}%}" Margin="0,0,0,5" />
+										</StackPanel>
+										<!-- 滑块在下方 -->
+										<Slider Value="{Binding MaxSatRainbow,FallbackValue=100}" Minimum="0" Maximum="100" Width="100" IsEnabled="{Binding RainbowExists}" />
+									</StackPanel>
                                 </StackPanel>
                             </StackPanel>
 
@@ -1315,7 +1318,7 @@
                 </StackPanel>
             </TabItem>
 
-            <TabItem Header="{lex:Loc Touchpad}" Height="22" VerticalAlignment="Top">
+            <TabItem Header="{lex:Loc Touchpad}">
                 <TabItem.Resources>
                     <Thickness x:Key="spaceMargin" Bottom="8" />
                 </TabItem.Resources>
@@ -1631,146 +1634,142 @@
                 
             </TabItem>
 
-            <TabItem Header="{lex:Loc Gyro}">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                            <Label Content="{lex:Loc OutputMode}" />
-                            <ComboBox x:Name="gyroOutModeCombo" Width="160" SelectedIndex="{Binding GyroOutModeIndex, FallbackValue='0'}" VerticalContentAlignment="Center" Margin="10,0,0,0">
-                                <ComboBoxItem Content="{lex:Loc GyroControlsAccel}" />
-                                <ComboBoxItem Content="{lex:Loc Mouse}" />
-                                <ComboBoxItem Content="{lex:Loc MouseJoystick}" />
-                                <ComboBoxItem Content="{lex:Loc DirectionalSwipe}" />
-                                <ComboBoxItem Content="{lex:Loc Passthru}" />
-                            </ComboBox>
-                        </StackPanel>
+			<TabItem Header="{lex:Loc Gyro}">
+				<ScrollViewer VerticalScrollBarVisibility="Auto">
+					<StackPanel>
+						<StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+							<Label Content="{lex:Loc OutputMode}" />
+							<ComboBox x:Name="gyroOutModeCombo" Width="160" SelectedIndex="{Binding GyroOutModeIndex, FallbackValue='0'}" VerticalContentAlignment="Center" Margin="10,0,0,0">
+								<ComboBoxItem Content="{lex:Loc GyroControlsAccel}" />
+								<ComboBoxItem Content="{lex:Loc Mouse}" />
+								<ComboBoxItem Content="{lex:Loc MouseJoystick}" />
+								<ComboBoxItem Content="{lex:Loc DirectionalSwipe}" />
+								<ComboBoxItem Content="{lex:Loc Passthru}" />
+							</ComboBox>
+						</StackPanel>
 
-                        <TabControl SelectedIndex="{Binding GyroOutModeIndex, FallbackValue='0'}" BorderBrush="{x:Null}" Margin="{StaticResource spaceMargin}">
-                            <TabItem Header="{lex:Loc GyroControlsAccel}" Visibility="Collapsed">
-                                <StackPanel x:Name="gyroControlsPanel">
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                        <Button x:Name="gyroZNBtn" Content="Tilt Up" Width="100" Tag="{Binding TiltUp, Source={StaticResource controlIndexCheck}}" Click="TiltControlsButton_Click" />
-                                        <Label x:Name="gyroZNLb" Content="{Binding MappingName,FallbackValue=Unassigned}" />
-                                    </StackPanel>
+						<TabControl SelectedIndex="{Binding GyroOutModeIndex, FallbackValue='0'}" BorderBrush="{x:Null}" Margin="{StaticResource spaceMargin}">
+							<TabItem Header="{lex:Loc GyroControlsAccel}" Visibility="Collapsed">
+								<StackPanel x:Name="gyroControlsPanel">
+									<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+										<Button x:Name="gyroZNBtn" Content="{lex:Loc TiltUp}" Width="100" Tag="{Binding TiltUp, Source={StaticResource controlIndexCheck}}" Click="TiltControlsButton_Click" />
+										<Label x:Name="gyroZNLb" Content="{Binding MappingName,FallbackValue=Unassigned}" />
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                        <Button x:Name="gyroZPBtn" Content="Tilt Down" Width="100" Tag="{Binding TiltDown, Source={StaticResource controlIndexCheck}}" Click="TiltControlsButton_Click" />
-                                        <Label x:Name="gyroZPLb" Content="{Binding MappingName,FallbackValue=Unassigned}" />
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+										<Button x:Name="gyroZPBtn" Content="{lex:Loc TiltDown}" Width="100" Tag="{Binding TiltDown, Source={StaticResource controlIndexCheck}}" Click="TiltControlsButton_Click" />
+										<Label x:Name="gyroZPLb" Content="{Binding MappingName,FallbackValue=Unassigned}" />
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                        <Button x:Name="gyroXPBtn" Content="Tilt Left" Width="100" Tag="{Binding TiltLeft, Source={StaticResource controlIndexCheck}}" Click="TiltControlsButton_Click" />
-                                        <Label x:Name="gyroXLb" Content="{Binding MappingName,FallbackValue=Unassigned}" />
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+										<Button x:Name="gyroXPBtn" Content="{lex:Loc TiltLeft}" Width="100" Tag="{Binding TiltLeft, Source={StaticResource controlIndexCheck}}" Click="TiltControlsButton_Click" />
+										<Label x:Name="gyroXLb" Content="{Binding MappingName,FallbackValue=Unassigned}" />
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                        <Button x:Name="gyroXNBtn" Content="Tilt Right" Width="100" Tag="{Binding TiltRight, Source={StaticResource controlIndexCheck}}" Click="TiltControlsButton_Click" />
-                                        <Label x:Name="gyroXNLb" Content="{Binding MappingName,FallbackValue=Unassigned}" />
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+										<Button x:Name="gyroXNBtn" Content="{lex:Loc TiltRight}" Width="100" Tag="{Binding TiltRight, Source={StaticResource controlIndexCheck}}" Click="TiltControlsButton_Click" />
+										<Label x:Name="gyroXNLb" Content="{Binding MappingName,FallbackValue=Unassigned}" />
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
-                                        <Label Content="Triggers" />
-                                        <Button x:Name="gyroControlsTrigBtn" Content="{Binding GyroControlsTrigDisplay,FallbackValue='Always On'}" MinWidth="160" Click="GyroControlsTrigBtn_Click" >
-                                            <Button.ContextMenu>
-                                                <ContextMenu />
-                                            </Button.ContextMenu>
-                                        </Button>
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+										<Label Content="{lex:Loc TriggersLabel}" />
+										<Button x:Name="gyroControlsTrigBtn" Content="{Binding GyroControlsTrigDisplay,FallbackValue='Always On'}" MinWidth="160" Click="GyroControlsTrigBtn_Click" >
+											<Button.ContextMenu>
+												<ContextMenu />
+											</Button.ContextMenu>
+										</Button>
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                        <CheckBox Content="Turn Behavior - Turns Gyro"
-                                  IsChecked="{Binding GyroControlsTurns}" ToolTip="{lex:Loc Resources:GyroTriggerBehavior}" />
-                                        <CheckBox Content="Toggle" IsChecked="{Binding GyroControlsToggle}" Margin="20,0,0,0" />
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+										<CheckBox Content="{lex:Loc TurnBehaviorTurnsGyro}"
+												  IsChecked="{Binding GyroControlsTurns}" ToolTip="{lex:Loc GyroTriggerBehavior}" />
+										<CheckBox Content="{lex:Loc Toggle}" IsChecked="{Binding GyroControlsToggle}" Margin="20,0,0,0" />
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                        <Label Content="Eval Cond." />
-                                        <ComboBox SelectedIndex="{Binding GyroControlsEvalCondIndex,FallbackValue=0}" Margin="8,0,0,0">
-                                            <ComboBoxItem Content="And" />
-                                            <ComboBoxItem Content="Or" />
-                                        </ComboBox>
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+										<Label Content="{lex:Loc EvalCond}" />
+										<ComboBox SelectedIndex="{Binding GyroControlsEvalCondIndex,FallbackValue=0}" Margin="8,0,0,0">
+											<ComboBoxItem Content="{lex:Loc And}" />
+											<ComboBoxItem Content="{lex:Loc Or}" />
+										</ComboBox>
+									</StackPanel>
 
-                                    <GroupBox Header="360 Steering Wheel" Margin="0,16,0,0" Padding="2,4">
-                                        <StackPanel>
-                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                                <Label Content="Steering wheel axis" />
-                                                <ComboBox Width="160" Margin="8,0,0,0" SelectedIndex="{Binding SASteeringWheelEmulationAxisIndex,FallbackValue=0}">
-                                                    <ComboBoxItem Content="None" />
-                                                    <ComboBoxItem Content="Left X-Axis" />
-                                                    <ComboBoxItem Content="Left Y-Axis" />
-                                                    <ComboBoxItem Content="Right X-Axis" />
-                                                    <ComboBoxItem Content="Right Y-Axis" />
-                                                    <ComboBoxItem Content="Trigger L+R Axis" />
-                                                    <ComboBoxItem Content="VJoy1 X-Axis" />
-                                                    <ComboBoxItem Content="VJoy1 Y-Axis" />
-                                                    <ComboBoxItem Content="VJoy1 Z-Axis" />
-                                                    <ComboBoxItem Content="VJoy2 X-Axis" />
-                                                    <ComboBoxItem Content="VJoy2 Y-Axis" />
-                                                    <ComboBoxItem Content="VJoy2 Z-Axis" />
-                                                </ComboBox>
-                                            </StackPanel>
+									<GroupBox Header="{lex:Loc SteeringWheel360}" Margin="0,16,0,0" Padding="2,4">
+										<StackPanel>
+											<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+												<Label Content="{lex:Loc SteeringWheelAxis}" />
+												<ComboBox Width="160" Margin="8,0,0,0" SelectedIndex="{Binding SASteeringWheelEmulationAxisIndex,FallbackValue=0}">
+													<ComboBoxItem Content="{lex:Loc None}" />
+													<ComboBoxItem Content="{lex:Loc LeftXAxis}" />
+													<ComboBoxItem Content="{lex:Loc LeftYAxis}" />
+													<ComboBoxItem Content="{lex:Loc RightXAxis}" />
+													<ComboBoxItem Content="{lex:Loc RightYAxis}" />
+													<ComboBoxItem Content="{lex:Loc TriggerLRAxis}" />
+													<ComboBoxItem Content="{lex:Loc VJoy1XAxis}" />
+													<ComboBoxItem Content="{lex:Loc VJoy1YAxis}" />
+													<ComboBoxItem Content="{lex:Loc VJoy1ZAxis}" />
+													<ComboBoxItem Content="{lex:Loc VJoy2XAxis}" />
+													<ComboBoxItem Content="{lex:Loc VJoy2YAxis}" />
+													<ComboBoxItem Content="{lex:Loc VJoy2ZAxis}" />
+												</ComboBox>
+											</StackPanel>
 
-                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                                <Label Content="Steering wheel range" />
-                                                <ComboBox Margin="8,0,0,0" SelectedIndex="{Binding SASteeringWheelEmulationRangeIndex,FallbackValue=0}">
-                                                    <ComboBoxItem Content="90" />
-                                                    <ComboBoxItem Content="180" />
-                                                    <ComboBoxItem Content="270" />
-                                                    <ComboBoxItem Content="360" />
-                                                    <ComboBoxItem Content="450" />
-                                                    <ComboBoxItem Content="720" />
-                                                    <ComboBoxItem Content="900" />
-                                                    <ComboBoxItem Content="1080" />
-                                                    <ComboBoxItem Content="1440" />
-                                                </ComboBox>
-                                                <Button x:Name="steeringWheelEmulationCalibrateBtn" Content="Calibrate" Margin="8,0,0,0"
-                                        Click="SteeringWheelEmulationCalibrateBtn_Click" />
-                                            </StackPanel>
+											<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+												<Label Content="{lex:Loc SteeringWheelRange}" />
+												<ComboBox Margin="8,0,0,0" SelectedIndex="{Binding SASteeringWheelEmulationRangeIndex,FallbackValue=0}">
+													<ComboBoxItem Content="90" />
+													<ComboBoxItem Content="180" />
+													<ComboBoxItem Content="270" />
+													<ComboBoxItem Content="360" />
+													<ComboBoxItem Content="450" />
+													<ComboBoxItem Content="720" />
+													<ComboBoxItem Content="900" />
+													<ComboBoxItem Content="1080" />
+													<ComboBoxItem Content="1440" />
+												</ComboBox>
+												<Button x:Name="steeringWheelEmulationCalibrateBtn" Content="{lex:Loc Calibrate}" Margin="8,0,0,0"
+														Click="SteeringWheelEmulationCalibrateBtn_Click" />
+											</StackPanel>
 
-                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                                <Label Content="{lex:Loc Fuzz}" ContentStringFormat="{}{0}:" />
-                                                <xctk:IntegerUpDown d:IsHidden="True" Value="{Binding SASteeringWheelFuzz}"
-                                                    Minimum="0" Maximum="100" ToolTip="{lex:Loc SASteeringWheelFuzzTooltip}"
-                                                    Margin="{StaticResource spaceMargin}" />
-                                                <TextBlock Text="units" FontSize="10" Margin="{StaticResource spaceMargin}" VerticalAlignment="Center" />
-                                            </StackPanel>
+											<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+												<Label Content="{lex:Loc Fuzz}" ContentStringFormat="{}{0}:" />
+												<xctk:IntegerUpDown d:IsHidden="True" Value="{Binding SASteeringWheelFuzz}"
+																	Minimum="0" Maximum="100" ToolTip="{lex:Loc SASteeringWheelFuzzTooltip}"
+																	Margin="{StaticResource spaceMargin}" />
+												<TextBlock Text="{lex:Loc Units}" FontSize="10" Margin="{StaticResource spaceMargin}" VerticalAlignment="Center" />
+											</StackPanel>
 
-                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                                <CheckBox Content="Use Smoothing" IsChecked="{Binding SASteeringWheelUseSmoothing}" />
-                                            </StackPanel>
+											<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+												<CheckBox Content="{lex:Loc UseSmoothing}" IsChecked="{Binding SASteeringWheelUseSmoothing}" />
+											</StackPanel>
 
-                                            <StackPanel x:Name="euroFilterOptionsPanel" IsEnabled="{Binding SASteeringWheelUseSmoothing,FallbackValue=False}"
-                                            Orientation="Horizontal" Margin="0,0,0,8">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Label Content="1&#x20ac; MinCutoff" />
-                                                    <xctk:DoubleUpDown x:Name="euroMinCutoff" d:IsHidden="True" FormatString="F5" Value="{Binding SASteeringWheelSmoothMinCutoff,FallbackValue=1.0,UpdateSourceTrigger=LostFocus}"
-                                                           Minimum="0.00001" Maximum="1000.0" Increment="0.1" MinWidth="60" />
-                                                </StackPanel>
-                                                <StackPanel Orientation="Horizontal" Margin="30,0,0,0">
-                                                    <Label Content="1&#x20ac; Beta" />
-                                                    <xctk:DoubleUpDown x:Name="euroBeta" d:IsHidden="True" FormatString="F5" Value="{Binding SASteeringWheelSmoothBeta,FallbackValue=0.0,UpdateSourceTrigger=LostFocus}"
-                                                           Minimum="0.0" Maximum="1.0" MinWidth="60" />
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </GroupBox>
+											<StackPanel x:Name="euroFilterOptionsPanel" IsEnabled="{Binding SASteeringWheelUseSmoothing,FallbackValue=False}"
+														Orientation="Horizontal" Margin="0,0,0,8">
+												<StackPanel Orientation="Horizontal">
+													<Label Content="{lex:Loc OneEuroMinCutoff}" />
+													<xctk:DoubleUpDown x:Name="euroMinCutoff" d:IsHidden="True" FormatString="F5" Value="{Binding SASteeringWheelSmoothMinCutoff,FallbackValue=1.0,UpdateSourceTrigger=LostFocus}"
+																	   Minimum="0.00001" Maximum="1000.0" Increment="0.1" MinWidth="60" />
+												</StackPanel>
+												<StackPanel Orientation="Horizontal" Margin="30,0,0,0">
+													<Label Content="{lex:Loc OneEuroBeta}" />
+													<xctk:DoubleUpDown x:Name="euroBeta" d:IsHidden="True" FormatString="F5" Value="{Binding SASteeringWheelSmoothBeta,FallbackValue=0.0,UpdateSourceTrigger=LostFocus}"
+																	   Minimum="0.0" Maximum="1.0" MinWidth="60" />
+												</StackPanel>
+											</StackPanel>
+										</StackPanel>
+									</GroupBox>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,8">
-                                        <Button x:Name="gyroCalBtn" Content="Gyro Calibration" Width="100"  Click="GyroCalibration_Click" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </TabItem>
+									<StackPanel Orientation="Horizontal" Margin="0,8,0,8">
+										<Button x:Name="gyroCalBtn" Content="{lex:Loc GyroCalibration}" Width="100" Click="GyroCalibration_Click" />
+									</StackPanel>
+								</StackPanel>
+							</TabItem>
 
 							<TabItem Header="{lex:Loc Mouse}" Visibility="Collapsed">
 								<StackPanel x:Name="gyroMousePanel" Margin="{StaticResource spaceMargin}">
-									<!-- Turn Behavior Trigger -->
+									<!-- Turn Behavior Trigger - 第一行：仅显示标签和按钮 -->
 									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-										<CheckBox x:Name="gyroMouseTurnsCheckBox" 
-												  Content="Turn Behavior Trigger:" 
-												  IsChecked="{Binding GyroMouseTurns}" 
-												  ToolTip="{lex:Loc Resources:GyroTriggerBehavior}" 
-												  VerticalAlignment="Center"/>
+										<Label Content="{lex:Loc TurnBehaviorTrigger}" VerticalAlignment="Center"/>
 										<Button x:Name="gyroMouseTrigBtn" 
 												Content="{Binding GyroMouseTrigDisplay,FallbackValue='L2'}" 
 												MinWidth="160" Margin="8,0,0,0" 
@@ -1781,115 +1780,151 @@
 										</Button>
 									</StackPanel>
 
-									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-										<Label Content="Eval Cond." Margin="20,0,0,0" />
-										<ComboBox SelectedIndex="{Binding GyroMouseEvalCondIndex,FallbackValue=0}">
-											<ComboBoxItem Content="And" />
-											<ComboBoxItem Content="Or" />
+									<!-- 第二行：复选框（按键行为反转） + 条件求值 -->
+									<Grid Margin="{StaticResource spaceMargin}">
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="Auto"/>
+											<ColumnDefinition Width="Auto"/>
+											<ColumnDefinition Width="Auto"/>
+										</Grid.ColumnDefinitions>
+
+										<!-- 条件求值标签 -->
+										<Label Content="{lex:Loc EvalCond}" 
+											   Grid.Column="0"
+											   Margin="20,0,5,0" 
+											   VerticalAlignment="Center"
+											   VerticalContentAlignment="Center"/>
+
+										<!-- 下拉框 -->
+										<ComboBox SelectedIndex="{Binding GyroMouseEvalCondIndex,FallbackValue=0}" 
+												  Grid.Column="1"
+												  Margin="0,0,0,0" 
+												  VerticalAlignment="Center">
+											<ComboBoxItem Content="{lex:Loc And}" />
+											<ComboBoxItem Content="{lex:Loc Or}" />
 										</ComboBox>
-									</StackPanel>
+
+										<!-- 复选框 -->
+										<CheckBox x:Name="gyroMouseTurnsCheckBox" 
+												  Grid.Column="2"
+												  Content="{lex:Loc InvertBehavior}" 
+												  IsChecked="{Binding GyroMouseTurns}" 
+												  ToolTip="{lex:Loc GyroTriggerBehavior}" 
+												  VerticalAlignment="Center"
+												  Margin="20,0,0,0"/>
+									</Grid>
 
 									<!-- Toggle Trigger -->
 									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
 										<CheckBox x:Name="gyroMouseToggleCheckBox" 
-												  Content="Toggle Trigger:" 
+												  Content="{lex:Loc ToggleTrigger}" 
 												  IsChecked="{Binding GyroMouseToggle}" 
 												  VerticalAlignment="Center"/>
 										<Button x:Name="gyroMouseToggleTrigBtn" 
 												Content="{Binding GyroMouseToggleTrigDisplay,FallbackValue='L2'}" 
 												MinWidth="160" Margin="8,0,0,0" 
-												Click="GyroMouseToggleTrigBtn_Click">
+												Click="GyroMouseToggleTrigBtn_Click"
+												MinHeight="26"
+												VerticalAlignment="Center">
 											<Button.ContextMenu>
 												<ContextMenu />
 											</Button.ContextMenu>
 										</Button>
 									</StackPanel>
-								  
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <Label Content="Gyro Sensitivity:" />
-                                        <xctk:IntegerUpDown d:IsHidden="True" MinWidth="50" Margin="8,0,0,0" Value="{Binding GyroSensitivity}"
-                                                Minimum="0" Maximum="500" Increment="10" />
-                                    </StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <Label Content="{lex:Loc VerticalScale}" ContentStringFormat="{}{0}:" />
-                                        <xctk:IntegerUpDown d:IsHidden="True" MinWidth="50" Margin="8,0,0,0" Value="{Binding GyroVertScale}"
-                                                Minimum="0" Maximum="400" Increment="10" />
-                                        <Label Content="%" />
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<Label Content="{lex:Loc GyroSensitivityLabel}" />
+										<xctk:IntegerUpDown d:IsHidden="True" MinWidth="50" Margin="8,0,0,0" Value="{Binding GyroSensitivity}"
+															Minimum="0" Maximum="500" Increment="10" />
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-										<Label Content="X Axis" Margin="{StaticResource spaceMargin}" />
-										<ComboBox SelectedIndex="{Binding GyroMouseXAxis,FallbackValue=0}">
-											<ComboBoxItem Content="Yaw" />
-											<ComboBoxItem Content="Roll" />
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<Label Content="{lex:Loc VerticalScale}" ContentStringFormat="{}{0}:" />
+										<xctk:IntegerUpDown d:IsHidden="True" MinWidth="50" Margin="8,0,0,0" Value="{Binding GyroVertScale}"
+															Minimum="0" Maximum="400" Increment="10" />
+										<Label Content="{lex:Loc PercentSign}" />
+									</StackPanel>
+
+									<Grid Margin="{StaticResource spaceMargin}">
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="Auto"/>
+											<ColumnDefinition Width="Auto"/>
+										</Grid.ColumnDefinitions>
+
+										<Label Content="{lex:Loc XAxis}" 
+											   Grid.Column="0"
+											   Margin="0,0,5,0" 
+											   VerticalAlignment="Center" 
+											   VerticalContentAlignment="Center"/>
+
+										<ComboBox SelectedIndex="{Binding GyroMouseXAxis,FallbackValue=0}" 
+												  Grid.Column="1"
+												  VerticalAlignment="Center" >
+											<ComboBoxItem Content="{lex:Loc Yaw}" />
+											<ComboBoxItem Content="{lex:Loc Roll}" />
 										</ComboBox>
-                                    </StackPanel>
+									</Grid>
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <Label Content="Invert" Padding="0"/>
-                                        <CheckBox Content="X" Margin="8,0,0,0" IsChecked="{Binding GyroMouseInvertX}" />
-                                        <CheckBox Content="Y" Margin="8,0,0,0" IsChecked="{Binding GyroMouseInvertY}" />
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<Label Content="{lex:Loc Invert}" Padding="0"/>
+										<CheckBox Content="{lex:Loc InvertX}" Margin="8,0,0,0" IsChecked="{Binding GyroMouseInvertX}" />
+										<CheckBox Content="{lex:Loc InvertY}" Margin="8,0,0,0" IsChecked="{Binding GyroMouseInvertY}" />
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <Label Content="{lex:Loc DeadZone}" />
-                                        <xctk:IntegerUpDown d:IsHidden="True" MinWidth="60" Margin="8,0,0,0"
-                                                Value="{Binding GyroMouseDeadZone}" Minimum="0" Maximum="1000" />
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<Label Content="{lex:Loc DeadZone}" />
+										<xctk:IntegerUpDown d:IsHidden="True" MinWidth="60" Margin="8,0,0,0"
+															Value="{Binding GyroMouseDeadZone}" Minimum="0" Maximum="1000" />
+									</StackPanel>
 
-                                    <CheckBox Content="Jitter Compensation" Margin="{StaticResource spaceMargin}"
-                                        IsChecked="{Binding GyroMouseJitterCompensation}" ToolTip="{lex:Loc GyroTriggerJitterCompensationTooltip}" />
+									<CheckBox Content="{lex:Loc JitterCompensation}" Margin="{StaticResource spaceMargin}"
+											  IsChecked="{Binding GyroMouseJitterCompensation}" ToolTip="{lex:Loc GyroTriggerJitterCompensationTooltip}" />
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <Label Content="Min Threshold" ContentStringFormat="{}{0}:" />
-                                        <xctk:DoubleUpDown d:IsHidden="True" MinWidth="80" Height="20" Minimum="1.0" Maximum="40.0" Increment="1.0" FormatString="F1" Value="{Binding GyroMouseMinThreshold,FallbackValue='1.0'}" Margin="8,0,0,0" />
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<Label Content="{lex:Loc MinThreshold}" ContentStringFormat="{}{0}:" />
+										<xctk:DoubleUpDown d:IsHidden="True" MinWidth="80" Height="20" Minimum="1.0" Maximum="40.0" Increment="1.0" FormatString="F1" Value="{Binding GyroMouseMinThreshold,FallbackValue='1.0'}" Margin="8,0,0,0" />
+									</StackPanel>
 
-                                    <CheckBox Content="Smoothing" IsChecked="{Binding GyroMouseSmooth,FallbackValue='False'}"  Margin="{StaticResource spaceMargin}" />
-                                    <GroupBox Header="Smoothing Options" IsEnabled="{Binding GyroMouseSmooth,FallbackValue='False'}" Margin="{StaticResource spaceMargin}">
-                                        <StackPanel>
-                                            <ComboBox x:Name="gyroMouseSmoothMethodCombo" Margin="{StaticResource spaceMargin}" SelectedIndex="{Binding GyroMouseSmoothMethodIndex,FallbackValue='0'}">
-                                                <ComboBoxItem Content="1&#x20ac; Filter" />
-                                                <ComboBoxItem Content="Weighted Average" />
-                                            </ComboBox>
+									<CheckBox Content="{lex:Loc Smoothing}" IsChecked="{Binding GyroMouseSmooth,FallbackValue='False'}" Margin="{StaticResource spaceMargin}" />
+									<GroupBox Header="{lex:Loc SmoothingOptions}" IsEnabled="{Binding GyroMouseSmooth,FallbackValue='False'}" Margin="{StaticResource spaceMargin}">
+										<StackPanel>
+											<ComboBox x:Name="gyroMouseSmoothMethodCombo" Margin="{StaticResource spaceMargin}" SelectedIndex="{Binding GyroMouseSmoothMethodIndex,FallbackValue='0'}">
+												<ComboBoxItem Content="{lex:Loc OneEuroFilter}" />
+												<ComboBoxItem Content="{lex:Loc WeightedAverage}" />
+											</ComboBox>
 
-                                            <StackPanel x:Name="gyroMouseOneEuroPanel" Orientation="Horizontal" Margin="{StaticResource spaceMargin}" Visibility="{Binding GyroMouseOneEuroPanelVisibility,FallbackValue='Visible'}">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Label Content="1&#x20ac; MinCutoff" />
-                                                    <xctk:DoubleUpDown d:IsHidden="True" FormatString="F5" Value="{Binding GyroMouseOneEuroMinCutoff,FallbackValue=1.0,UpdateSourceTrigger=LostFocus}"
-                                                           Minimum="0.00001" Maximum="100.0" Increment="0.1" MinWidth="60" />
-                                                </StackPanel>
-                                                <StackPanel Orientation="Horizontal" Margin="30,0,0,0">
-                                                    <Label Content="1&#x20ac; Beta" />
-                                                    <xctk:DoubleUpDown  d:IsHidden="True" FormatString="F5" Value="{Binding GyroMouseOneEuroBeta,FallbackValue=0.0,UpdateSourceTrigger=LostFocus}"
-                                                           Minimum="0.0" Maximum="1.0" Increment="0.1" MinWidth="60" />
-                                                </StackPanel>
-                                            </StackPanel>
+											<StackPanel x:Name="gyroMouseOneEuroPanel" Orientation="Horizontal" Margin="{StaticResource spaceMargin}" Visibility="{Binding GyroMouseOneEuroPanelVisibility,FallbackValue='Visible'}">
+												<StackPanel Orientation="Horizontal">
+													<Label Content="{lex:Loc OneEuroMinCutoff}" />
+													<xctk:DoubleUpDown d:IsHidden="True" FormatString="F5" Value="{Binding GyroMouseOneEuroMinCutoff,FallbackValue=1.0,UpdateSourceTrigger=LostFocus}"
+																	   Minimum="0.00001" Maximum="100.0" Increment="0.1" MinWidth="60" />
+												</StackPanel>
+												<StackPanel Orientation="Horizontal" Margin="30,0,0,0">
+													<Label Content="{lex:Loc OneEuroBeta}" />
+													<xctk:DoubleUpDown d:IsHidden="True" FormatString="F5" Value="{Binding GyroMouseOneEuroBeta,FallbackValue=0.0,UpdateSourceTrigger=LostFocus}"
+																	   Minimum="0.0" Maximum="1.0" Increment="0.1" MinWidth="60" />
+												</StackPanel>
+											</StackPanel>
 
-                                            <StackPanel x:Name="gyroMouseWeightedAvgPanel" Orientation="Horizontal" Margin="{StaticResource spaceMargin}" Visibility="{Binding GyroMouseWeightAvgPanelVisibility,FallbackValue='Collapsed'}">
-                                                <Label Content="Smooth Weight" Padding="0" />
-                                                <xctk:DoubleUpDown d:IsHidden="True" MinWidth="60" Margin="8,0,0,0"
-                                                   Value="{Binding GyroMouseSmoothWeight}" Minimum="0.0" Maximum="1.0" Increment="0.1" />
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </GroupBox>
+											<StackPanel x:Name="gyroMouseWeightedAvgPanel" Orientation="Horizontal" Margin="{StaticResource spaceMargin}" Visibility="{Binding GyroMouseWeightAvgPanelVisibility,FallbackValue='Collapsed'}">
+												<Label Content="{lex:Loc SmoothWeight}" Padding="0" />
+												<xctk:DoubleUpDown d:IsHidden="True" MinWidth="60" Margin="8,0,0,0"
+																   Value="{Binding GyroMouseSmoothWeight}" Minimum="0.0" Maximum="1.0" Increment="0.1" />
+											</StackPanel>
+										</StackPanel>
+									</GroupBox>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,8">
-                                        <Button x:Name="gyroCalBtn4" Content="Gyro Calibration" Width="100"  Click="GyroCalibration_Click" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </TabItem>
+									<StackPanel Orientation="Horizontal" Margin="0,8,0,8">
+										<Button x:Name="gyroCalBtn4" Content="{lex:Loc GyroCalibration}" Width="100" Click="GyroCalibration_Click" />
+									</StackPanel>
+								</StackPanel>
+							</TabItem>
 
 							<TabItem Header="{lex:Loc MouseJoystick}" Visibility="Collapsed">
 								<StackPanel x:Name="gyroMouseJoystickPanel">
-									<!-- Turn Behavior Trigger -->
+									<!-- Turn Behavior Trigger - 第一行：仅显示标签和按钮 -->
 									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-										<CheckBox x:Name="gyroMouseStickTurnsCheckBox" 
-												  Content="Turn Behavior Trigger:" 
-												  IsChecked="{Binding GyroMouseStickTurns}" 
-												  ToolTip="{lex:Loc Resources:GyroTriggerBehavior}" 
-												  VerticalAlignment="Center"/>
+										<Label Content="{lex:Loc TurnBehaviorTrigger}" VerticalAlignment="Center"/>
 										<Button x:Name="gyroMouseStickTrigBtn" 
 												Content="{Binding GyroMouseStickTrigDisplay,FallbackValue='L2'}" 
 												MinWidth="160" Margin="8,0,0,0" 
@@ -1900,236 +1935,315 @@
 										</Button>
 									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <Label Content="Eval Cond." Margin="20,0,0,0" />
-                                        <ComboBox SelectedIndex="{Binding GyroMouseStickEvalCondIndex,FallbackValue=0}" Margin="8,0,0,0">
-                                            <ComboBoxItem Content="And" />
-                                            <ComboBoxItem Content="Or" />
-                                        </ComboBox>
-                                    </StackPanel>
+									<!-- 第二行：复选框（按键行为反转） + 条件求值 -->
+									<Grid Margin="{StaticResource spaceMargin}">
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="Auto"/>
+											<ColumnDefinition Width="Auto"/>
+											<ColumnDefinition Width="Auto"/>
+										</Grid.ColumnDefinitions>
+
+										<!-- 条件求值标签 -->
+										<Label Content="{lex:Loc EvalCond}" 
+											   Grid.Column="0"
+											   Margin="20,0,5,0" 
+											   VerticalAlignment="Center"
+											   VerticalContentAlignment="Center"/>
+
+										<!-- 下拉框 -->
+										<ComboBox SelectedIndex="{Binding GyroMouseStickEvalCondIndex,FallbackValue=0}" 
+												  Grid.Column="1"
+												  VerticalAlignment="Center">
+											<ComboBoxItem Content="{lex:Loc And}" />
+											<ComboBoxItem Content="{lex:Loc Or}" />
+										</ComboBox>
+
+										<!-- 复选框（按键行为反转） -->
+										<CheckBox x:Name="gyroMouseStickTurnsCheckBox" 
+												  Grid.Column="2"
+												  Content="{lex:Loc InvertBehavior}" 
+												  IsChecked="{Binding GyroMouseStickTurns}" 
+												  ToolTip="{lex:Loc GyroTriggerBehavior}" 
+												  VerticalAlignment="Center"
+												  Margin="20,0,0,0"/>
+									</Grid>
 
 									<!-- Toggle Trigger -->
 									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
 										<CheckBox x:Name="gyroMouseStickToggleCheckBox" 
-												  Content="Toggle Trigger:" 
+												  Content="{lex:Loc ToggleTrigger}" 
 												  IsChecked="{Binding GyroMouseStickToggle}" 
 												  VerticalAlignment="Center"/>
 										<Button x:Name="gyroMouseStickToggleTrigBtn" 
 												Content="{Binding GyroMouseStickToggleTrigDisplay,FallbackValue='L2'}" 
 												MinWidth="160" Margin="8,0,0,0" 
-												Click="GyroMouseStickToggleTrigBtn_Click">
+												Click="GyroMouseStickToggleTrigBtn_Click"
+												MinHeight="26"
+												VerticalAlignment="Center">
 											<Button.ContextMenu>
 												<ContextMenu />
 											</Button.ContextMenu>
 										</Button>
 									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <Label Content="{lex:Loc DeadZone}" />
-                                        <xctk:IntegerUpDown d:IsHidden="True" Margin="8,0,0,0" Value="{Binding GyroMouseStickDeadZone}" MinWidth="60" />
-                                        <Label Content="{lex:Loc MaxZone}" Margin="8,0,0,0" />
-                                        <xctk:IntegerUpDown d:IsHidden="True" Margin="8,0,0,0" Value="{Binding GyroMouseStickMaxZone}" MinWidth="60"
-                                                Minimum="1" />
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<Label Content="{lex:Loc DeadZone}" />
+										<xctk:IntegerUpDown d:IsHidden="True" Margin="8,0,0,0" Value="{Binding GyroMouseStickDeadZone}" MinWidth="60" />
+										<Label Content="{lex:Loc MaxZone}" Margin="8,0,0,0" />
+										<xctk:IntegerUpDown d:IsHidden="True" Margin="8,0,0,0" Value="{Binding GyroMouseStickMaxZone}" MinWidth="60"
+															Minimum="1" />
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <Label Content="Output Stick" />
-                                        <ComboBox SelectedIndex="{Binding GyroMouseStickOutputStick}">
-                                            <ComboBoxItem Content="None" />
-                                            <ComboBoxItem Content="Left Stick" />
-                                            <ComboBoxItem Content="Right Stick" />
-                                        </ComboBox>
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<Label Content="{lex:Loc OutputStick}" />
+										<ComboBox SelectedIndex="{Binding GyroMouseStickOutputStick}">
+											<ComboBoxItem Content="{lex:Loc None}" />
+											<ComboBoxItem Content="{lex:Loc LeftStick}" />
+											<ComboBoxItem Content="{lex:Loc RightStick}" />
+										</ComboBox>
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <Label Content="Output Axes" />
-                                        <ComboBox SelectedIndex="{Binding GyroMouseStickOutputAxes}">
-                                            <ComboBoxItem Content="None" />
-                                            <ComboBoxItem Content="Horizontal and Vertical" />
-                                            <ComboBoxItem Content="Horizontal Only" />
-                                            <ComboBoxItem Content="Vertical Only" />
-                                        </ComboBox>
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<Label Content="{lex:Loc OutputAxes}" />
+										<ComboBox SelectedIndex="{Binding GyroMouseStickOutputAxes}">
+											<ComboBoxItem Content="{lex:Loc None}" />
+											<ComboBoxItem Content="{lex:Loc HorizontalAndVertical}" />
+											<ComboBoxItem Content="{lex:Loc HorizontalOnly}" />
+											<ComboBoxItem Content="{lex:Loc VerticalOnly}" />
+										</ComboBox>
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Height="30" Margin="{StaticResource spaceMargin}">
-                                        <Label Content="Minimum X" />
-                                        <xctk:DoubleUpDown d:IsHidden="True" Margin="8,0,0,0" Value="{Binding GyroMouseStickAntiDeadX}" MinWidth="60"
-                                               FormatString="F0" Minimum="0.0" Maximum="100.0" Increment="10.0" />
-                                        <Label Content="%" />
+									<StackPanel Orientation="Horizontal" Height="30" Margin="{StaticResource spaceMargin}">
+										<Label Content="{lex:Loc MinimumX}" />
+										<xctk:DoubleUpDown d:IsHidden="True" Margin="8,0,0,0" Value="{Binding GyroMouseStickAntiDeadX}" MinWidth="60"
+														   FormatString="F0" Minimum="0.0" Maximum="100.0" Increment="10.0" />
+										<Label Content="{lex:Loc PercentSign}" />
 
-                                        <Label Content="Minimum Y" Margin="8,0,0,0" />
-                                        <xctk:DoubleUpDown d:IsHidden="True" Margin="8,0,0,0" Value="{Binding GyroMouseStickAntiDeadY}" MinWidth="60"
-                                               FormatString="F0" Minimum="0.0" Maximum="100.0" Increment="10.0" />
-                                        <Label Content="%" />
-                                    </StackPanel>
+										<Label Content="{lex:Loc MinimumY}" Margin="8,0,0,0" />
+										<xctk:DoubleUpDown d:IsHidden="True" Margin="8,0,0,0" Value="{Binding GyroMouseStickAntiDeadY}" MinWidth="60"
+														   FormatString="F0" Minimum="0.0" Maximum="100.0" Increment="10.0" />
+										<Label Content="{lex:Loc PercentSign}" />
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <Label Content="{lex:Loc VerticalScale}" />
-                                        <xctk:IntegerUpDown d:IsHidden="True" Margin="8,0,0,0" Value="{Binding GyroMouseStickVertScale}" MinWidth="60"
-                                                Minimum="0" Maximum="400" Increment="10" />
-                                        <Label Content="%" />
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<Label Content="{lex:Loc VerticalScale}" />
+										<xctk:IntegerUpDown d:IsHidden="True" Margin="8,0,0,0" Value="{Binding GyroMouseStickVertScale}" MinWidth="60"
+															Minimum="0" Maximum="400" Increment="10" />
+										<Label Content="{lex:Loc PercentSign}" />
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <CheckBox Content="{lex:Loc MaxOutput}" IsChecked="{Binding GyroMouseStickMaxOutputEnabled,FallbackValue=False}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                        <xctk:DoubleUpDown d:IsHidden="True" Margin="8,0,0,0" Value="{Binding GyroMouseStickMaxOutput}" IsEnabled="{Binding GyroMouseStickMaxOutputEnabled,FallbackValue=False}"
-                                               FormatString="F0" MinWidth="60" Maximum="100.0" Minimum="0.0" Increment="10.0" />
-                                        <Label Content="%" />
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<CheckBox Content="{lex:Loc MaxOutput}" IsChecked="{Binding GyroMouseStickMaxOutputEnabled,FallbackValue=False}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+										<xctk:DoubleUpDown d:IsHidden="True" Margin="8,0,0,0" Value="{Binding GyroMouseStickMaxOutput}" IsEnabled="{Binding GyroMouseStickMaxOutputEnabled,FallbackValue=False}"
+														   FormatString="F0" MinWidth="60" Maximum="100.0" Minimum="0.0" Increment="10.0" />
+										<Label Content="{lex:Loc PercentSign}" />
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <Label Content="X-Axis" />
-                                        <ComboBox SelectedIndex="{Binding GyroMouseStickXAxis,FallbackValue=0}" Margin="8,0,0,0">
-                                            <ComboBoxItem Content="Yaw" />
-                                            <ComboBoxItem Content="Roll" />
-                                        </ComboBox>
-                                    </StackPanel>
+									<Grid Margin="{StaticResource spaceMargin}">
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="Auto"/>
+											<ColumnDefinition Width="Auto"/>
+										</Grid.ColumnDefinitions>
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <CheckBox Content="Invert X" IsChecked="{Binding GyroMouseStickInvertX}"/>
-                                        <CheckBox Content="Invert Y" Margin="10,0,0,0" IsChecked="{Binding GyroMouseStickInvertY}" />
-                                    </StackPanel>
+										<!-- X轴标签 -->
+										<Label Content="{lex:Loc XAxis}" 
+											   Grid.Column="0"
+											   Margin="0,0,5,0" 
+											   VerticalAlignment="Center"
+											   VerticalContentAlignment="Center"/>
 
-                                    <CheckBox Content="Jitter Compensation" Margin="{StaticResource spaceMargin}"
-                                        IsChecked="{Binding GyroMouseStickJitterCompensation}" ToolTip="{lex:Loc GyroTriggerJitterCompensationTooltip}" />
+										<!-- 下拉框 -->
+										<ComboBox SelectedIndex="{Binding GyroMouseStickXAxis,FallbackValue=0}" 
+												  Grid.Column="1"
+												  MinWidth="60"
+												  VerticalAlignment="Center">
+											<ComboBoxItem Content="{lex:Loc Yaw}" />
+											<ComboBoxItem Content="{lex:Loc Roll}" />
+										</ComboBox>
+									</Grid>
 
-                                    <CheckBox Content="Smoothing" IsChecked="{Binding GyroMouseStickSmooth}" Margin="{StaticResource spaceMargin}" />
-                                    <GroupBox Header="Smoothing Options" IsEnabled="{Binding GyroMouseStickSmooth,FallbackValue='False'}" Margin="{StaticResource spaceMargin}">
-                                        <StackPanel>
-                                            <ComboBox x:Name="gyroMouseStickSmoothMethodCombo" Margin="{StaticResource spaceMargin}" SelectedIndex="{Binding GyroMouseStickSmoothMethodIndex,FallbackValue='0'}">
-                                                <ComboBoxItem Content="1&#x20ac; Filter" />
-                                                <ComboBoxItem Content="Weighted Average" />
-                                            </ComboBox>
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<CheckBox Content="{lex:Loc InvertX}" IsChecked="{Binding GyroMouseStickInvertX}"/>
+										<CheckBox Content="{lex:Loc InvertY}" Margin="10,0,0,0" IsChecked="{Binding GyroMouseStickInvertY}" />
+									</StackPanel>
 
-                                            <StackPanel x:Name="gyroMouseStickOneEuroPanel" Orientation="Horizontal" Margin="{StaticResource spaceMargin}" Visibility="{Binding GyroMouseStickOneEuroPanelVisibility,FallbackValue='Visible'}">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Label Content="1&#x20ac; MinCutoff" />
-                                                    <xctk:DoubleUpDown d:IsHidden="True" FormatString="F5" Value="{Binding GyroMouseStickOneEuroMinCutoff,FallbackValue='1.0',UpdateSourceTrigger=LostFocus}"
-                                                           Minimum="0.00001" Maximum="100.0" Increment="0.1" MinWidth="60" />
-                                                </StackPanel>
-                                                <StackPanel Orientation="Horizontal" Margin="30,0,0,0">
-                                                    <Label Content="1&#x20ac; Beta" />
-                                                    <xctk:DoubleUpDown d:IsHidden="True" FormatString="F5" Value="{Binding GyroMouseStickOneEuroBeta,FallbackValue='0.0',UpdateSourceTrigger=LostFocus}"
-                                                           Minimum="0.0" Maximum="1.0" Increment="0.1" MinWidth="60" />
-                                                </StackPanel>
-                                            </StackPanel>
+									<CheckBox Content="{lex:Loc JitterCompensation}" Margin="{StaticResource spaceMargin}"
+											  IsChecked="{Binding GyroMouseStickJitterCompensation}" ToolTip="{lex:Loc GyroTriggerJitterCompensationTooltip}" />
 
-                                            <StackPanel x:Name="gyroMouseStickWeightedAvgPanel" Orientation="Horizontal" Margin="{StaticResource spaceMargin}" Visibility="{Binding GyroMouseStickWeightAvgPanelVisibility,FallbackValue='Collapsed'}">
-                                                <Label Content="Weight" Padding="0" Margin="20,0,0,0" />
-                                                <xctk:DoubleUpDown d:IsHidden="True" Margin="8,0,0,0" FormatString="F2" Value="{Binding GyroMouseStickSmoothWeight}"
-                                               Minimum="0.0" Maximum="1.0" Increment="0.1" MinWidth="60" IsEnabled="{Binding GyroMouseStickSmooth}" />
-                                            </StackPanel>
+									<CheckBox Content="{lex:Loc Smoothing}" IsChecked="{Binding GyroMouseStickSmooth}" Margin="{StaticResource spaceMargin}" />
+									<GroupBox Header="{lex:Loc SmoothingOptions}" IsEnabled="{Binding GyroMouseStickSmooth,FallbackValue='False'}" Margin="{StaticResource spaceMargin}">
+										<StackPanel>
+											<ComboBox x:Name="gyroMouseStickSmoothMethodCombo" Margin="{StaticResource spaceMargin}" SelectedIndex="{Binding GyroMouseStickSmoothMethodIndex,FallbackValue='0'}">
+												<ComboBoxItem Content="{lex:Loc OneEuroFilter}" />
+												<ComboBoxItem Content="{lex:Loc WeightedAverage}" />
+											</ComboBox>
 
-                                        </StackPanel>
-                                    </GroupBox>
+											<StackPanel x:Name="gyroMouseStickOneEuroPanel" Orientation="Horizontal" Margin="{StaticResource spaceMargin}" Visibility="{Binding GyroMouseStickOneEuroPanelVisibility,FallbackValue='Visible'}">
+												<StackPanel Orientation="Horizontal">
+													<Label Content="{lex:Loc OneEuroMinCutoff}" />
+													<xctk:DoubleUpDown d:IsHidden="True" FormatString="F5" Value="{Binding GyroMouseStickOneEuroMinCutoff,FallbackValue='1.0',UpdateSourceTrigger=LostFocus}"
+																	   Minimum="0.00001" Maximum="100.0" Increment="0.1" MinWidth="60" />
+												</StackPanel>
+												<StackPanel Orientation="Horizontal" Margin="30,0,0,0">
+													<Label Content="{lex:Loc OneEuroBeta}" />
+													<xctk:DoubleUpDown d:IsHidden="True" FormatString="F5" Value="{Binding GyroMouseStickOneEuroBeta,FallbackValue='0.0',UpdateSourceTrigger=LostFocus}"
+																	   Minimum="0.0" Maximum="1.0" Increment="0.1" MinWidth="60" />
+												</StackPanel>
+											</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,8">
-                                        <Button x:Name="gyroCalBtn1" Content="Gyro Calibration" Width="100"  Click="GyroCalibration_Click" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </TabItem>
+											<StackPanel x:Name="gyroMouseStickWeightedAvgPanel" Orientation="Horizontal" Margin="{StaticResource spaceMargin}" Visibility="{Binding GyroMouseStickWeightAvgPanelVisibility,FallbackValue='Collapsed'}">
+												<Label Content="{lex:Loc Weight}" Padding="0" Margin="20,0,0,0" />
+												<xctk:DoubleUpDown d:IsHidden="True" Margin="8,0,0,0" FormatString="F2" Value="{Binding GyroMouseStickSmoothWeight}"
+																   Minimum="0.0" Maximum="1.0" Increment="0.1" MinWidth="60" IsEnabled="{Binding GyroMouseStickSmooth}" />
+											</StackPanel>
+										</StackPanel>
+									</GroupBox>
 
-                            <TabItem Header="{lex:Loc DirectionalSwipe}" Visibility="Collapsed">
-                                <StackPanel x:Name="gyroDirSwipePanel">
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                        <Button x:Name="gyroSwipeUpBtn" Content="Swipe Up" Width="100" Tag="{Binding GyroSwipeUp, Source={StaticResource controlIndexCheck}}" Click="GyroSwipeControlsBtn_Click" />
-                                        <Label x:Name="gyroSwipeUpLb" Content="{Binding MappingName,FallbackValue=Unassigned}" />
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="0,8,0,8">
+										<Button x:Name="gyroCalBtn1" Content="{lex:Loc GyroCalibration}" Width="100" Click="GyroCalibration_Click" />
+									</StackPanel>
+								</StackPanel>
+							</TabItem>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                        <Button x:Name="gyroSwipeDownBtn" Content="Swipe Down" Width="100" Tag="{Binding GyroSwipeDown, Source={StaticResource controlIndexCheck}}" Click="GyroSwipeControlsBtn_Click" />
-                                        <Label x:Name="gyroSwipeDownLb" Content="{Binding MappingName,FallbackValue=Unassigned}" />
-                                    </StackPanel>
+							<TabItem Header="{lex:Loc DirectionalSwipe}" Visibility="Collapsed">
+								<StackPanel x:Name="gyroDirSwipePanel">
+									<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+										<Button x:Name="gyroSwipeUpBtn" Content="{lex:Loc SwipeUp}" Width="100" Tag="{Binding GyroSwipeUp, Source={StaticResource controlIndexCheck}}" Click="GyroSwipeControlsBtn_Click" />
+										<Label x:Name="gyroSwipeUpLb" Content="{Binding MappingName,FallbackValue=Unassigned}" />
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                        <Button x:Name="gyroSwipeLeftBtn" Content="Swipe Left" Width="100" Tag="{Binding GyroSwipeLeft, Source={StaticResource controlIndexCheck}}" Click="GyroSwipeControlsBtn_Click" />
-                                        <Label x:Name="gyroSwipeLeftLb" Content="{Binding MappingName,FallbackValue=Unassigned}" />
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+										<Button x:Name="gyroSwipeDownBtn" Content="{lex:Loc SwipeDown}" Width="100" Tag="{Binding GyroSwipeDown, Source={StaticResource controlIndexCheck}}" Click="GyroSwipeControlsBtn_Click" />
+										<Label x:Name="gyroSwipeDownLb" Content="{Binding MappingName,FallbackValue=Unassigned}" />
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                        <Button x:Name="gyroSwipeRightBtn" Content="Swipe Right" Width="100" Tag="{Binding GyroSwipeRight, Source={StaticResource controlIndexCheck}}" Click="GyroSwipeControlsBtn_Click" />
-                                        <Label x:Name="gyroSwipeRightLb" Content="{Binding MappingName,FallbackValue=Unassigned}" />
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+										<Button x:Name="gyroSwipeLeftBtn" Content="{lex:Loc SwipeLeft}" Width="100" Tag="{Binding GyroSwipeLeft, Source={StaticResource controlIndexCheck}}" Click="GyroSwipeControlsBtn_Click" />
+										<Label x:Name="gyroSwipeLeftLb" Content="{Binding MappingName,FallbackValue=Unassigned}" />
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                        <Label Content="Triggers" />
-                                        <Button x:Name="gyroSwipeTrigBtn" Content="{Binding GyroSwipeTrigDisplay,FallbackValue=Always On}" MinWidth="160" Click="GyroSwipeTrigBtn_Click" >
-                                            <Button.ContextMenu>
-                                                <ContextMenu />
-                                            </Button.ContextMenu>
-                                        </Button>
-                                    </StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+										<Button x:Name="gyroSwipeRightBtn" Content="{lex:Loc SwipeRight}" Width="100" Tag="{Binding GyroSwipeRight, Source={StaticResource controlIndexCheck}}" Click="GyroSwipeControlsBtn_Click" />
+										<Label x:Name="gyroSwipeRightLb" Content="{Binding MappingName,FallbackValue=Unassigned}" />
+									</StackPanel>
 
-                                    <CheckBox Content="Turn Behavior - Turns Gyro" Margin="0,8,0,0"
-                                  IsChecked="{Binding GyroSwipeTurns}" ToolTip="{lex:Loc Resources:GyroTriggerBehavior}" />
+									<StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+										<Label Content="{lex:Loc TriggersLabel}" />
+										<Button x:Name="gyroSwipeTrigBtn" Content="{Binding GyroSwipeTrigDisplay,FallbackValue=Always On}" MinWidth="160" Click="GyroSwipeTrigBtn_Click" >
+											<Button.ContextMenu>
+												<ContextMenu />
+											</Button.ContextMenu>
+										</Button>
+									</StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <StackPanel>
-                                            <Label Content="Eval Cond." Margin="{StaticResource spaceMargin}" />
-                                            <ComboBox SelectedIndex="{Binding GyroSwipeEvalCondIndex,FallbackValue=0}">
-                                                <ComboBoxItem Content="And" />
-                                                <ComboBoxItem Content="Or" />
-                                            </ComboBox>
-                                        </StackPanel>
+									<CheckBox Content="{lex:Loc TurnBehaviorTurnsGyro}" Margin="0,8,0,0"
+											  IsChecked="{Binding GyroSwipeTurns}" 
+											  ToolTip="{lex:Loc GyroTriggerBehavior}" 
+											  MinHeight="20"
+									/>
 
-                                        <StackPanel Margin="20,0,0,0">
-                                            <Label Content="X Axis" Margin="{StaticResource spaceMargin}" />
-                                            <ComboBox SelectedIndex="{Binding GyroSwipeXAxis,FallbackValue=0}">
-                                                <ComboBoxItem Content="Yaw" />
-                                                <ComboBoxItem Content="Roll" />
-                                            </ComboBox>
-                                        </StackPanel>
-                                    </StackPanel>
+									<Grid Margin="{StaticResource spaceMargin}">
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="Auto"/>
+											<ColumnDefinition Width="Auto"/>
+										</Grid.ColumnDefinitions>
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <Label Content="{lex:Loc DeadZoneX}" />
-                                        <xctk:IntegerUpDown d:IsHidden="True" MinWidth="60" Margin="8,0,0,0"
-                                                Value="{Binding GyroSwipeDeadZoneX}" Minimum="0" Maximum="2000" />
-                                        <Label Content="deg/sec." />
-                                    </StackPanel>
+										<!-- 第一组：条件求值 -->
+										<Grid Grid.Column="0">
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition Width="Auto"/>
+												<ColumnDefinition Width="Auto"/>
+											</Grid.ColumnDefinitions>
 
-                                    <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                                        <Label Content="{lex:Loc DeadZoneY}" />
-                                        <xctk:IntegerUpDown d:IsHidden="True" MinWidth="60" Margin="8,0,0,0"
-                                                Value="{Binding GyroSwipeDeadZoneY}" Minimum="0" Maximum="2000" />
-                                        <Label Content="deg/sec." />
-                                    </StackPanel>
+											<!-- 条件求值标签 -->
+											<Label Content="{lex:Loc EvalCond}" 
+												   Grid.Column="0"
+												   Margin="0,0,5,0" 
+												   VerticalAlignment="Center"
+												   VerticalContentAlignment="Center"/>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                        <Label Content="Delay Time" ContentStringFormat="{}{0}:" />
-                                        <xctk:IntegerUpDown d:IsHidden="True" MinWidth="60" Margin="8,0,0,0"
-                                                Value="{Binding GyroSwipeDelayTime}" Minimum="0" Maximum="5000" Increment="10" />
-                                        <Label Content="ms" />
-                                    </StackPanel>
+											<!-- 下拉框 -->
+											<ComboBox SelectedIndex="{Binding GyroSwipeEvalCondIndex,FallbackValue=0}" 
+													  Grid.Column="1"
+													  VerticalAlignment="Center">
+												<ComboBoxItem Content="{lex:Loc And}" />
+												<ComboBoxItem Content="{lex:Loc Or}" />
+											</ComboBox>
+										</Grid>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,8">
-                                        <Button x:Name="gyroCalBtn2" Content="Gyro Calibration" Width="100"  Click="GyroCalibration_Click" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </TabItem>
+										<!-- 第二组：X轴 -->
+										<Grid Grid.Column="1" Margin="20,0,0,0">
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition Width="Auto"/>
+												<ColumnDefinition Width="Auto"/>
+											</Grid.ColumnDefinitions>
 
-                            <TabItem Header="{lex:Loc Passthru}" Visibility="Collapsed">
-                                <StackPanel x:Name="passthruPanel">
-                                    <TextBlock Foreground="Red"
-                                               Visibility="{Binding UsingMinViGEm173333, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"
-                                               Text="{lex:Loc ViGEm117MinNeeded}">
-                                    </TextBlock>
+											<!-- X轴标签 -->
+											<Label Content="{lex:Loc XAxis}" 
+												   Grid.Column="0"
+												   Margin="0,0,5,0" 
+												   VerticalAlignment="Center"
+												   VerticalContentAlignment="Center"/>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,8">
-                                        <Button x:Name="gyroCalBtn3" Content="Gyro Calibration" Width="100"  Click="GyroCalibration_Click" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </TabItem>
+											<!-- 下拉框 -->
+											<ComboBox SelectedIndex="{Binding GyroSwipeXAxis,FallbackValue=0}" 
+													  Grid.Column="1"
+													  VerticalAlignment="Center">
+												<ComboBoxItem Content="{lex:Loc Yaw}" />
+												<ComboBoxItem Content="{lex:Loc Roll}" />
+											</ComboBox>
+										</Grid>
+									</Grid>
 
-                        </TabControl>
-                        <StackPanel Orientation="Horizontal" Margin="0, 8, 0, 8">
-                            <CheckBox Content="{lex:Loc UseDs3PitchRollSim}"
-                                      IsChecked="{Binding UseDs3PitchRollSim}"
-                                      ToolTip="{lex:Loc UseDs3PitchRollSimTooltip}"/>
-                        </StackPanel>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<Label Content="{lex:Loc DeadZoneX}" />
+										<xctk:IntegerUpDown d:IsHidden="True" MinWidth="60" Margin="8,0,0,0"
+															Value="{Binding GyroSwipeDeadZoneX}" Minimum="0" Maximum="2000" />
+										<Label Content="{lex:Loc DegreesPerSecond}" />
+									</StackPanel>
+
+									<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
+										<Label Content="{lex:Loc DeadZoneY}" />
+										<xctk:IntegerUpDown d:IsHidden="True" MinWidth="60" Margin="8,0,0,0"
+															Value="{Binding GyroSwipeDeadZoneY}" Minimum="0" Maximum="2000" />
+										<Label Content="{lex:Loc DegreesPerSecond}" />
+									</StackPanel>
+
+									<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+										<Label Content="{lex:Loc DelayTime}" ContentStringFormat="{}{0}:" />
+										<xctk:IntegerUpDown d:IsHidden="True" MinWidth="60" Margin="8,0,0,0"
+															Value="{Binding GyroSwipeDelayTime}" Minimum="0" Maximum="5000" Increment="10" />
+										<Label Content="{lex:Loc Milliseconds}" />
+									</StackPanel>
+
+									<StackPanel Orientation="Horizontal" Margin="0,8,0,8">
+										<Button x:Name="gyroCalBtn2" Content="{lex:Loc GyroCalibration}" Width="100" Click="GyroCalibration_Click" />
+									</StackPanel>
+								</StackPanel>
+							</TabItem>
+
+							<TabItem Header="{lex:Loc Passthru}" Visibility="Collapsed">
+								<StackPanel x:Name="passthruPanel">
+									<TextBlock Foreground="Red"
+											   Visibility="{Binding UsingMinViGEm173333, Mode=OneWay, Converter={StaticResource InvertBoolToVisibilityConverter}}"
+											   Text="{lex:Loc ViGEm117MinNeeded}">
+									</TextBlock>
+
+									<StackPanel Orientation="Horizontal" Margin="0,8,0,8">
+										<Button x:Name="gyroCalBtn3" Content="{lex:Loc GyroCalibration}" Width="100" Click="GyroCalibration_Click" />
+									</StackPanel>
+								</StackPanel>
+							</TabItem>
+						</TabControl>
+
+						<StackPanel Orientation="Horizontal" Margin="0, 8, 0, 8">
+							<CheckBox Content="{lex:Loc UseDs3PitchRollSim}"
+									  IsChecked="{Binding UseDs3PitchRollSim}"
+									  ToolTip="{lex:Loc UseDs3PitchRollSimTooltip}"/>
+						</StackPanel>
+					</StackPanel>
+				</ScrollViewer>
+			</TabItem>
 
             <TabItem Header="{lex:Loc Other}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">

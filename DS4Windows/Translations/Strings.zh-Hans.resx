@@ -1144,7 +1144,7 @@
     <value>鼠标加速度</value>
   </data>
   <data name="MouseJoystick" xml:space="preserve">
-    <value>鼠标摇杆</value>
+    <value>摇杆</value>
   </data>
   <data name="MouseOffset" xml:space="preserve">
     <value>鼠标偏移</value>
@@ -1505,4 +1505,123 @@
     <value>控制器 {0} 电量低（{1}%）。请尽快充电。</value>
     <comment>参数：0=控制器编号，1=电量百分比</comment>
   </data>
+  
+	<data name="FlashAtOption" xml:space="preserve">
+		<value>占比闪烁</value>
+	</data>
+	<data name="PulseAtOption" xml:space="preserve">
+		<value>呼吸</value>
+	</data>
+	<data name="PercentSign" xml:space="preserve">
+		<value>%</value>
+	</data>
+	<data name="FlashAtTip" xml:space="preserve">
+		<value>点击更改闪烁颜色。黑色 = 默认颜色</value>
+	</data>
+	<data name="WhileChargingLabel" xml:space="preserve">
+		<value>充电时：</value>
+	</data>
+	<data name="ChargingNormal" xml:space="preserve">
+		<value>正常</value>
+	</data>
+	<data name="ChargingPulse" xml:space="preserve">
+		<value>脉冲</value>
+	</data>
+	<data name="ChargingRainbow" xml:space="preserve">
+		<value>彩虹</value>
+	</data>
+	<data name="ChargingColor" xml:space="preserve">
+		<value>颜色</value>
+	</data>
+	<data name="ColorByBattery" xml:space="preserve">
+		<value>按电池百分比变色</value>
+	</data>
+	<data name="LightByBatteryTip" xml:space="preserve">
+		<value>当DS4充满电后，闲置超时后灯光也会变暗。</value>
+	</data>
+	<data name="AlwaysRainbow" xml:space="preserve">
+		<value>始终彩虹</value>
+	</data>
+	<data name="SecsPerCycle" xml:space="preserve">
+		<value>秒/周期</value>
+	</data>
+	<data name="MaxLightFormat" xml:space="preserve">
+		<value>最大亮度 {0:N2}%</value>
+	</data>
+	<data name="EmptyColor" xml:space="preserve">
+		<value>电量空</value>
+	</data>
+	<data name="MaxLightPrefix" xml:space="preserve">
+		<value>最大亮度 </value>
+	</data>
+	
+	<data name="TiltUp" xml:space="preserve"><value>上倾</value></data>
+	<data name="TiltDown" xml:space="preserve"><value>下倾</value></data>
+	<data name="TiltLeft" xml:space="preserve"><value>左倾</value></data>
+	<data name="TiltRight" xml:space="preserve"><value>右倾</value></data>
+	<data name="TriggersLabel" xml:space="preserve"><value>触发按键</value></data>
+	<data name="TurnBehaviorTurnsGyro" xml:space="preserve"><value>按键反转</value></data>
+	<data name="GyroTriggerBehavior" xml:space="preserve"><value>勾选时，按下扳机启用陀螺仪；取消勾选时，按下扳机关闭陀螺仪。</value></data>
+	<data name="Toggle" xml:space="preserve"><value>切换</value></data>
+	<data name="EvalCond" xml:space="preserve"><value>按键组合行为</value></data>
+	<data name="And" xml:space="preserve"><value>与</value></data>
+	<data name="Or" xml:space="preserve"><value>或</value></data>
+	<data name="SteeringWheel360" xml:space="preserve"><value>360度方向盘</value></data>
+	<data name="SteeringWheelAxis" xml:space="preserve"><value>方向盘轴</value></data>
+	<data name="None" xml:space="preserve"><value>无</value></data>
+	<data name="LeftXAxis" xml:space="preserve"><value>左 X 轴</value></data>
+	<data name="LeftYAxis" xml:space="preserve"><value>左 Y 轴</value></data>
+	<data name="RightXAxis" xml:space="preserve"><value>右 X 轴</value></data>
+	<data name="RightYAxis" xml:space="preserve"><value>右 Y 轴</value></data>
+	<data name="TriggerLRAxis" xml:space="preserve"><value>扳机 L+R 轴</value></data>
+	<data name="VJoy1XAxis" xml:space="preserve"><value>VJoy1 X 轴</value></data>
+	<data name="VJoy1YAxis" xml:space="preserve"><value>VJoy1 Y 轴</value></data>
+	<data name="VJoy1ZAxis" xml:space="preserve"><value>VJoy1 Z 轴</value></data>
+	<data name="VJoy2XAxis" xml:space="preserve"><value>VJoy2 X 轴</value></data>
+	<data name="VJoy2YAxis" xml:space="preserve"><value>VJoy2 Y 轴</value></data>
+	<data name="VJoy2ZAxis" xml:space="preserve"><value>VJoy2 Z 轴</value></data>
+	<data name="SteeringWheelRange" xml:space="preserve"><value>方向盘范围</value></data>
+	<data name="Calibrate" xml:space="preserve"><value>校准</value></data>
+	<data name="Units" xml:space="preserve"><value>单位</value></data>
+	<data name="UseSmoothing" xml:space="preserve"><value>使用平滑</value></data>
+	<data name="OneEuroMinCutoff" xml:space="preserve"><value>1€ 最小截止</value></data>
+	<data name="OneEuroBeta" xml:space="preserve"><value>1€ Beta</value></data>
+	<data name="GyroCalibration" xml:space="preserve"><value>陀螺仪校准</value></data>
+	<data name="TurnBehaviorTrigger" xml:space="preserve"><value>触发按键：</value></data>
+	<data name="InvertBehavior" xml:space="preserve"><value>按键反转</value></data>
+	<data name="ToggleTrigger" xml:space="preserve"><value>常开按键：</value></data>
+	<data name="GyroSensitivityLabel" xml:space="preserve"><value>陀螺仪灵敏度：</value></data>
+	<data name="XAxis" xml:space="preserve"><value>X 轴</value></data>
+	<data name="Yaw" xml:space="preserve"><value>偏航</value></data>
+	<data name="Roll" xml:space="preserve"><value>翻滚</value></data>
+	<data name="Invert" xml:space="preserve"><value>反转</value></data>
+	<data name="InvertX" xml:space="preserve"><value>X</value></data>
+	<data name="InvertY" xml:space="preserve"><value>Y</value></data>
+	<data name="JitterCompensation" xml:space="preserve"><value>抖动补偿</value></data>
+	<data name="GyroTriggerJitterCompensationTooltip" xml:space="preserve"><value>在曲线低端增加额外的抑制，以减少设备抖动的影响。</value></data>
+	<data name="MinThreshold" xml:space="preserve"><value>最小阈值</value></data>
+	<data name="Smoothing" xml:space="preserve"><value>平滑</value></data>
+	<data name="SmoothingOptions" xml:space="preserve"><value>平滑选项</value></data>
+	<data name="OneEuroFilter" xml:space="preserve"><value>1€ 滤波器</value></data>
+	<data name="WeightedAverage" xml:space="preserve"><value>加权平均</value></data>
+	<data name="SmoothWeight" xml:space="preserve"><value>平滑权重</value></data>
+	<data name="OutputStick" xml:space="preserve"><value>输出摇杆</value></data>
+	<data name="LeftStick" xml:space="preserve"><value>左摇杆</value></data>
+	<data name="RightStick" xml:space="preserve"><value>右摇杆</value></data>
+	<data name="OutputAxes" xml:space="preserve"><value>输出轴</value></data>
+	<data name="HorizontalAndVertical" xml:space="preserve"><value>水平和垂直</value></data>
+	<data name="HorizontalOnly" xml:space="preserve"><value>仅水平</value></data>
+	<data name="VerticalOnly" xml:space="preserve"><value>仅垂直</value></data>
+	<data name="MinimumX" xml:space="preserve"><value>最小 X</value></data>
+	<data name="MinimumY" xml:space="preserve"><value>最小 Y</value></data>
+	<data name="Weight" xml:space="preserve"><value>权重</value></data>
+	<data name="SwipeUp" xml:space="preserve"><value>上滑</value></data>
+	<data name="SwipeDown" xml:space="preserve"><value>下滑</value></data>
+	<data name="SwipeLeft" xml:space="preserve"><value>左滑</value></data>
+	<data name="SwipeRight" xml:space="preserve"><value>右滑</value></data>
+	<data name="DegreesPerSecond" xml:space="preserve"><value>度/秒</value></data>
+	<data name="DelayTime" xml:space="preserve"><value>延迟时间</value></data>
+	<data name="Milliseconds" xml:space="preserve"><value>毫秒</value></data>
+	<data name="UseDs3PitchRollSim" xml:space="preserve"><value>[实验性] 使用 DS3 陀螺仪模拟</value></data>
+	<data name="UseDs3PitchRollSimTooltip" xml:space="preserve"><value>为期望 DS3 风格陀螺仪模拟的应用程序启用此功能。</value></data>
 </root>

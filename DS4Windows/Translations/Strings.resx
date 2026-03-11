@@ -1498,4 +1498,123 @@ Please click OK to confirm that you have read the message. Press Cancel to be re
     <value>Show system notification when battery drops below the threshold set above.  </value>
     <comment>Tooltip for low battery notification checkbox  </comment>
   </data>
+  
+	<data name="FlashAtOption" xml:space="preserve">
+		<value>Flash at</value>
+	</data>
+	<data name="PulseAtOption" xml:space="preserve">
+		<value>Pulse at</value>
+	</data>
+	<data name="PercentSign" xml:space="preserve">
+		<value>%</value>
+	</data>
+	<data name="FlashAtTip" xml:space="preserve">
+		<value>Click to change flash color. Black = default color</value>
+	</data>
+	<data name="WhileChargingLabel" xml:space="preserve">
+		<value>While Charging:</value>
+	</data>
+	<data name="ChargingNormal" xml:space="preserve">
+		<value>Normal</value>
+	</data>
+	<data name="ChargingPulse" xml:space="preserve">
+		<value>Pulse</value>
+	</data>
+	<data name="ChargingRainbow" xml:space="preserve">
+		<value>Rainbow</value>
+	</data>
+	<data name="ChargingColor" xml:space="preserve">
+		<value>Color</value>
+	</data>
+	<data name="ColorByBattery" xml:space="preserve">
+		<value>Color by Battery %</value>
+	</data>
+	<data name="LightByBatteryTip" xml:space="preserve">
+		<value>When DS4 is fully charged, the light will also dim after the idle timeout.</value>
+	</data>
+	<data name="AlwaysRainbow" xml:space="preserve">
+		<value>Always Rainbow</value>
+	</data>
+	<data name="SecsPerCycle" xml:space="preserve">
+		<value>secs/cycle</value>
+	</data>
+	<data name="MaxLightFormat" xml:space="preserve">
+		<value>Max Light {0:N2}%</value>
+	</data>
+	<data name="EmptyColor" xml:space="preserve">
+		<value>Empty</value>
+	</data>
+	<data name="MaxLightPrefix" xml:space="preserve">
+		<value>Max Light </value>
+	</data>
+	
+	<data name="TiltUp" xml:space="preserve"><value>Tilt Up</value></data>
+	<data name="TiltDown" xml:space="preserve"><value>Tilt Down</value></data>
+	<data name="TiltLeft" xml:space="preserve"><value>Tilt Left</value></data>
+	<data name="TiltRight" xml:space="preserve"><value>Tilt Right</value></data>
+	<data name="TriggersLabel" xml:space="preserve"><value>Triggers</value></data>
+	<data name="TurnBehaviorTurnsGyro" xml:space="preserve"><value>Turn Behavior - Turns Gyro</value></data>
+	<data name="GyroTriggerBehavior" xml:space="preserve"><value>When checked, gyro is enabled when trigger is pressed. When unchecked, gyro is disabled when trigger is pressed.</value></data>
+	<data name="Toggle" xml:space="preserve"><value>Toggle</value></data>
+	<data name="EvalCond" xml:space="preserve"><value>Eval Cond.</value></data>
+	<data name="And" xml:space="preserve"><value>And</value></data>
+	<data name="Or" xml:space="preserve"><value>Or</value></data>
+	<data name="SteeringWheel360" xml:space="preserve"><value>360 Steering Wheel</value></data>
+	<data name="SteeringWheelAxis" xml:space="preserve"><value>Steering wheel axis</value></data>
+	<data name="None" xml:space="preserve"><value>None</value></data>
+	<data name="LeftXAxis" xml:space="preserve"><value>Left X-Axis</value></data>
+	<data name="LeftYAxis" xml:space="preserve"><value>Left Y-Axis</value></data>
+	<data name="RightXAxis" xml:space="preserve"><value>Right X-Axis</value></data>
+	<data name="RightYAxis" xml:space="preserve"><value>Right Y-Axis</value></data>
+	<data name="TriggerLRAxis" xml:space="preserve"><value>Trigger L+R Axis</value></data>
+	<data name="VJoy1XAxis" xml:space="preserve"><value>VJoy1 X-Axis</value></data>
+	<data name="VJoy1YAxis" xml:space="preserve"><value>VJoy1 Y-Axis</value></data>
+	<data name="VJoy1ZAxis" xml:space="preserve"><value>VJoy1 Z-Axis</value></data>
+	<data name="VJoy2XAxis" xml:space="preserve"><value>VJoy2 X-Axis</value></data>
+	<data name="VJoy2YAxis" xml:space="preserve"><value>VJoy2 Y-Axis</value></data>
+	<data name="VJoy2ZAxis" xml:space="preserve"><value>VJoy2 Z-Axis</value></data>
+	<data name="SteeringWheelRange" xml:space="preserve"><value>Steering wheel range</value></data>
+	<data name="Calibrate" xml:space="preserve"><value>Calibrate</value></data>
+	<data name="Units" xml:space="preserve"><value>units</value></data>
+	<data name="UseSmoothing" xml:space="preserve"><value>Use Smoothing</value></data>
+	<data name="OneEuroMinCutoff" xml:space="preserve"><value>1€ MinCutoff</value></data>
+	<data name="OneEuroBeta" xml:space="preserve"><value>1€ Beta</value></data>
+	<data name="GyroCalibration" xml:space="preserve"><value>Gyro Calibration</value></data>
+	<data name="TurnBehaviorTrigger" xml:space="preserve"><value>Turn Behavior Trigger:</value></data>
+	<data name="InvertBehavior" xml:space="preserve"><value>Turn Behavior - Turns Gyro</value></data>
+	<data name="ToggleTrigger" xml:space="preserve"><value>Toggle Trigger:</value></data>
+	<data name="GyroSensitivityLabel" xml:space="preserve"><value>Gyro Sensitivity:</value></data>
+	<data name="XAxis" xml:space="preserve"><value>X Axis</value></data>
+	<data name="Yaw" xml:space="preserve"><value>Yaw</value></data>
+	<data name="Roll" xml:space="preserve"><value>Roll</value></data>
+	<data name="Invert" xml:space="preserve"><value>Invert</value></data>
+	<data name="InvertX" xml:space="preserve"><value>X</value></data>
+	<data name="InvertY" xml:space="preserve"><value>Y</value></data>
+	<data name="JitterCompensation" xml:space="preserve"><value>Jitter Compensation</value></data>
+	<data name="GyroTriggerJitterCompensationTooltip" xml:space="preserve"><value>Adds additional throttling at the low end of the curve to account for device shaking.</value></data>
+	<data name="MinThreshold" xml:space="preserve"><value>Min Threshold</value></data>
+	<data name="Smoothing" xml:space="preserve"><value>Smoothing</value></data>
+	<data name="SmoothingOptions" xml:space="preserve"><value>Smoothing Options</value></data>
+	<data name="OneEuroFilter" xml:space="preserve"><value>1€ Filter</value></data>
+	<data name="WeightedAverage" xml:space="preserve"><value>Weighted Average</value></data>
+	<data name="SmoothWeight" xml:space="preserve"><value>Smooth Weight</value></data>
+	<data name="OutputStick" xml:space="preserve"><value>Output Stick</value></data>
+	<data name="LeftStick" xml:space="preserve"><value>Left Stick</value></data>
+	<data name="RightStick" xml:space="preserve"><value>Right Stick</value></data>
+	<data name="OutputAxes" xml:space="preserve"><value>Output Axes</value></data>
+	<data name="HorizontalAndVertical" xml:space="preserve"><value>Horizontal and Vertical</value></data>
+	<data name="HorizontalOnly" xml:space="preserve"><value>Horizontal Only</value></data>
+	<data name="VerticalOnly" xml:space="preserve"><value>Vertical Only</value></data>
+	<data name="MinimumX" xml:space="preserve"><value>Minimum X</value></data>
+	<data name="MinimumY" xml:space="preserve"><value>Minimum Y</value></data>
+	<data name="Weight" xml:space="preserve"><value>Weight</value></data>
+	<data name="SwipeUp" xml:space="preserve"><value>Swipe Up</value></data>
+	<data name="SwipeDown" xml:space="preserve"><value>Swipe Down</value></data>
+	<data name="SwipeLeft" xml:space="preserve"><value>Swipe Left</value></data>
+	<data name="SwipeRight" xml:space="preserve"><value>Swipe Right</value></data>
+	<data name="DegreesPerSecond" xml:space="preserve"><value>deg/sec.</value></data>
+	<data name="DelayTime" xml:space="preserve"><value>Delay Time</value></data>
+	<data name="Milliseconds" xml:space="preserve"><value>ms</value></data>
+	<data name="UseDs3PitchRollSim" xml:space="preserve"><value>[EXPERIMENTAL] Use DS3 gyro simulation</value></data>
+	<data name="UseDs3PitchRollSimTooltip" xml:space="preserve"><value>Enables DS3-style gyro simulation for applications that expect it.</value></data>
 </root>
