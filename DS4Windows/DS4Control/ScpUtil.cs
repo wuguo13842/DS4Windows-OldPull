@@ -9641,7 +9641,7 @@ namespace DS4Windows
             lightInfo.m_FlashLed = new DS4Color(Color.Red);
             lightInfo.flashAt = 20;
 			lightInfo.enableLowBatteryNotification = true;
-            lightInfo.flashType = 1;
+            lightInfo.flashType = 0;
             lightInfo.chargingType = 3; // While Charging项默认设置Color
             lightInfo.rainbow = 0;
             lightInfo.maxRainbowSat = LightbarDS4WinInfo.DEFAULT_MAX_RAINBOW_SAT;
