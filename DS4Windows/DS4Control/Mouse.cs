@@ -615,211 +615,225 @@ namespace DS4Windows
             }
         }
 
-        private void SixMouseStick(SixAxisEventArgs arg)
-        {
-            int deltaX = 0, deltaY = 0;
-            deltaX = Global.getGyroMouseStickHorizontalAxis(0) == 0 ? arg.sixAxis.gyroYawFull :
-                arg.sixAxis.gyroRollFull;
-            deltaY = -arg.sixAxis.gyroPitchFull;
-            //int inputX = deltaX, inputY = deltaY;
-            int maxDirX = deltaX >= 0 ? 127 : -128;
-            int maxDirY = deltaY >= 0 ? 127 : -128;
+		private void SixMouseStick(SixAxisEventArgs arg)
+		{
+			int deltaX = 0, deltaY = 0;
+			deltaX = Global.getGyroMouseStickHorizontalAxis(0) == 0 ? arg.sixAxis.gyroYawFull :
+				arg.sixAxis.gyroRollFull;
+			deltaY = -arg.sixAxis.gyroPitchFull;
+			//int inputX = deltaX, inputY = deltaY;
+			int maxDirX = deltaX >= 0 ? 127 : -128;
+			int maxDirY = deltaY >= 0 ? 127 : -128;
 
-            GyroMouseStickInfo msinfo = Global.GetGyroMouseStickInfo(deviceNum);
+			GyroMouseStickInfo msinfo = Global.GetGyroMouseStickInfo(deviceNum);
 
-            double tempDouble = arg.sixAxis.elapsed * 250.0; // Base default speed on 4 ms
-            double tempAngle = Math.Atan2(-deltaY, deltaX);
-            double normX = Math.Abs(Math.Cos(tempAngle));
-            double normY = Math.Abs(Math.Sin(tempAngle));
-            int signX = Math.Sign(deltaX);
-            int signY = Math.Sign(deltaY);
+			double tempDouble = arg.sixAxis.elapsed * 250.0; // Base default speed on 4 ms
+			double tempAngle = Math.Atan2(-deltaY, deltaX);
+			double normX = Math.Abs(Math.Cos(tempAngle));
+			double normY = Math.Abs(Math.Sin(tempAngle));
+			int signX = Math.Sign(deltaX);
+			int signY = Math.Sign(deltaY);
 
-            int deadzoneX = (int)Math.Abs(normX * msinfo.deadZone);
-            int deadzoneY = (int)Math.Abs(normY * msinfo.deadZone);
+			int deadzoneX = (int)Math.Abs(normX * msinfo.deadZone);
+			int deadzoneY = (int)Math.Abs(normY * msinfo.deadZone);
 
-            int maxValX = signX * msinfo.maxZone;
-            int maxValY = signY * msinfo.maxZone;
+			int maxValX = signX * msinfo.maxZone;
+			int maxValY = signY * msinfo.maxZone;
 
-            double xratio = 0.0, yratio = 0.0;
-            double antiX = msinfo.antiDeadX * normX;
-            double antiY = msinfo.antiDeadY * normY;
+			double xratio = 0.0, yratio = 0.0;
+			double antiX = msinfo.antiDeadX * normX;
+			double antiY = msinfo.antiDeadY * normY;
 
-            if (Math.Abs(deltaX) > deadzoneX)
-            {
-                deltaX -= signX * deadzoneX;
-                //deltaX = (int)(deltaX * tempDouble);
-                deltaX = (deltaX < 0 && deltaX < maxValX) ? maxValX :
-                    (deltaX > 0 && deltaX > maxValX) ? maxValX : deltaX;
-                //if (deltaX != maxValX) deltaX -= deltaX % (signX * GyroMouseFuzz);
-            }
-            else
-            {
-                deltaX = 0;
-            }
+			// --- 死区处理：线性映射（修改部分）---
+			int absDeltaX = Math.Abs(deltaX);
+			int absDeltaY = Math.Abs(deltaY);
+			int absDeadX = deadzoneX;
+			int absDeadY = deadzoneY;
+			int absMaxX = msinfo.maxZone; // 最大绝对值，正数
+			int absMaxY = msinfo.maxZone;
 
-            if (Math.Abs(deltaY) > deadzoneY)
-            {
-                deltaY -= signY * deadzoneY;
-                //deltaY = (int)(deltaY * tempDouble);
-                deltaY = (deltaY < 0 && deltaY < maxValY) ? maxValY :
-                    (deltaY > 0 && deltaY > maxValY) ? maxValY : deltaY;
-                //if (deltaY != maxValY) deltaY -= deltaY % (signY * GyroMouseFuzz);
-            }
-            else
-            {
-                deltaY = 0;
-            }
+			if (absDeltaX > absDeadX && absMaxX > absDeadX) // 防止除零
+			{
+				// 将 [absDeadX, absMaxX] 线性映射到 [0, absMaxX]
+				long numerator = (long)(absDeltaX - absDeadX) * absMaxX;
+				int scaledX = (int)(numerator / (absMaxX - absDeadX));
+				// 限幅，防止因整数除法误差导致超过最大值
+				scaledX = Math.Min(scaledX, absMaxX);
+				deltaX = signX * scaledX;
+			}
+			else
+			{
+				deltaX = 0;
+			}
 
-            if (msinfo.jitterCompensation)
-            {
-                // Possibly expose threshold later
-                const double threshold = 2;
-                const float thresholdF = (float)threshold;
+			if (absDeltaY > absDeadY && absMaxY > absDeadY)
+			{
+				long numerator = (long)(absDeltaY - absDeadY) * absMaxY;
+				int scaledY = (int)(numerator / (absMaxY - absDeadY));
+				scaledY = Math.Min(scaledY, absMaxY);
+				deltaY = signY * scaledY;
+			}
+			else
+			{
+				deltaY = 0;
+			}
+			// --- 死区处理结束 ---
 
-                double absX = Math.Abs(deltaX);
-                if (absX <= normX * threshold)
-                {
-                    deltaX = (int)(signX * Math.Pow(absX / thresholdF, 1.408) * threshold);
-                }
+			// 抖动补偿（原样保留）
+			if (msinfo.jitterCompensation)
+			{
+				// Possibly expose threshold later
+				const double threshold = 2;
+				const float thresholdF = (float)threshold;
 
-                double absY = Math.Abs(deltaY);
-                if (absY <= normY * threshold)
-                {
-                    deltaY = (int)(signY * Math.Pow(absY / thresholdF, 1.408) * threshold);
-                }
-            }
+				double absX = Math.Abs(deltaX);
+				if (absX <= normX * threshold)
+				{
+					deltaX = (int)(signX * Math.Pow(absX / thresholdF, 1.408) * threshold);
+				}
 
-            if (msinfo.useSmoothing)
-            {
-                if (msinfo.smoothingMethod == GyroMouseStickInfo.SmoothingMethod.OneEuro)
-                {
-                    double currentRate = 1.0 / arg.sixAxis.elapsed;
-                    deltaX = (int)(filterPair.axis1Filter.Filter(deltaX, currentRate));
-                    deltaY = (int)(filterPair.axis2Filter.Filter(deltaY, currentRate));
-                }
-                else if (msinfo.smoothingMethod == GyroMouseStickInfo.SmoothingMethod.WeightedAverage)
-                {
-                    int iIndex = smoothBufferTail % SMOOTH_BUFFER_LEN;
-                    xSmoothBuffer[iIndex] = deltaX;
-                    ySmoothBuffer[iIndex] = deltaY;
-                    smoothBufferTail = iIndex + 1;
+				double absY = Math.Abs(deltaY);
+				if (absY <= normY * threshold)
+				{
+					deltaY = (int)(signY * Math.Pow(absY / thresholdF, 1.408) * threshold);
+				}
+			}
 
-                    double currentWeight = 1.0;
-                    double finalWeight = 0.0;
-                    double x_out = 0.0, y_out = 0.0;
-                    int idx = 0;
-                    for (int i = 0; i < SMOOTH_BUFFER_LEN; i++)
-                    {
-                        idx = (smoothBufferTail - i - 1 + SMOOTH_BUFFER_LEN) % SMOOTH_BUFFER_LEN;
-                        x_out += xSmoothBuffer[idx] * currentWeight;
-                        y_out += ySmoothBuffer[idx] * currentWeight;
-                        finalWeight += currentWeight;
-                        currentWeight *= msinfo.smoothWeight;
-                    }
+			// 平滑滤波（原样保留）
+			if (msinfo.useSmoothing)
+			{
+				if (msinfo.smoothingMethod == GyroMouseStickInfo.SmoothingMethod.OneEuro)
+				{
+					double currentRate = 1.0 / arg.sixAxis.elapsed;
+					deltaX = (int)(filterPair.axis1Filter.Filter(deltaX, currentRate));
+					deltaY = (int)(filterPair.axis2Filter.Filter(deltaY, currentRate));
+				}
+				else if (msinfo.smoothingMethod == GyroMouseStickInfo.SmoothingMethod.WeightedAverage)
+				{
+					int iIndex = smoothBufferTail % SMOOTH_BUFFER_LEN;
+					xSmoothBuffer[iIndex] = deltaX;
+					ySmoothBuffer[iIndex] = deltaY;
+					smoothBufferTail = iIndex + 1;
 
-                    x_out /= finalWeight;
-                    deltaX = (int)x_out;
-                    y_out /= finalWeight;
-                    deltaY = (int)y_out;
-                }
+					double currentWeight = 1.0;
+					double finalWeight = 0.0;
+					double x_out = 0.0, y_out = 0.0;
+					int idx = 0;
+					for (int i = 0; i < SMOOTH_BUFFER_LEN; i++)
+					{
+						idx = (smoothBufferTail - i - 1 + SMOOTH_BUFFER_LEN) % SMOOTH_BUFFER_LEN;
+						x_out += xSmoothBuffer[idx] * currentWeight;
+						y_out += ySmoothBuffer[idx] * currentWeight;
+						finalWeight += currentWeight;
+						currentWeight *= msinfo.smoothWeight;
+					}
 
-                maxValX = deltaX < 0 ? -msinfo.maxZone : msinfo.maxZone;
-                maxValY = deltaY < 0 ? -msinfo.maxZone : msinfo.maxZone;
-                maxDirX = deltaX >= 0 ? 127 : -128;
-                maxDirY = deltaY >= 0 ? 127 : -128;
-            }
+					x_out /= finalWeight;
+					deltaX = (int)x_out;
+					y_out /= finalWeight;
+					deltaY = (int)y_out;
+				}
 
-            if (msinfo.vertScale != 100)
-            {
-                double verticalScale = msinfo.vertScale * 0.01;
-                deltaY = (int)(deltaY * verticalScale);
-                deltaY = (deltaY < 0 && deltaY < maxValY) ? maxValY :
-                    (deltaY > 0 && deltaY > maxValY) ? maxValY : deltaY;
-            }
+				maxValX = deltaX < 0 ? -msinfo.maxZone : msinfo.maxZone;
+				maxValY = deltaY < 0 ? -msinfo.maxZone : msinfo.maxZone;
+				maxDirX = deltaX >= 0 ? 127 : -128;
+				maxDirY = deltaY >= 0 ? 127 : -128;
+			}
 
-            if (deltaX != 0) xratio = deltaX / (double)maxValX;
-            if (deltaY != 0) yratio = deltaY / (double)maxValY;
+			// 垂直缩放（原样保留）
+			if (msinfo.vertScale != 100)
+			{
+				double verticalScale = msinfo.vertScale * 0.01;
+				deltaY = (int)(deltaY * verticalScale);
+				deltaY = (deltaY < 0 && deltaY < maxValY) ? maxValY :
+					(deltaY > 0 && deltaY > maxValY) ? maxValY : deltaY;
+			}
 
-            if (msinfo.maxOutputEnabled)
-            {
-                double maxOutRatio = msinfo.maxOutput / 100.0;
-                // Expand output a bit. Likely not going to get a straight line with Gyro
-                double maxOutXRatio = Math.Min(normX / 0.95, 1.0) * maxOutRatio;
-                double maxOutYRatio = Math.Min(normY / 0.95, 1.0) * maxOutRatio;
+			if (deltaX != 0) xratio = deltaX / (double)maxValX;
+			if (deltaY != 0) yratio = deltaY / (double)maxValY;
 
-                xratio = Math.Min(Math.Max(xratio, 0.0), maxOutXRatio);
-                yratio = Math.Min(Math.Max(yratio, 0.0), maxOutYRatio);
-            }
+			// 最大输出限制（原样保留）
+			if (msinfo.maxOutputEnabled)
+			{
+				double maxOutRatio = msinfo.maxOutput / 100.0;
+				// Expand output a bit. Likely not going to get a straight line with Gyro
+				double maxOutXRatio = Math.Min(normX / 0.95, 1.0) * maxOutRatio;
+				double maxOutYRatio = Math.Min(normY / 0.95, 1.0) * maxOutRatio;
 
-            double xNorm = 0.0, yNorm = 0.0;
-            if (xratio != 0.0)
-            {
-                xNorm = (1.0 - antiX) * xratio + antiX;
-            }
+				xratio = Math.Min(Math.Max(xratio, 0.0), maxOutXRatio);
+				yratio = Math.Min(Math.Max(yratio, 0.0), maxOutYRatio);
+			}
 
-            if (yratio != 0.0)
-            {
-                yNorm = (1.0 - antiY) * yratio + antiY;
-            }
+			// 计算最终轴值（原样保留）
+			double xNorm = 0.0, yNorm = 0.0;
+			if (xratio != 0.0)
+			{
+				xNorm = (1.0 - antiX) * xratio + antiX;
+			}
 
-            if (msinfo.inverted != 0)
-            {
-                if ((msinfo.inverted & 1) == 1)
-                {
-                    // Invert max dir value
-                    maxDirX = deltaX >= 0 ? -128 : 127;
-                }
+			if (yratio != 0.0)
+			{
+				yNorm = (1.0 - antiY) * yratio + antiY;
+			}
 
-                if ((msinfo.inverted & 2) == 2)
-                {
-                    // Invert max dir value
-                    maxDirY = deltaY >= 0 ? -128 : 127;
-                }
-            }
+			if (msinfo.inverted != 0)
+			{
+				if ((msinfo.inverted & 1) == 1)
+				{
+					// Invert max dir value
+					maxDirX = deltaX >= 0 ? -128 : 127;
+				}
 
-            byte axisXOut = (byte)(xNorm * maxDirX + 128.0);
-            byte axisYOut = (byte)(yNorm * maxDirY + 128.0);
+				if ((msinfo.inverted & 2) == 2)
+				{
+					// Invert max dir value
+					maxDirY = deltaY >= 0 ? -128 : 127;
+				}
+			}
 
-            bool outputX = msinfo.OutputHorizontal();
-            bool outputY = msinfo.OutputVertical();
+			byte axisXOut = (byte)(xNorm * maxDirX + 128.0);
+			byte axisYOut = (byte)(yNorm * maxDirY + 128.0);
 
-            Mapping.PostMapStickData tempMapStickData = Mapping.mapStickActionData[deviceNum];
-            if (outputX)
-            {
-                if (msinfo.outputStick == GyroMouseStickInfo.OutputStick.LeftStick &&
-                    Math.Abs(axisXOut - 128) > Math.Abs(tempMapStickData.LX - 128))
-                {
-                    tempMapStickData.LX = axisXOut;
-                    tempMapStickData.dirty = true;
-                }
-                else if (msinfo.outputStick == GyroMouseStickInfo.OutputStick.RightStick &&
-                    Math.Abs(axisXOut - 128) > Math.Abs(tempMapStickData.RX - 128))
-                {
-                    tempMapStickData.RX = axisXOut;
-                    tempMapStickData.dirty = true;
-                }
+			bool outputX = msinfo.OutputHorizontal();
+			bool outputY = msinfo.OutputVertical();
 
-                Mapping.gyroStickX[deviceNum] = axisXOut;
-            }
+			Mapping.PostMapStickData tempMapStickData = Mapping.mapStickActionData[deviceNum];
+			if (outputX)
+			{
+				if (msinfo.outputStick == GyroMouseStickInfo.OutputStick.LeftStick &&
+					Math.Abs(axisXOut - 128) > Math.Abs(tempMapStickData.LX - 128))
+				{
+					tempMapStickData.LX = axisXOut;
+					tempMapStickData.dirty = true;
+				}
+				else if (msinfo.outputStick == GyroMouseStickInfo.OutputStick.RightStick &&
+					Math.Abs(axisXOut - 128) > Math.Abs(tempMapStickData.RX - 128))
+				{
+					tempMapStickData.RX = axisXOut;
+					tempMapStickData.dirty = true;
+				}
 
-            if (outputY)
-            {
-                if (msinfo.outputStick == GyroMouseStickInfo.OutputStick.LeftStick &&
-                    Math.Abs(axisYOut - 128) > Math.Abs(tempMapStickData.LY - 128))
-                {
-                    tempMapStickData.LY = axisYOut;
-                    tempMapStickData.dirty = true;
-                }
-                else if (msinfo.outputStick == GyroMouseStickInfo.OutputStick.RightStick &&
-                    Math.Abs(axisYOut - 128) > Math.Abs(tempMapStickData.RY - 128))
-                {
-                    tempMapStickData.RY = axisYOut;
-                    tempMapStickData.dirty = true;
-                }
+				Mapping.gyroStickX[deviceNum] = axisXOut;
+			}
 
-                Mapping.gyroStickY[deviceNum] = axisYOut;
-            }
-        }
+			if (outputY)
+			{
+				if (msinfo.outputStick == GyroMouseStickInfo.OutputStick.LeftStick &&
+					Math.Abs(axisYOut - 128) > Math.Abs(tempMapStickData.LY - 128))
+				{
+					tempMapStickData.LY = axisYOut;
+					tempMapStickData.dirty = true;
+				}
+				else if (msinfo.outputStick == GyroMouseStickInfo.OutputStick.RightStick &&
+					Math.Abs(axisYOut - 128) > Math.Abs(tempMapStickData.RY - 128))
+				{
+					tempMapStickData.RY = axisYOut;
+					tempMapStickData.dirty = true;
+				}
+
+				Mapping.gyroStickY[deviceNum] = axisYOut;
+			}
+		}
 
         private void SixDirectionalSwipe(SixAxisEventArgs arg, GyroDirectionalSwipeInfo swipeInfo)
         {
