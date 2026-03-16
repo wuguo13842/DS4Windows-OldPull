@@ -154,6 +154,21 @@
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
+								
+								<!-- 在此处插入新的校准陀螺列 -->
+								<GridViewColumn x:Name="calibrateGyroColumn" Header="{lex:Loc GyroCalibration}" Width="90">
+									<GridViewColumn.CellTemplate>
+										<DataTemplate>
+											<Button Content="{lex:Loc Calibrate}" 
+													Click="CalibrateGyroBtn_Click" 
+													Tag="{Binding DevIndex}" 
+													HorizontalAlignment="Center" 
+													VerticalAlignment="Center" 
+													Padding="5,2"/>
+										</DataTemplate>
+									</GridViewColumn.CellTemplate>
+								</GridViewColumn>
+
                             </GridView>
                         </ListView.View>
                     </ListView>

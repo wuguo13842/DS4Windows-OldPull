@@ -858,6 +858,32 @@ Suspend support not enabled.", true);
                 slotManControl.IsEnabled = service.running;
             }));
         }
+		
+		private void CalibrateGyroBtn_Click(object sender, RoutedEventArgs e)
+		{
+			Button btn = sender as Button;
+			int devIndex = (int)btn.Tag;
+
+			if (devIndex < ControlService.CURRENT_DS4_CONTROLLER_LIMIT)
+			{
+				DS4Device device = App.rootHub.DS4Controllers[devIndex];
+				if (device != null)
+				{
+					// 重置陀螺仪连续校准（与 ProfileEditor 中的 GyroCalibration_Click 逻辑一致）
+					device.SixAxis.ResetContinuousCalibration();
+
+					// 如果存在联合设备（如左右手柄），也对其校准
+					if (device.JointDeviceSlotNumber != DS4Device.DEFAULT_JOINT_SLOT_NUMBER)
+					{
+						DS4Device jointDev = App.rootHub.DS4Controllers[device.JointDeviceSlotNumber];
+						jointDev?.SixAxis.ResetContinuousCalibration();
+					}
+
+					// 可选：弹出通知提示校准完成
+					AppLogger.LogToGui($"Controller {devIndex + 1} gyro recalibrated.", false);
+				}
+			}
+		}
 
         private void AboutBtn_Click(object sender, RoutedEventArgs e)
         {
