@@ -25,6 +25,7 @@ using System.Windows;
 using System.Windows.Controls;
 using DS4Windows;
 using WPFLocalizeExtension.Extensions;
+using System.Windows.Threading;
 
 namespace DS4WinWPF.DS4Forms.ViewModels
 {
@@ -42,6 +43,11 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         private MenuItem closeItem;
         private int? prevBattery = null;
 
+        // 陀螺校准闪烁相关
+        private DispatcherTimer gyroCalibrationBlinkTimer;
+        private bool blinkState;
+        private string normalIconSource; // 保存用户配置的正常图标
+
         public string TooltipText
         {
             get => tooltipText;
@@ -51,7 +57,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 if (value.Length > 63) temp = value.Substring(0, 63);
                 if (tooltipText == temp) return;
                 tooltipText = temp;
-                //Trace.WriteLine(tooltipText);
                 try
                 {
                     TooltipTextChanged?.Invoke(this, EventArgs.Empty);
@@ -61,7 +66,9 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         }
         public event EventHandler TooltipTextChanged;
 
-        public string IconSource { get => iconSource;
+        public string IconSource
+        {
+            get => iconSource;
             set
             {
                 if (iconSource == value) return;
@@ -93,8 +100,9 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             this.profileListHolder = profileListHolder;
             this.controlService = service;
             contextMenu = new ContextMenu();
-            iconSource = Global.iconChoiceResources[Global.UseIconChoice];
-            Global.BatteryChanged += UpdateTrayBattery;
+            normalIconSource = Global.iconChoiceResources[Global.UseIconChoice];
+            iconSource = normalIconSource;
+            Global.BatteryChanged += UpdateTrayBattery; // 仅当用户选择电池图标时有用
 
             // 初始化菜单项
             changeServiceItem = new MenuItem()
@@ -103,14 +111,14 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 IsEnabled = false
             };
             changeServiceItem.Click += ChangeControlServiceItem_Click;
-            openItem = new MenuItem() {  Header = GetLocalizedString("MenuOpen"),
+            openItem = new MenuItem() { Header = GetLocalizedString("MenuOpen"),
                 FontWeight = FontWeights.Bold };
             openItem.Click += OpenMenuItem_Click;
             minimizeItem = new MenuItem() { Header = GetLocalizedString("MenuMinimize") };
             minimizeItem.Click += MinimizeMenuItem_Click;
             openProgramItem = new MenuItem() { Header = GetLocalizedString("MenuOpenProgramFolder") };
             openProgramItem.Click += OpenProgramFolderItem_Click;
-            closeItem = new MenuItem()  { Header = GetLocalizedString("MenuExit") };
+            closeItem = new MenuItem() { Header = GetLocalizedString("MenuExit") };
             closeItem.Click += ExitMenuItem_Click;
 
             PopulateControllerList();
@@ -127,12 +135,18 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             service.PreServiceStop += ClearControllerList;
             service.RunningChanged += Service_RunningChanged;
             service.HotplugController += Service_HotplugController;
-            /*tester.StartControllers += HookBatteryUpdate;
+        	/*tester.StartControllers += HookBatteryUpdate;
             tester.StartControllers += StartPopulateText;
             tester.PreRemoveControllers += ClearToolText;
             tester.HotplugControllers += HookBatteryUpdate;
             tester.HotplugControllers += StartPopulateText;
 			*/
+
+            // 初始化陀螺校准闪烁定时器（500ms 间隔）
+            gyroCalibrationBlinkTimer = new DispatcherTimer();
+            gyroCalibrationBlinkTimer.Interval = TimeSpan.FromMilliseconds(500);
+            gyroCalibrationBlinkTimer.Tick += GyroCalibrationBlinkTimer_Tick;
+            gyroCalibrationBlinkTimer.Start();
         }
 
         private string GetLocalizedString(string key)
@@ -325,6 +339,10 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
         private void StartPopulateText(object sender, EventArgs e)
         {
+            if (!gyroCalibrationBlinkTimer.IsEnabled)
+            {
+                gyroCalibrationBlinkTimer.Start();
+            }
             Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 PopulateToolText();
@@ -423,6 +441,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
         private void ClearToolText(object sender, EventArgs e)
         {
+            gyroCalibrationBlinkTimer?.Stop();
             Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 TooltipText = "DS4Windows";
@@ -449,7 +468,13 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
         private void UpdateTrayBattery(object sender, byte percentage)
         {
-            IconSource = percentage switch
+            // 此方法只在用户选择了“电池”图标时被调用，但我们的闪烁逻辑可能覆盖它。
+            // 为了兼容，在非闪烁状态且用户选择了电池图标时，才调用此方法更新图标。
+            // 但为了简化，我们在闪烁时直接覆盖图标，闪烁结束后恢复 normalIconSource（配置图标）。
+            // 如果用户选择了电池图标，normalIconSource 是 battery 图标的路径，但 battery 图标本身会随电量变化，
+            // 所以我们需要在非闪烁时确保电池图标能更新。为此，我们在 UpdateTrayBattery 中也更新 normalIconSource，
+            // 并立即应用（如果当前不在闪烁状态）。
+            normalIconSource = percentage switch
             {
                 < 10 => $"{Global.RESOURCES_PREFIX}/0.ico",
                 >= 10 and < 20 => $"{Global.RESOURCES_PREFIX}/10.ico",
@@ -464,11 +489,66 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 100 => $"{Global.RESOURCES_PREFIX}/100.ico",
                 _ => $"{Global.RESOURCES_PREFIX}/DS4W.ico"
             };
+
+            // 如果当前不在闪烁状态，则立即更新图标
+            if (!blinkState)
+            {
+                IconSource = normalIconSource;
+            }
         }
 
         private void ExitMenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             RequestShutdown?.Invoke(this, EventArgs.Empty);
+        }
+
+        // 陀螺校准闪烁定时器逻辑
+        private void GyroCalibrationBlinkTimer_Tick(object sender, EventArgs e)
+        {
+            // 检查是否有任一设备正在校准（CntCalibrating > 0）
+            bool anyCalibrating = false;
+            _colLocker.EnterReadLock();
+            try
+            {
+                foreach (var holder in controllerList)
+                {
+                    var device = holder.Device;
+                    if (device != null && device.SixAxis.CntCalibrating > 0)
+                    {
+                        anyCalibrating = true;
+                        break;
+                    }
+                }
+            }
+            finally
+            {
+                _colLocker.ExitReadLock();
+            }
+
+            if (!anyCalibrating)
+            {
+                // 没有设备校准：恢复常规图标
+                if (blinkState)
+                {
+                    blinkState = false;
+                    IconSource = normalIconSource; // 恢复用户配置的图标
+                }
+                return;
+            }
+
+            // 有设备校准：切换闪烁状态
+            blinkState = !blinkState;
+
+            if (blinkState)
+            {
+                // 闪烁时显示一个特殊图标（可使用 DS4W.ico 或专用图标）
+                IconSource = $"{Global.RESOURCES_PREFIX}/gyro.ico";
+            }
+            else
+            {
+                // 非闪烁状态显示常规图标（用户配置的图标）
+                IconSource = normalIconSource;
+            }
         }
     }
 
