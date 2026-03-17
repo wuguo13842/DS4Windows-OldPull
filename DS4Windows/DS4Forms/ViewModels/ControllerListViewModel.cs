@@ -28,6 +28,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using DS4Windows;
+using System.ComponentModel;
 
 namespace DS4WinWPF.DS4Forms.ViewModels
 {
@@ -205,7 +206,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         }
     }
 
-    public class CompositeDeviceModel
+    public class CompositeDeviceModel : INotifyPropertyChanged
     {
         private DS4Device device;
         private string selectedProfile;
@@ -218,6 +219,23 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         public string SelectedProfile { get => selectedProfile; set => selectedProfile = value; }
         public ProfileList ProfileEntities { get => profileListHolder; set => profileListHolder = value; }
         public ObservableCollection<ProfileEntity> ProfileListCol => profileListHolder.ProfileListCol;
+		
+		private int gyroCalibrationCounter;
+		public int GyroCalibrationCounter
+		{
+			get => gyroCalibrationCounter;
+			set
+			{
+				if (gyroCalibrationCounter != value)
+				{
+					gyroCalibrationCounter = value;
+					PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GyroCalibrationCounter)));
+					PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsGyroCalibratingBlink)));
+				}
+			}
+		}
+		public bool IsGyroCalibratingBlink => gyroCalibrationCounter > 0 && (gyroCalibrationCounter / 250) % 2 == 1;
+		public event PropertyChangedEventHandler PropertyChanged;
 
         public string LightColor
         {
@@ -400,6 +418,8 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             }
 
             useCustomColor = Global.LightbarSettingsInfo[devIndex].ds4winSettings.useCustomLed;
+			
+			gyroCalibrationCounter = 0;
         }
 
         public void ChangeSelectedProfile()

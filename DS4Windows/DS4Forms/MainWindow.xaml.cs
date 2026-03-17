@@ -80,6 +80,7 @@ namespace DS4WinWPF.DS4Forms
         private Size oldSize;
         private bool contextclose;
         private bool startMinimized;
+		private System.Windows.Threading.DispatcherTimer gyroCalibrationTimer;
 
         public ProfileList ProfileListHolder { get => profileListHolder; }
 
@@ -190,6 +191,11 @@ namespace DS4WinWPF.DS4Forms
             timerThread.Start();
             // Wait for thread tasks to finish before continuing
             timerThread.Join();
+			
+			gyroCalibrationTimer = new System.Windows.Threading.DispatcherTimer();
+			gyroCalibrationTimer.Interval = TimeSpan.FromMilliseconds(50);
+			gyroCalibrationTimer.Tick += GyroCalibrationTimer_Tick;
+			gyroCalibrationTimer.Start();
         }
 
 		private void SetupLocalizedPriorityComboBox()
@@ -696,6 +702,20 @@ Suspend support not enabled.", true);
 
             hotkeysTimer.Start();
         }
+		
+		private void GyroCalibrationTimer_Tick(object sender, EventArgs e)
+		{
+			var items = conLvViewModel.ControllerCol.ToList();
+			foreach (var item in items)
+			{
+				DS4Device device = item.Device;
+				if (device != null)
+				{
+					long cnt = device.SixAxis.CntCalibrating;
+					item.GyroCalibrationCounter = (int)cnt;
+				}
+			}
+		}
 
         private void ShowHotkeyNotification(string message)
         {
@@ -1079,6 +1099,7 @@ Suspend support not enabled.", true);
 
         private void MainDS4Window_Closed(object sender, EventArgs e)
         {
+			gyroCalibrationTimer?.Stop();
             hotkeysTimer.Stop();
             autoProfilesTimer.Stop();
             //autoProfileHolder.Save();

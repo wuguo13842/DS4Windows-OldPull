@@ -156,18 +156,36 @@
                                 </GridViewColumn>
 								
 								<!-- 在此处插入新的校准陀螺列 -->
-								<GridViewColumn x:Name="calibrateGyroColumn" Header="{lex:Loc GyroCalibration}" Width="90">
-									<GridViewColumn.CellTemplate>
-										<DataTemplate>
-											<Button Content="{lex:Loc Calibrate}" 
-													Click="CalibrateGyroBtn_Click" 
-													Tag="{Binding DevIndex}" 
-													HorizontalAlignment="Center" 
-													VerticalAlignment="Center" 
-													Padding="5,2"/>
-										</DataTemplate>
-									</GridViewColumn.CellTemplate>
-								</GridViewColumn>
+                                <GridViewColumn x:Name="calibrateGyroColumn" Width="110" Header="{lex:Loc GyroCalibration}">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Width="{Binding Path=Width, ElementName=selectProfileColumn, Mode=OneWay}" HorizontalAlignment="Center">
+												<Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
+													<Grid.ColumnDefinitions>
+														<ColumnDefinition Width="*"/>   <!-- 左侧弹性空间 -->
+														<ColumnDefinition Width="20"/>  <!-- 固定20给图标+间距 -->
+														<ColumnDefinition Width="70"/>  <!-- 固定70给按钮 -->
+														<ColumnDefinition Width="*"/>   <!-- 右侧弹性空间 -->
+													</Grid.ColumnDefinitions>
+													
+													<!-- 图标放在第二列 -->
+													<Ellipse Grid.Column="1" Width="12" Height="12" Fill="Green" 
+															 HorizontalAlignment="Center" VerticalAlignment="Center"
+															 Visibility="{Binding IsGyroCalibratingBlink, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+													
+													<!-- 按钮放在第三列 -->
+													<Button Grid.Column="2" Content="{lex:Loc Calibrate}" 
+															Click="CalibrateGyroBtn_Click" 
+															Tag="{Binding DevIndex}" 
+															HorizontalAlignment="Center" 
+															VerticalAlignment="Center"
+															Width="70" 
+															Padding="5,2"/>
+												</Grid>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
 
                             </GridView>
                         </ListView.View>
