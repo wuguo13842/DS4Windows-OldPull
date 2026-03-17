@@ -67,9 +67,10 @@ namespace DS4WinWPF.DS4Forms
         private sbyte rsDriftX;
         private sbyte rsDriftY;
 
-        // 新增：用于控制陀螺仪校准闪烁的定时器
+        // 用于控制陀螺仪校准闪烁的定时器
         private System.Windows.Threading.DispatcherTimer blinkTimer;
         private bool isCalibrating;
+        private bool isUnloaded; // 标记控件是否已卸载，防止后续操作
 
         public double LsDeadX
         {
@@ -258,6 +259,9 @@ namespace DS4WinWPF.DS4Forms
         /// </summary>
         private void BlinkTimer_Tick(object sender, EventArgs e)
         {
+            // 如果控件已卸载，不再处理
+            if (isUnloaded) return;
+
             gyroCalEllipse.Visibility = gyroCalEllipse.Visibility == Visibility.Visible 
                 ? Visibility.Hidden 
                 : Visibility.Visible;
@@ -265,11 +269,13 @@ namespace DS4WinWPF.DS4Forms
 
         private void ControllerReadingsControl_DeviceNumChanged(object sender, EventArgs e)
         {
+            if (isUnloaded) return;
             inputContNum.Content = $"#{deviceNum + 1}";
         }
 
         private void ChangeSixAxisDeadControls(object sender, EventArgs e)
         {
+            if (isUnloaded) return;
             sixAxisDeadEllipse.Width = sixAxisXDead * CANVAS_WIDTH;
             sixAxisDeadEllipse.Height = sixAxisZDead * CANVAS_WIDTH;
             Canvas.SetLeft(sixAxisDeadEllipse, CANVAS_MIDPOINT - (sixAxisXDead * CANVAS_WIDTH / 2.0));
@@ -278,6 +284,7 @@ namespace DS4WinWPF.DS4Forms
 
         private void ChangeRsDriftControls(object sender, EventArgs e)
         {
+            if (isUnloaded) return;
             rsDriftEllipse.Width = rsDeadX * CANVAS_WIDTH;
             rsDriftEllipse.Height = rsDeadY * CANVAS_WIDTH;
             Canvas.SetLeft(rsDriftEllipse, (1 + (RsDriftX / 127.0) - rsDeadX) * CANVAS_MIDPOINT);
@@ -286,6 +293,7 @@ namespace DS4WinWPF.DS4Forms
 
         private void ChangeLsDriftControls(object sender, EventArgs e)
         {
+            if (isUnloaded) return;
             lsDriftEllipse.Width = lsDeadX * CANVAS_WIDTH;
             lsDriftEllipse.Height = lsDeadY * CANVAS_WIDTH;
             Canvas.SetLeft(lsDriftEllipse, (1 + (LsDriftX / 127.0) - lsDeadX) * CANVAS_MIDPOINT);
@@ -294,6 +302,7 @@ namespace DS4WinWPF.DS4Forms
 
         private void ChangeRsDeadControls(object sender, EventArgs e)
         {
+            if (isUnloaded) return;
             rsDeadEllipse.Width = rsDeadX * CANVAS_WIDTH;
             rsDeadEllipse.Height = rsDeadY * CANVAS_WIDTH;
             Canvas.SetLeft(rsDeadEllipse, CANVAS_MIDPOINT - (rsDeadX * CANVAS_WIDTH / 2.0));
@@ -302,6 +311,7 @@ namespace DS4WinWPF.DS4Forms
 
         private void ChangeLsDeadControls(object sender, EventArgs e)
         {
+            if (isUnloaded) return;
             lsDeadEllipse.Width = lsDeadX * CANVAS_WIDTH;
             lsDeadEllipse.Height = lsDeadY * CANVAS_WIDTH;
             Canvas.SetLeft(lsDeadEllipse, CANVAS_MIDPOINT - (lsDeadX * CANVAS_WIDTH / 2.0));
@@ -310,6 +320,8 @@ namespace DS4WinWPF.DS4Forms
 
         public void UseDevice(int index, int profileDevIdx)
         {
+            if (isUnloaded) return;
+
             // 先取消旧设备的事件订阅，防止内存泄漏
             if (deviceNum >= 0 && deviceNum < Program.rootHub.DS4Controllers.Length)
             {
@@ -331,6 +343,12 @@ namespace DS4WinWPF.DS4Forms
             {
                 newDev.SixAxis.CalibrationStarted += SixAxis_CalibrationStarted;
                 newDev.SixAxis.CalibrationStopped += SixAxis_CalibrationStopped;
+
+                // 如果当前设备已经在校准中，触发开始事件
+                if (newDev.SixAxis.CntCalibrating > 0)
+                {
+                    SixAxis_CalibrationStarted(null, EventArgs.Empty);
+                }
             }
         }
 
@@ -339,15 +357,20 @@ namespace DS4WinWPF.DS4Forms
         /// </summary>
         private void SixAxis_CalibrationStarted(object sender, EventArgs e)
         {
+            if (isUnloaded) return;
+
             isCalibrating = true;
             // 在 UI 线程上启动闪烁定时器
-            Dispatcher.BeginInvoke(new Action(() =>
+            if (Dispatcher != null && !Dispatcher.HasShutdownStarted && !Dispatcher.HasShutdownFinished)
             {
-                // 确保定时器停止后再重新启动，避免多个定时器实例
-                blinkTimer.Stop();
-                gyroCalEllipse.Visibility = Visibility.Visible; // 先显示
-                blinkTimer.Start();
-            }));
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (isUnloaded || blinkTimer == null) return;
+                    blinkTimer.Stop();
+                    gyroCalEllipse.Visibility = Visibility.Visible; // 先显示
+                    blinkTimer.Start();
+                }));
+            }
         }
 
         /// <summary>
@@ -355,16 +378,24 @@ namespace DS4WinWPF.DS4Forms
         /// </summary>
         private void SixAxis_CalibrationStopped(object sender, EventArgs e)
         {
+            if (isUnloaded) return;
+
             isCalibrating = false;
-            Dispatcher.BeginInvoke(new Action(() =>
+            if (Dispatcher != null && !Dispatcher.HasShutdownStarted && !Dispatcher.HasShutdownFinished)
             {
-                blinkTimer.Stop();
-                gyroCalEllipse.Visibility = Visibility.Hidden; // 隐藏
-            }));
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (isUnloaded || blinkTimer == null) return;
+                    blinkTimer.Stop();
+                    gyroCalEllipse.Visibility = Visibility.Hidden; // 隐藏
+                }));
+            }
         }
 
         public void EnableControl(bool state)
         {
+            if (isUnloaded) return;
+
             if (state)
             {
                 IsEnabled = true;
@@ -387,7 +418,10 @@ namespace DS4WinWPF.DS4Forms
                 readingTimer.Stop();
 
                 // 停止闪烁并隐藏椭圆
-                blinkTimer.Stop();
+                if (blinkTimer != null)
+                {
+                    blinkTimer.Stop();
+                }
                 gyroCalEllipse.Visibility = Visibility.Hidden;
             }
         }
@@ -397,9 +431,24 @@ namespace DS4WinWPF.DS4Forms
         /// </summary>
         private void ControllerReadingsControl_Unloaded(object sender, RoutedEventArgs e)
         {
+            if (isUnloaded) return;
+            isUnloaded = true;
+
             // 停止所有定时器
-            blinkTimer?.Stop();
-            readingTimer?.Stop();
+            if (blinkTimer != null)
+            {
+                blinkTimer.Stop();
+                blinkTimer.Tick -= BlinkTimer_Tick;
+                blinkTimer = null;
+            }
+
+            if (readingTimer != null)
+            {
+                readingTimer.Stop();
+                readingTimer.Elapsed -= ControllerReadingTimer_Elapsed;
+                readingTimer.Dispose();
+                readingTimer = null;
+            }
 
             // 取消事件订阅
             if (deviceNum >= 0 && deviceNum < Program.rootHub.DS4Controllers.Length)
@@ -411,35 +460,24 @@ namespace DS4WinWPF.DS4Forms
                     dev.SixAxis.CalibrationStopped -= SixAxis_CalibrationStopped;
                 }
             }
-
-            // 清理定时器资源
-            if (readingTimer != null)
-            {
-                readingTimer.Elapsed -= ControllerReadingTimer_Elapsed;
-                readingTimer.Dispose();
-                readingTimer = null;
-            }
-
-            if (blinkTimer != null)
-            {
-                blinkTimer.Tick -= BlinkTimer_Tick;
-                blinkTimer = null;
-            }
         }
 
         private void ControllerReadingTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
+            // 如果控件已卸载，停止定时器并返回
+            if (isUnloaded)
+            {
+                readingTimer?.Stop();
+                return;
+            }
+
             readingTimer.Stop();
 
             DS4Device ds = Program.rootHub.DS4Controllers[deviceNum];
             if (ds != null)
             {
-                // Don't bother waiting for UI thread to grab references
-                //DS4StateExposed tmpexposeState = Program.rootHub.ExposedState[deviceNum];
                 DS4State tmpbaseState = Program.rootHub.getDS4State(deviceNum);
                 DS4State tmpinterState = Program.rootHub.getDS4StateTemp(deviceNum);
-                // 不再需要从 ds 获取 cntCalibrating，因为改用事件驱动
-                // long cntCalibrating = ds.SixAxis.CntCalibrating;
 
                 // Wait for controller to be in a wait period
                 ds.ReadWaitEv.Wait();
@@ -455,111 +493,109 @@ namespace DS4WinWPF.DS4Forms
                 // Done with copying. Allow input thread to resume
                 ds.ReadWaitEv.Set();
 
-                Dispatcher.BeginInvoke(new Action(() =>
+                if (Dispatcher != null && !Dispatcher.HasShutdownStarted && !Dispatcher.HasShutdownFinished)
                 {
-                    int x = baseState.LX;
-                    int y = baseState.LY;
-
-                    Canvas.SetLeft(lsValRec, x / 255.0 * CANVAS_WIDTH - 3);
-                    Canvas.SetTop(lsValRec, y / 255.0 * CANVAS_WIDTH - 3);
-                    //bool mappedLS = interState.LX != x || interState.LY != y;
-                    //if (mappedLS)
-                    //{
-                    Canvas.SetLeft(lsMapValRec, interState.LX / 255.0 * CANVAS_WIDTH - 3);
-                    Canvas.SetTop(lsMapValRec, interState.LY / 255.0 * CANVAS_WIDTH - 3);
-                    //}
-
-                    x = baseState.RX;
-                    y = baseState.RY;
-                    Canvas.SetLeft(rsValRec, x / 255.0 * CANVAS_WIDTH - 3);
-                    Canvas.SetTop(rsValRec, y / 255.0 * CANVAS_WIDTH - 3);
-                    Canvas.SetLeft(rsMapValRec, interState.RX / 255.0 * CANVAS_WIDTH - 3);
-                    Canvas.SetTop(rsMapValRec, interState.RY / 255.0 * CANVAS_WIDTH - 3);
-
-                    x = exposeState.getAccelX() + 127;
-                    y = exposeState.getAccelZ() + 127;
-                    Canvas.SetLeft(sixAxisValRec, x / 255.0 * CANVAS_WIDTH - 3);
-                    Canvas.SetTop(sixAxisValRec, y / 255.0 * CANVAS_WIDTH - 3);
-                    Canvas.SetLeft(sixAxisMapValRec, Math.Min(Math.Max(interState.Motion.outputAccelX + 127.0, 0), 255.0) / 255.0 * CANVAS_WIDTH - 3);
-                    Canvas.SetTop(sixAxisMapValRec, Math.Min(Math.Max(interState.Motion.outputAccelZ + 127.0, 0), 255.0) / 255.0 * CANVAS_WIDTH - 3);
-
-                    l2Slider.Value = baseState.L2;
-                    l2ValLbTrans.Y = Math.Min(interState.L2, Math.Max(0, 255)) / 255.0 * -70.0 + TRIG_LB_TRANSFORM_OFFSETY;
-                    if (interState.L2 >= 255)
+                    Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        l2ValLbBrush.Color = Colors.Green;
-                    }
-                    else if (interState.L2 == 0)
-                    {
-                        l2ValLbBrush.Color = Colors.Red;
-                    }
-                    else
-                    {
-                        l2ValLbBrush.Color = Colors.Black;
-                    }
+                        if (isUnloaded) return;
 
-                    r2Slider.Value = baseState.R2;
-                    r2ValLbTrans.Y = Math.Min(interState.R2, Math.Max(0, 255)) / 255.0 * -70.0 + TRIG_LB_TRANSFORM_OFFSETY;
-                    if (interState.R2 >= 255)
-                    {
-                        r2ValLbBrush.Color = Colors.Green;
-                    }
-                    else if (interState.R2 == 0)
-                    {
-                        r2ValLbBrush.Color = Colors.Red;
-                    }
-                    else
-                    {
-                        r2ValLbBrush.Color = Colors.Black;
-                    }
+                        int x = baseState.LX;
+                        int y = baseState.LY;
 
-                    gyroYawSlider.Value = baseState.Motion.gyroYawFull;
-                    gyroPitchSlider.Value = baseState.Motion.gyroPitchFull;
-                    gyroRollSlider.Value = baseState.Motion.gyroRollFull;
+                        Canvas.SetLeft(lsValRec, x / 255.0 * CANVAS_WIDTH - 3);
+                        Canvas.SetTop(lsValRec, y / 255.0 * CANVAS_WIDTH - 3);
+                        Canvas.SetLeft(lsMapValRec, interState.LX / 255.0 * CANVAS_WIDTH - 3);
+                        Canvas.SetTop(lsMapValRec, interState.LY / 255.0 * CANVAS_WIDTH - 3);
 
-                    accelXSlider.Value = exposeState.getAccelX();
-                    accelYSlider.Value = exposeState.getAccelY();
-                    accelZSlider.Value = exposeState.getAccelZ();
+                        x = baseState.RX;
+                        y = baseState.RY;
+                        Canvas.SetLeft(rsValRec, x / 255.0 * CANVAS_WIDTH - 3);
+                        Canvas.SetTop(rsValRec, y / 255.0 * CANVAS_WIDTH - 3);
+                        Canvas.SetLeft(rsMapValRec, interState.RX / 255.0 * CANVAS_WIDTH - 3);
+                        Canvas.SetTop(rsMapValRec, interState.RY / 255.0 * CANVAS_WIDTH - 3);
 
-                    touchXValLb.Content = baseState.TrackPadTouch0.X;
-                    touchYValLb.Content = baseState.TrackPadTouch0.Y;
+                        x = exposeState.getAccelX() + 127;
+                        y = exposeState.getAccelZ() + 127;
+                        Canvas.SetLeft(sixAxisValRec, x / 255.0 * CANVAS_WIDTH - 3);
+                        Canvas.SetTop(sixAxisValRec, y / 255.0 * CANVAS_WIDTH - 3);
+                        Canvas.SetLeft(sixAxisMapValRec, Math.Min(Math.Max(interState.Motion.outputAccelX + 127.0, 0), 255.0) / 255.0 * CANVAS_WIDTH - 3);
+                        Canvas.SetTop(sixAxisMapValRec, Math.Min(Math.Max(interState.Motion.outputAccelZ + 127.0, 0), 255.0) / 255.0 * CANVAS_WIDTH - 3);
 
-                    double latency = ds.Latency;
-                    int warnInterval = ds.getWarnInterval();
-                    inputDelayLb.Content = string.Format(Properties.Resources.InputDelay,
-                        latency.ToString());
+                        l2Slider.Value = baseState.L2;
+                        l2ValLbTrans.Y = Math.Min(interState.L2, Math.Max(0, 255)) / 255.0 * -70.0 + TRIG_LB_TRANSFORM_OFFSETY;
+                        if (interState.L2 >= 255)
+                        {
+                            l2ValLbBrush.Color = Colors.Green;
+                        }
+                        else if (interState.L2 == 0)
+                        {
+                            l2ValLbBrush.Color = Colors.Red;
+                        }
+                        else
+                        {
+                            l2ValLbBrush.Color = Colors.Black;
+                        }
 
-                    if (latency > warnInterval)
-                    {
-                        warnMode = LatencyWarnMode.Warn;
-                        inpuDelayBackBrush.Color = Colors.Red;
-                        inpuDelayForeBrush.Color = Colors.White;
-                    }
-                    else if (latency > (warnInterval * 0.5))
-                    {
-                        warnMode = LatencyWarnMode.Caution;
-                        inpuDelayBackBrush.Color = Colors.Yellow;
-                        inpuDelayForeBrush.Color = Colors.Black;
-                    }
-                    else
-                    {
-                        warnMode = LatencyWarnMode.None;
-                        inpuDelayBackBrush.Color = Colors.Transparent;
-                        inpuDelayForeBrush.Color = SystemColors.WindowTextColor;
-                    }
+                        r2Slider.Value = baseState.R2;
+                        r2ValLbTrans.Y = Math.Min(interState.R2, Math.Max(0, 255)) / 255.0 * -70.0 + TRIG_LB_TRANSFORM_OFFSETY;
+                        if (interState.R2 >= 255)
+                        {
+                            r2ValLbBrush.Color = Colors.Green;
+                        }
+                        else if (interState.R2 == 0)
+                        {
+                            r2ValLbBrush.Color = Colors.Red;
+                        }
+                        else
+                        {
+                            r2ValLbBrush.Color = Colors.Black;
+                        }
 
-                    prevWarnMode = warnMode;
+                        gyroYawSlider.Value = baseState.Motion.gyroYawFull;
+                        gyroPitchSlider.Value = baseState.Motion.gyroPitchFull;
+                        gyroRollSlider.Value = baseState.Motion.gyroRollFull;
 
-                    batteryLvlLb.Content = $"{Translations.Strings.Battery}: {baseState.Battery}%";
-                    
-                    // 移除原代码：gyroCalEllipse.Visibility = cntCalibrating > 0 && ((cntCalibrating / 250) % 2 == 1) ? Visibility.Visible : Visibility.Hidden;
-                    // 闪烁已由事件驱动处理
+                        accelXSlider.Value = exposeState.getAccelX();
+                        accelYSlider.Value = exposeState.getAccelY();
+                        accelZSlider.Value = exposeState.getAccelZ();
 
-                    UpdateCoordLabels(baseState, interState, exposeState);
-                }), System.Windows.Threading.DispatcherPriority.Background);
+                        touchXValLb.Content = baseState.TrackPadTouch0.X;
+                        touchYValLb.Content = baseState.TrackPadTouch0.Y;
+
+                        double latency = ds.Latency;
+                        int warnInterval = ds.getWarnInterval();
+                        inputDelayLb.Content = string.Format(Properties.Resources.InputDelay,
+                            latency.ToString());
+
+                        if (latency > warnInterval)
+                        {
+                            warnMode = LatencyWarnMode.Warn;
+                            inpuDelayBackBrush.Color = Colors.Red;
+                            inpuDelayForeBrush.Color = Colors.White;
+                        }
+                        else if (latency > (warnInterval * 0.5))
+                        {
+                            warnMode = LatencyWarnMode.Caution;
+                            inpuDelayBackBrush.Color = Colors.Yellow;
+                            inpuDelayForeBrush.Color = Colors.Black;
+                        }
+                        else
+                        {
+                            warnMode = LatencyWarnMode.None;
+                            inpuDelayBackBrush.Color = Colors.Transparent;
+                            inpuDelayForeBrush.Color = SystemColors.WindowTextColor;
+                        }
+
+                        prevWarnMode = warnMode;
+
+                        batteryLvlLb.Content = $"{Translations.Strings.Battery}: {baseState.Battery}%";
+
+                        UpdateCoordLabels(baseState, interState, exposeState);
+                    }), System.Windows.Threading.DispatcherPriority.Background);
+                }
             }
 
-            if (useTimer)
+            if (useTimer && !isUnloaded)
             {
                 readingTimer.Start();
             }
@@ -568,6 +604,7 @@ namespace DS4WinWPF.DS4Forms
         private void UpdateCoordLabels(DS4State inState, DS4State mapState,
             DS4StateExposed exposeState)
         {
+            if (isUnloaded) return;
             lxInValLb.Content = inState.LX;
             lxOutValLb.Content = mapState.LX;
             lyInValLb.Content = inState.LY;
