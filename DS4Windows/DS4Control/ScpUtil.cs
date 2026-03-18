@@ -529,6 +529,8 @@ namespace DS4Windows
         public const int TEST_PROFILE_INDEX = TEST_PROFILE_ITEM_COUNT - 1;
         public const int OLD_XINPUT_CONTROLLER_COUNT = 4;
         public const byte DS4_STICK_AXIS_MIDPOINT = 128;
+		
+		public static ManualResetEventSlim EventsSubscribedEvent = new ManualResetEventSlim(false);// 等待事件订阅完成（确保 UI 已订阅校准事件）
 
         public static CultureInfo configFileDecimalCulture = new CultureInfo("en-US"); // Loading and Saving decimal values in configuration files should always use en-US decimal format (ie. dot char as decimal separator char, not comma char)
 

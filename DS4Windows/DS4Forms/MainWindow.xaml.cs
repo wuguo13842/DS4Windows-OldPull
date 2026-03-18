@@ -482,6 +482,9 @@ namespace DS4WinWPF.DS4Forms
                 AppLogger.LogToGui(@"Could not connect to Windows Management Instrumentation service.
 Suspend support not enabled.", true);
             }
+			
+			// 等待事件订阅完成（确保 UI 已订阅校准事件）
+			DS4Windows.Global.EventsSubscribedEvent.Set();
         }
 
         private void SettingsWrapVM_AppChoiceIndexChanged(object sender, EventArgs e)
