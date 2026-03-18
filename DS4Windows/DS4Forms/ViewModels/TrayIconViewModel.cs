@@ -546,6 +546,11 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             if (!isBlinking)
             {
                 blinkTimer.Stop();
+				// 检查当前图标是否为陀螺图标，若是则恢复（防御性）
+				if (IconSource == gyroIcon)
+				{
+					IconSource = Global.iconChoiceResources[Global.UseIconChoice];
+				}
                 return;
             }
 
