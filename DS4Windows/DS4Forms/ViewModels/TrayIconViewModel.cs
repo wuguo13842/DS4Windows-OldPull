@@ -367,17 +367,18 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             device.ChargingChanged += UpdateForBattery;
             device.Removal += CurrentDev_Removal;
 
-            if (device.SixAxis != null)
-            {
-                device.SixAxis.CalibrationStarted += Device_CalibrationStarted;
-                device.SixAxis.CalibrationStopped += Device_CalibrationStopped;
+			if (device?.SixAxis != null)
+			{
+				// 改为使用 lambda 捕获 device
+				device.SixAxis.CalibrationStarted += (s, e) => Device_CalibrationStarted(device, e);
+				device.SixAxis.CalibrationStopped += (s, e) => Device_CalibrationStopped(device, e);
 
-                // 检查设备是否已经在校准中（例如刚连接时自动校准）
-                if (device.SixAxis.CntCalibrating > 0)
-                {
-                    Device_CalibrationStarted(device, EventArgs.Empty);
-                }
-            }
+				// 手动触发时直接传入 device
+				if (device.SixAxis.CntCalibrating > 0)
+				{
+					Device_CalibrationStarted(device, EventArgs.Empty);
+				}
+			}
         }
 
         private void RemoveDeviceEvents(DS4Device device)
@@ -388,8 +389,8 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
             if (device.SixAxis != null)
             {
-                device.SixAxis.CalibrationStarted -= Device_CalibrationStarted;
-                device.SixAxis.CalibrationStopped -= Device_CalibrationStopped;
+				device.SixAxis.CalibrationStarted -= (s, e) => Device_CalibrationStarted(device, e);
+				device.SixAxis.CalibrationStopped -= (s, e) => Device_CalibrationStopped(device, e);
             }
         }
 
