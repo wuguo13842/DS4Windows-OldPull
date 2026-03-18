@@ -17,6 +17,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using System;
+using DS4WinWPF.Translations;
+using DS4Windows.InputDevices;
 
 namespace DS4Windows
 {
@@ -24,7 +26,6 @@ namespace DS4Windows
     {
         public static event EventHandler<DebugEventArgs> TrayIconLog;
         public static event EventHandler<DebugEventArgs> GuiLog;
-
         public static void LogToGui(string data, bool warning, bool temporary = false)
         {
             if (GuiLog != null)
@@ -43,6 +44,38 @@ namespace DS4Windows
                     TrayIconLog(null, new DebugEventArgs(data, warning));
             }
         }
+		
+        /// <summary>
+        /// 记录陀螺仪校准开始通知
+        /// </summary>
+        /// <param name="deviceIndex">设备索引（0-based）</param>
+		
+        // 全局冷却：上次发送陀螺仪通知的时间
+        private static DateTime lastGyroNotificationTime = DateTime.MinValue;
+        private static readonly object notificationLock = new object();
+        private const int GYRO_NOTIFICATION_COOLDOWN_SECONDS = 10;
+
+        // public static void LogGyroCalibrationStarted(int deviceIndex)
+        // {
+            // string message = string.Format(Strings.GyroCalibrationStarted, deviceIndex + 1);
+            // LogToTray(message, false, true);
+        // }
+        public static void LogGyroCalibrationStarted(int deviceIndex)
+        {
+            lock (notificationLock)
+            {
+                DateTime now = DateTime.Now;
+                if ((now - lastGyroNotificationTime).TotalSeconds < GYRO_NOTIFICATION_COOLDOWN_SECONDS)
+                {
+                    return; // 仍在冷却期内，不发送
+                }
+
+                lastGyroNotificationTime = now;
+                string message = Strings.GyroCalibrationStarted;
+                LogToTray(message, false, true);
+            }
+        }
+		
     }
 }
 

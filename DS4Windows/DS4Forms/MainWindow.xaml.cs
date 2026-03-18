@@ -1039,8 +1039,7 @@ Suspend support not enabled.", true);
 			if (device != null)
 			{
 				// 发送系统通知（仅手动校准时触发）
-				string message = string.Format(Translations.Strings.GyroCalibrationStarted, devIndex + 1);
-				AppLogger.LogToTray(message, false, true);
+				AppLogger.LogGyroCalibrationStarted(devIndex);
 
 				// 调用陀螺仪校准重置（与 ProfileEditor 中的 GyroCalibration_Click 一致）
 				device.SixAxis.ResetContinuousCalibration();

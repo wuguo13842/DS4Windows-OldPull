@@ -1842,8 +1842,7 @@ namespace DS4WinWPF.DS4Forms
 			if (deviceNum < ControlService.CURRENT_DS4_CONTROLLER_LIMIT)
 			{
 				// 发送系统通知（仅手动校准时触发）
-				string message = string.Format(Translations.Strings.GyroCalibrationStarted, deviceNum + 1);
-				AppLogger.LogToTray(message, false, true);
+				AppLogger.LogGyroCalibrationStarted(deviceNum);
 
 				DS4Device d = App.rootHub.DS4Controllers[deviceNum];
 				d.SixAxis.ResetContinuousCalibration();

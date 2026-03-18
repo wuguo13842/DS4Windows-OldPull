@@ -4402,8 +4402,7 @@ namespace DS4Windows
 									var d = ctrl.DS4Controllers[device];
 
 									// 添加系统通知（仅手动校准时触发）
-									string message = string.Format(DS4WinWPF.Translations.Strings.GyroCalibrationStarted, device + 1);
-									DS4Windows.AppLogger.LogToTray(message, false, true);
+									AppLogger.LogGyroCalibrationStarted(device);
 
 									d.SixAxis.ResetContinuousCalibration();
 									if (d.JointDeviceSlotNumber != DS4Device.DEFAULT_JOINT_SLOT_NUMBER)

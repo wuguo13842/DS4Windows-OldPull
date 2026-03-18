@@ -1420,8 +1420,12 @@
     <value>控制器 {0} 电量低（{1}%）。请尽快充电。</value>
     <comment>参数：0=控制器编号，1=电量百分比</comment>
   </data>
+	<!-- <data name="GyroCalibrationStarted" xml:space="preserve"> -->
+		<!-- <value>控制器 {0} 陀螺仪校准开始。&#10;请静止平面上不要移动等待校准完成！！</value> -->
+		<!-- <comment>参数：0=控制器编号</comment> -->
+	<!-- </data> -->
 	<data name="GyroCalibrationStarted" xml:space="preserve">
-		<value>控制器 {0} 陀螺仪校准开始。&#10;请静止平面上不要移动等待校准完成！！&#10;&#8203;&#10;&#8203;</value>
+		<value>请静止平放不要移动等待校准完成！！</value>
 		<comment>参数：0=控制器编号</comment>
 	</data>
   <data name="ThresholdPrefix" xml:space="preserve">
