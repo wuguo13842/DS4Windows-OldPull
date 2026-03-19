@@ -34,6 +34,9 @@ using static DS4Windows.Util;
 using Microsoft.Win32;
 using DS4WinWPF.Translations;
 using DS4Windows.InputDevices;
+using System.Text.RegularExpressions; 
+using System.Management;
+using System.Text;
 
 namespace DS4WinWPF.DS4Forms.ViewModels
 {
@@ -666,37 +669,76 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             HidHideClientFoundChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private void RefreshMonitorChoices()
-        {
-            absMonitorChoices.Clear();
-            absMonitorChoices.Add(new MonitorChoiceListing()
-            {
-                DisplayName = Strings.AllMonitors,
-                EDID = string.Empty,
-                Index = 0,
-            });
+		private void RefreshMonitorChoices()
+		{
+			absMonitorChoices.Clear();
+			absMonitorChoices.Add(new MonitorChoiceListing()
+			{
+				DisplayName = Strings.AllMonitors,
+				EDID = string.Empty,
+				Index = 0,
+			});
 
-            int idx = 1;
-            foreach(DISPLAY_DEVICE tempDis in Global.GrabCurrentMonitors())
-            {
-				string displayName = tempDis.DeviceString;
+			int idx = 1;
+			foreach (DISPLAY_DEVICE tempDis in Global.GrabCurrentMonitors())
+			{
+				string deviceId = tempDis.DeviceID ?? "";
+				string displayName = ExtractHardwareId(deviceId);
+
+				// 如果提取失败，尝试使用 DeviceString（即使它是通用名称）
+				if (string.IsNullOrEmpty(displayName))
+				{
+					displayName = tempDis.DeviceString;
+				}
+
+				// 如果仍然为空，使用 Unknown
 				if (string.IsNullOrWhiteSpace(displayName))
 				{
-					displayName = Strings.Unknown; // 或使用本地化字符串
+					displayName = Strings.Unknown;
 				}
-				
-                absMonitorChoices.Add(new MonitorChoiceListing()
-                {
-                    DisplayName = displayName,
-                    EDID = tempDis.DeviceID,
-                    Index = idx,
-                });
 
-                idx++;
-            }
+				// 调试输出：查看 DeviceID 和提取结果
+				System.Diagnostics.Debug.WriteLine($"DeviceID: {deviceId} -> DisplayName: {displayName}");
 
-            AbsMonitorChoicesChanged?.Invoke(this, EventArgs.Empty);
-        }
+				absMonitorChoices.Add(new MonitorChoiceListing()
+				{
+					DisplayName = displayName,
+					EDID = tempDis.DeviceID,
+					Index = idx,
+				});
+
+				idx++;
+			}
+
+			AbsMonitorChoicesChanged?.Invoke(this, EventArgs.Empty);
+		}
+
+		private string ExtractHardwareId(string deviceId)
+		{
+			if (string.IsNullOrEmpty(deviceId)) return null;
+
+			// 格式1: \\?\DISPLAY#AOC2369#...
+			var match = Regex.Match(deviceId, @"#([^#]+)#");
+			if (match.Success)
+				return match.Groups[1].Value;
+
+			// 格式2: DISPLAY\AOC2369\...
+			match = Regex.Match(deviceId, @"DISPLAY\\([^\\]+)");
+			if (match.Success)
+				return match.Groups[1].Value;
+
+			// 格式3: MONITOR\AOC2369\...
+			match = Regex.Match(deviceId, @"MONITOR\\([^\\]+)");
+			if (match.Success)
+				return match.Groups[1].Value;
+
+			// 格式4: 简单分割取第二部分（适用于传统格式）
+			string[] parts = deviceId.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+			if (parts.Length >= 2)
+				return parts[1];
+
+			return null;
+		}
     }
 
     public struct MonitorChoiceListing

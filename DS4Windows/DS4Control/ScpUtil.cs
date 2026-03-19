@@ -3275,33 +3275,33 @@ namespace DS4Windows
             return foundMonitor;
         }
 
-        public static IEnumerable<DISPLAY_DEVICE> GrabCurrentMonitors()
-        {
-            List<DISPLAY_DEVICE> result = new List<DISPLAY_DEVICE>();
+		public static IEnumerable<DISPLAY_DEVICE> GrabCurrentMonitors()
+		{
+			List<DISPLAY_DEVICE> result = new List<DISPLAY_DEVICE>();
+			DISPLAY_DEVICE d = new DISPLAY_DEVICE();
+			d.cb = Marshal.SizeOf(d);
 
-            DISPLAY_DEVICE d = new DISPLAY_DEVICE();
-            d.cb = Marshal.SizeOf(d);
-            try
-            {
-                for (uint id = 0;
-                    EnumDisplayDevicesW(null, id, ref d, 0); id++)
-                {
-                    if (d.StateFlags.HasFlag(DisplayDeviceStateFlags.AttachedToDesktop))
-                    {
-                        EnumDisplayDevicesW(d.DeviceName, id, ref d,
-                            EDD_GET_DEVICE_INTERFACE_NAME);
-                        result.Add(d);
-                    }
+			try
+			{
+				for (uint id = 0; EnumDisplayDevicesW(null, id, ref d, 0); id++)
+				{
+					if (d.StateFlags.HasFlag(DisplayDeviceStateFlags.AttachedToDesktop))
+					{
+						// 第二步：获取该接口连接的显示器
+						DISPLAY_DEVICE monitor = new DISPLAY_DEVICE();
+						monitor.cb = Marshal.SizeOf(monitor);
+						if (EnumDisplayDevicesW(d.DeviceName, 0, ref monitor, 0))
+						{
+							result.Add(monitor);
+						}
+					}
+					d.cb = Marshal.SizeOf(d); // 重置结构体大小
+				}
+			}
+			catch (Exception) { }
 
-                    d.cb = Marshal.SizeOf(d);
-                }
-            }
-            catch (Exception)
-            {
-            }
-
-            return result;
-        }
+			return result;
+		}
     }
 
     public class Changelog

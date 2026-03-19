@@ -993,7 +993,7 @@
     <value>链接配置/ID</value>
   </data>
   <data name="MainWin.AbsDisplayMonitor" xml:space="preserve">
-    <value>绝对显示器设置</value>
+    <value>触板映射显示器</value>
   </data>
   <data name="MainWin.AllMonitors" xml:space="preserve">
     <value>所有显示器</value>
