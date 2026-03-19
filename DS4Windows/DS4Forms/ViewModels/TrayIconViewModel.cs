@@ -25,6 +25,7 @@ using System.Windows;
 using System.Windows.Controls;
 using DS4Windows;
 using WPFLocalizeExtension.Extensions;
+using DS4WinWPF.Translations; // 添加此命名空间以使用 Strings
 
 namespace DS4WinWPF.DS4Forms.ViewModels
 {
@@ -213,6 +214,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
             using (ReadLocker locker = new ReadLocker(_colLocker))
             {
+                // 为每个控制器创建子菜单
                 foreach (ControllerHolder holder in controllerList)
                 {
                     DS4Device currentDev = holder.Device;
@@ -237,6 +239,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     idx++;
                 }
 
+                // 断开连接菜单（父菜单）
                 item = new MenuItem() {  Header = GetLocalizedString("MenuDisconnect") };
                 idx = 0;
                 foreach (ControllerHolder holder in controllerList)
@@ -251,15 +254,38 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     }
                     idx++;
                 }
-                if (idx == 0)
+                if (item.Items.Count == 0)
                 {
                     item.IsEnabled = false;
                 }
-            }
+                items.Add(item);
 
-            items.Add(item);
-            items.Add(new Separator());
-            PopulateStaticItems();
+                // ========== 新增：陀螺仪校准菜单 ==========
+                MenuItem gyroCalibItem = new MenuItem() { Header = GetLocalizedString("GyroCalibration") }; // 使用本地化标题
+                idx = 0;
+                foreach (ControllerHolder holder in controllerList)
+                {
+                    DS4Device tempDev = holder.Device;
+                    // 只要设备支持陀螺仪（SixAxis 不为 null）且已同步（可选），就添加子菜单项
+                    if (tempDev?.SixAxis != null)
+                    {
+                        MenuItem subitem = new MenuItem() { Header = $"Calibrate Controller {idx + 1}" }; // 可本地化，简单起见直接用英文
+                        subitem.Click += CalibrateGyroMenuItem_Click;
+                        subitem.Tag = idx;
+                        gyroCalibItem.Items.Add(subitem);
+                    }
+                    idx++;
+                }
+                if (gyroCalibItem.Items.Count == 0)
+                {
+                    gyroCalibItem.IsEnabled = false; // 没有可校准的控制器时禁用
+                }
+                items.Add(gyroCalibItem);
+                // =========================================
+
+                items.Add(new Separator());
+                PopulateStaticItems();
+            }
         }
 
         private void ChangeControlServiceItem_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -312,6 +338,30 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 }
             }
         }
+
+        // ========== 新增：陀螺仪校准菜单项点击事件 ==========
+        private void CalibrateGyroMenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            MenuItem item = sender as MenuItem;
+            int idx = Convert.ToInt32(item.Tag);
+            ControllerHolder holder = controllerList[idx];
+            DS4Device device = holder?.Device;
+            if (device != null)
+            {
+                // 发送系统通知（普通通知）
+                string message = string.Format(Strings.GyroCalibrationStarted, idx + 1);
+                AppLogger.LogToTray(message, false);
+
+                // 执行陀螺仪校准重置
+                device.SixAxis.ResetContinuousCalibration();
+                if (device.JointDeviceSlotNumber != DS4Device.DEFAULT_JOINT_SLOT_NUMBER)
+                {
+                    DS4Device tempDev = controlService.DS4Controllers[device.JointDeviceSlotNumber];
+                    tempDev?.SixAxis.ResetContinuousCalibration();
+                }
+            }
+        }
+        // ==================================================
 
         private void PopulateControllerList()
         {
@@ -378,7 +428,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     Device_CalibrationStarted(device, EventArgs.Empty);
                 }
             }
-
         }
 
         private void RemoveDeviceEvents(DS4Device device)
@@ -390,7 +439,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             if (device.SixAxis != null)
             {
                 device.SixAxis.CalibrationStarted -= (s, e) => Device_CalibrationStarted(device, e);
-				device.SixAxis.CalibrationStopped -= (s, e) => Device_CalibrationStopped(device, e);
+                device.SixAxis.CalibrationStopped -= (s, e) => Device_CalibrationStopped(device, e);
             }
         }
 
@@ -546,11 +595,11 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             if (!isBlinking)
             {
                 blinkTimer.Stop();
-				// 检查当前图标是否为陀螺图标，若是则恢复（防御性）
-				if (IconSource == gyroIcon)
-				{
-					IconSource = Global.iconChoiceResources[Global.UseIconChoice];
-				}
+                // 检查当前图标是否为陀螺图标，若是则恢复（防御性）
+                if (IconSource == gyroIcon)
+                {
+                    IconSource = Global.iconChoiceResources[Global.UseIconChoice];
+                }
                 return;
             }
 
@@ -605,7 +654,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                                     blinkTimer.Stop();
                                     blinkTimeoutTimer.Stop();
                                     isBlinking = false;
-                                	IconSource = Global.iconChoiceResources[Global.UseIconChoice];
+                                    IconSource = Global.iconChoiceResources[Global.UseIconChoice];
                                 }
                             }
                         }));
