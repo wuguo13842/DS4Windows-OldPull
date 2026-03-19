@@ -32,6 +32,8 @@ using System.Runtime.InteropServices;
 using DS4Windows;
 using static DS4Windows.Util;
 using Microsoft.Win32;
+using DS4WinWPF.Translations;
+using DS4Windows.InputDevices;
 
 namespace DS4WinWPF.DS4Forms.ViewModels
 {
@@ -669,7 +671,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             absMonitorChoices.Clear();
             absMonitorChoices.Add(new MonitorChoiceListing()
             {
-                DisplayName = "All Monitors",
+                DisplayName = Strings.AllMonitors,
                 EDID = string.Empty,
                 Index = 0,
             });
@@ -677,9 +679,15 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             int idx = 1;
             foreach(DISPLAY_DEVICE tempDis in Global.GrabCurrentMonitors())
             {
+				string displayName = tempDis.DeviceString;
+				if (string.IsNullOrWhiteSpace(displayName))
+				{
+					displayName = Strings.Unknown; // 或使用本地化字符串
+				}
+				
                 absMonitorChoices.Add(new MonitorChoiceListing()
                 {
-                    DisplayName = tempDis.DeviceString,
+                    DisplayName = displayName,
                     EDID = tempDis.DeviceID,
                     Index = idx,
                 });

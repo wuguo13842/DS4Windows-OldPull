@@ -183,6 +183,9 @@
   <data name="Controllers" xml:space="preserve">
     <value>控制器</value>
   </data>
+  <data name="DisconnectController" xml:space="preserve">
+    <value>控制器</value>
+  </data>
   <data name="ControlPanel" xml:space="preserve">
     <value>手柄</value>
   </data>
@@ -344,7 +347,7 @@
     <value>自定义可执行文件名称</value>
   </data>
   <data name="CustomExeNameInfo" xml:space="preserve">
-    <value>一些游戏如果测到DS4Windows.exe 或 InputMapper.exe 正在运行，则会忽略 DS4 的输入。&#10;  对于这些游戏，解决方法是将 DS4Windows.exe 重命名，以规避检测。&#10;  在这样自定义可执行文件的名称以允许 DS4Updater 自动更新已被重命名的DS4Windows。&#10;请不要输入扩展名（即 .exe)。&#10;- 名称示例: whyme_DS4Windows</value>
+    <value>一些游戏如果测到DS4Windows.exe 或 InputMapper.exe 正在运行，则会忽略 DS4 的输入。对于这些游戏，解决方法是将 DS4Windows.exe 重命名，以规避检测。在这样自定义可执行文件的名称以允许 DS4Updater 自动更新已被重命名的DS4Windows。请不要输入扩展名（即 .exe)。&#10;&#10;- 名称示例: whyme_DS4Windows</value>
   </data>
   <data name="XInputChecker" xml:space="preserve">
     <value>XInput 检查器</value>
@@ -991,6 +994,12 @@
   </data>
   <data name="MainWin.AbsDisplayMonitor" xml:space="preserve">
     <value>绝对显示器设置</value>
+  </data>
+  <data name="MainWin.AllMonitors" xml:space="preserve">
+    <value>所有显示器</value>
+  </data>
+  <data name="MainWin.Unknown" xml:space="preserve">
+    <value>未知</value>
   </data>
   <data name="MainWin.EnableServer" xml:space="preserve">
     <value>启用服务器</value>
@@ -1844,7 +1853,7 @@
     <value>控制器读数</value>
   </data>
   <data name="MenuDisconnect" xml:space="preserve">
-    <value>断开连接菜单</value>
+    <value>断开控制器</value>
   </data>
   <data name="ServiceStart" xml:space="preserve">
     <value>启动</value>

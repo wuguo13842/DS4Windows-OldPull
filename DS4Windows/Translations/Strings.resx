@@ -183,6 +183,9 @@
   <data name="Controllers" xml:space="preserve">
     <value>Controllers</value>
   </data>
+  <data name="DisconnectController" xml:space="preserve">
+    <value>Disconnect Controller</value>
+  </data>
   <data name="ControlPanel" xml:space="preserve">
     <value>Control Panel</value>
   </data>
@@ -1023,6 +1026,12 @@ Disabled:
   </data>
   <data name="MainWin.AbsDisplayMonitor" xml:space="preserve">
     <value>Abs Display Monitor</value>
+  </data>
+  <data name="MainWin.AllMonitors" xml:space="preserve">
+    <value>All Monitors</value>
+  </data>
+  <data name="MainWin.Unknown" xml:space="preserve">
+    <value>Unknown</value>
   </data>
   <data name="MainWin.EnableServer" xml:space="preserve">
     <value>Enable Server</value>

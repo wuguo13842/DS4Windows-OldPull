@@ -218,7 +218,8 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 foreach (ControllerHolder holder in controllerList)
                 {
                     DS4Device currentDev = holder.Device;
-                    item = new MenuItem() { Header = $"Controller {idx + 1}" };
+					// string itemHeader = string.Format(GetLocalizedString("ControllerNumber"), idx + 1);
+                    item = new MenuItem() { Header = GetLocalizedString("Controllers") + " " + (idx + 1) };
                     item.Tag = idx;
                     ItemCollection subitems = item.Items;
                     string currentProfile = Global.ProfilePath[idx];
@@ -247,7 +248,10 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     DS4Device tempDev = holder.Device;
                     if (tempDev.Synced && !tempDev.Charging)
                     {
-                        MenuItem subitem = new MenuItem() { Header = $"Disconnect Controller {idx + 1}" };
+						// string disconnectHeader = string.Format(GetLocalizedString("Controllers"), idx + 1);
+                        // MenuItem subitem = new MenuItem() { Header = disconnectHeader  };
+                        // MenuItem subitem = new MenuItem() { Header = GetLocalizedString("Disconnect Controller") + " " + (idx + 1) };
+                        MenuItem subitem = new MenuItem() { Header = GetLocalizedString("DisconnectController") + " " + (idx + 1) };
                         subitem.Click += DisconnectMenuItem_Click;
                         subitem.Tag = idx;
                         item.Items.Add(subitem);
@@ -269,7 +273,9 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     // 只要设备支持陀螺仪（SixAxis 不为 null）且已同步（可选），就添加子菜单项
                     if (tempDev?.SixAxis != null)
                     {
-                        MenuItem subitem = new MenuItem() { Header = $"Calibrate Controller {idx + 1}" }; // 可本地化，简单起见直接用英文
+                        // string calibHeader = GetLocalizedString("Calibrate") + " " + GetLocalizedString("Controllers") + " " +  (idx + 1).ToString();
+						string calibHeader = string.Format(GetLocalizedString("Controllers"), idx + 1);
+						MenuItem subitem = new MenuItem() { Header = GetLocalizedString("Controllers") + " " + (idx + 1) };// 本地化
                         subitem.Click += CalibrateGyroMenuItem_Click;
                         subitem.Tag = idx;
                         gyroCalibItem.Items.Add(subitem);

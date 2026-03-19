@@ -5654,5 +5654,23 @@ namespace DS4WinWPF.Translations {
 				return ResourceManager.GetString("GyroCalibrationStarted", resourceCulture);
 			}
 		}
+		
+		/// <summary>
+		///   Looks up a localized string similar to All Monitors.
+		/// </summary>
+		public static string AllMonitors {
+			get {
+				return ResourceManager.GetString("MainWin.AllMonitors", resourceCulture);
+			}
+		}
+		
+		/// <summary>
+		///   Looks up a localized string similar to Unknown.
+		/// </summary>
+		public static string Unknown {
+			get {
+				return ResourceManager.GetString("MainWin.Unknown", resourceCulture);
+			}
+		}
     }
 }
