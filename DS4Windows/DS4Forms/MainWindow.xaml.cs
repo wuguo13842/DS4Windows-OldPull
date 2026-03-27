@@ -210,25 +210,28 @@ namespace DS4WinWPF.DS4Forms
             showAppInTaskbar = false;
         }
 
-        /// <summary>
-        /// 从系统托盘显示窗口，并激活到前台
-        /// </summary>
-        private void ShowFromTray()
-        {
-            // 如果窗口已隐藏，则显示
-            if (Visibility != Visibility.Visible)
-            {
-                Show();
-            }
-            // 如果窗口处于最小化状态，恢复为正常状态
-            if (WindowState == WindowState.Minimized)
-            {
-                WindowState = WindowState.Normal;
-            }
-            // 激活窗口，使其获得焦点并置于最前
-            Activate();
-            showAppInTaskbar = true;
-        }
+		/// <summary>
+		/// 从系统托盘显示窗口，并激活到前台
+		/// </summary>
+		private void ShowFromTray()
+		{
+			// 恢复任务栏显示（启动时可能被设为 false）
+			ShowInTaskbar = true;
+
+			// 如果窗口已隐藏，则显示
+			if (Visibility != Visibility.Visible)
+			{
+				Show();
+			}
+			// 如果窗口处于最小化状态，恢复为正常状态
+			if (WindowState == WindowState.Minimized)
+			{
+				WindowState = WindowState.Normal;
+			}
+			// 激活窗口，使其获得焦点并置于最前
+			Activate();
+			showAppInTaskbar = true;
+		}
 
         private void SetupLocalizedPriorityComboBox()
         {
@@ -1175,29 +1178,28 @@ Suspend support not enabled.", true);
             Application.Current.Shutdown();
         }
 
-        protected override void OnSourceInitialized(EventArgs e)
-        {
-            base.OnSourceInitialized(e);
+		protected override void OnSourceInitialized(EventArgs e)
+		{
+			base.OnSourceInitialized(e);
 
-            if (!Global.firstRun)
-            {
-                WindowPlacementHelper.ApplyPlacement(this, startMinimized);
-            }
+			if (!Global.firstRun)
+			{
+				WindowPlacementHelper.ApplyPlacement(this, startMinimized);
+			}
 
-            HwndSource source = PresentationSource.FromVisual(this) as HwndSource;
-            HookWindowMessages(source);
-            source.AddHook(WndProc);
+			HwndSource source = PresentationSource.FromVisual(this) as HwndSource;
+			HookWindowMessages(source);
+			source.AddHook(WndProc);
 
-            // ===== 新增：如果启动时需要最小化，则强制隐藏到系统托盘 =====
-            if (_startMinimized)
-            {
-                // 等待窗口完全加载后再隐藏，避免闪烁
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    HideToTray();
-                }), System.Windows.Threading.DispatcherPriority.Background);
-            }
-        }
+			// ===== 新增：启动最小化时立即隐藏，并禁止在任务栏显示 =====
+			if (_startMinimized)
+			{
+				// 禁止在任务栏显示图标（避免残留）
+				ShowInTaskbar = false;
+				// 立即隐藏窗口（无动画、无闪烁）
+				HideToTray();
+			}
+		}
 
         private bool inHotPlug = false;
         private int hotplugCounter = 0;

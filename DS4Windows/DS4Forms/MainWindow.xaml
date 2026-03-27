@@ -491,7 +491,6 @@
                         </ComboBox>
                     </StackPanel>
                     -->
-						<local:LanguagePackControl Margin="{StaticResource spaceMargin}" VerticalAlignment="Center" />
 
 						<GroupBox Header="{lex:Loc UseCustomSteamFolder}" Padding="0,8,0,4" Margin="{StaticResource spaceMargin}">
 							<DockPanel LastChildFill="True" Margin="0,0,8,0">
@@ -507,6 +506,8 @@
 										 VerticalContentAlignment="Center" />
 							</DockPanel>
 						</GroupBox>
+						
+						<local:LanguagePackControl Margin="{StaticResource spaceMargin}" VerticalAlignment="Center" />
 
 						<DockPanel Margin="{StaticResource spaceMargin}" LastChildFill="True">
 							<Label Content="{lex:Loc CustomExeName}" VerticalAlignment="Center" />
