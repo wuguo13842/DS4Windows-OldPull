@@ -330,42 +330,39 @@
                                    ToolTip="{lex:Loc Resources:UACTask}" Margin="20,0,0,0" />
                             </StackPanel>
                         </GroupBox>
-                        <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                            <Label Content="{lex:Loc ShowNotifications}" />
-                            <ComboBox MinWidth="100" SelectedIndex="{Binding ShowNotificationsIndex}" Margin="8,0,0,0">
-                                <ComboBoxItem Content="{lex:Loc None}" />
-                                <ComboBoxItem Content="{lex:Loc WarningsOnly}" />
-                                <ComboBoxItem Content="{lex:Loc All}" />
-                            </ComboBox>
-                        </StackPanel>
-                        <CheckBox Content="{lex:Loc ProfileSwitchNotification}" IsChecked="{Binding ProfileChangedNotification}"
-                                  Visibility="{Binding IsProfileChangedCheckVisible}" Margin="16 0 0 10"/>
                         <CheckBox Content="{lex:Loc DisconnectFromBtWhenStopping}" Margin="{StaticResource spaceMargin}"
                               IsChecked="{Binding DisconnectBTStop}" />
                         <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
                             <CheckBox Content="{lex:Loc FlashLightbarAtHighLatency}" VerticalAlignment="Center"
                                   IsChecked="{Binding FlashHighLatency}" />
-                            <StackPanel Orientation="Horizontal" Margin="8,0,0,0"
+                            <StackPanel Orientation="Horizontal" Margin="4,0,0,0"
                                     IsEnabled="{Binding FlashHighLatency,FallbackValue='False'}">
                                 <!--<TextBox Text="20" VerticalContentAlignment="Center" />-->
-                                <xctk:IntegerUpDown d:IsHidden="True" Value="{Binding FlashHighLatencyAt}" MinWidth="30" ButtonSpinnerLocation="Right" Increment="1" Maximum="100" Minimum="10" />
-                                <Label Content="ms" />
+                                <xctk:IntegerUpDown d:IsHidden="True" Value="{Binding FlashHighLatencyAt}" MinWidth="30" Height="22" ButtonSpinnerLocation="Right" Increment="1" Maximum="100" Minimum="10" />
+                                <Label Content="{lex:Loc Milliseconds}" />
                             </StackPanel>
                         </StackPanel>
-                        <CheckBox Content="{lex:Loc StartMinimized}" Margin="{StaticResource spaceMargin}"
-                              IsChecked="{Binding StartMinimize}" />
-                        <CheckBox Content="{lex:Loc MinimizeToTaskbar}"
-                                  ToolTip="{lex:Loc MinimizeToTaskbarTip}"
-                                  IsChecked="{Binding MinimizeToTaskbar}" Margin="{StaticResource spaceMargin}" />
-                        <CheckBox Content="{lex:Loc CloseMinimizes}" Margin="{StaticResource spaceMargin}"
-                              IsChecked="{Binding CloseMinimizes}"
-                              ToolTip="{lex:Loc Resources:CloseMinimize}" />
                         <CheckBox Content="{lex:Loc QuickCharge}" Margin="{StaticResource spaceMargin}"
                               IsChecked="{Binding QuickCharge}"
                               ToolTip="{lex:Loc Resources:QuickCharge}" />
-                        <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                            <Label Content="{lex:Loc IconChoice}" ContentStringFormat="{}{0}:"/>
-                            <ComboBox x:Name="useIconChoiceCom" SelectedIndex="{Binding IconChoiceIndex,FallbackValue='0'}" Margin="10,0,0,0">
+                        <CheckBox Content="{lex:Loc StartMinimized}" Margin="{StaticResource spaceMargin}"
+                              IsChecked="{Binding StartMinimize}" />
+						<CheckBox x:Name="closeMinimizesCk" Content="{lex:Loc CloseMinimizes}" Margin="{StaticResource spaceMargin}"
+								  IsChecked="{Binding CloseMinimizes}" />
+						<StackPanel Orientation="Horizontal" Margin="10,-10,0,10" IsEnabled="{Binding CloseMinimizes}" VerticalAlignment="Center">
+							<TextBlock Text="└ " VerticalAlignment="Center" />
+							<CheckBox x:Name="minimizeToTaskbarCk"
+									  IsChecked="{Binding MinimizeToTaskbar}"
+									  VerticalAlignment="Center" />
+							<Label Content="{lex:Loc MinimizeToTaskbar}" 
+								   ToolTip="{lex:Loc MinimizeToTaskbarTip}"
+								   VerticalAlignment="Center" />
+						</StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}" VerticalAlignment="Center">
+                            <Label Content="{lex:Loc IconChoice}" ContentStringFormat="{}{0}:" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="useIconChoiceCom" SelectedIndex="{Binding IconChoiceIndex,FallbackValue='0'}"
+                                      VerticalAlignment="Center"
+                                      VerticalContentAlignment="Center">
                                 <ComboBoxItem Content="{lex:Loc Default}"/>
                                 <ComboBoxItem Content="{lex:Loc Colored}"/>
                                 <ComboBoxItem Content="{lex:Loc White}"/>
@@ -373,77 +370,120 @@
                                 <ComboBoxItem Content="{lex:Loc Battery}"/>
                             </ComboBox>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                            <Label Content="{lex:Loc AppTheme}" ContentStringFormat="{}{0}:"/>
-                            <ComboBox x:Name="appThemeCom" SelectedIndex="{Binding AppChoiceIndex,FallbackValue='0'}" Margin="10,0,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}" VerticalAlignment="Center">
+                            <Label Content="{lex:Loc AppTheme}" ContentStringFormat="{}{0}:" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="appThemeCom" SelectedIndex="{Binding AppChoiceIndex,FallbackValue='0'}"
+                                      VerticalAlignment="Center"
+                                      VerticalContentAlignment="Center">
                                 <ComboBoxItem Content="{lex:Loc Default}"/>
                                 <ComboBoxItem Content="{lex:Loc Light}"/>
                                 <ComboBoxItem Content="{lex:Loc Dark}"/>
                             </ComboBox>
                         </StackPanel>
+						<StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}" VerticalAlignment="Center">
+							<Label Content="{lex:Loc ShowNotifications}" ContentStringFormat="{}{0}:" VerticalAlignment="Center" />
+							<ComboBox MinWidth="100" 
+									  SelectedIndex="{Binding ShowNotificationsIndex}" 
+									  VerticalAlignment="Center"
+									  VerticalContentAlignment="Center">
+								<ComboBoxItem Content="{lex:Loc None}" />
+								<ComboBoxItem Content="{lex:Loc WarningsOnly}" />
+								<ComboBoxItem Content="{lex:Loc All}" />
+								<ComboBoxItem Content="{lex:Loc AllWithProfileSwitch}" />
+							</ComboBox>
+						</StackPanel>
 
-                        <CheckBox Content="{lex:Loc CheckUpdateStartup}" Margin="{StaticResource spaceMargin}"
-                              IsChecked="{Binding CheckForUpdates}" />
-                        <StackPanel x:Name="checkEveryOptionsStack" Orientation="Horizontal" Margin="{StaticResource spaceMargin}"
-                                IsEnabled="{Binding CheckForUpdates}">
-                            <Label Content="{lex:Loc CheckEvery}" />
+						<StackPanel Orientation="Vertical" Margin="{StaticResource spaceMargin}">
+							<Label Content="{lex:Loc MainWin.AbsDisplayMonitor}" ContentStringFormat="{}{0}:" VerticalAlignment="Center" />
+							<StackPanel Orientation="Horizontal" Margin="10,-3,0,0">
+								<TextBlock Text="└" VerticalAlignment="Center" Margin="0,0,4,0" />
+								<ComboBox ItemsSource="{Binding AbsMonitorChoices}" DisplayMemberPath="DisplayItemString" SelectedValuePath="EDID"
+										  SelectedValue="{Binding AbsMonitorSettingEDID}"
+										  VerticalAlignment="Center"
+										  VerticalContentAlignment="Center" />
+							</StackPanel>
+						</StackPanel>
+
+                        <!-- <CheckBox Content="{lex:Loc CheckUpdateStartup}" Margin="{StaticResource spaceMargin}" -->
+                              <!-- IsChecked="{Binding CheckForUpdates}" /> -->
+                        <!-- <StackPanel x:Name="checkEveryOptionsStack" Orientation="Horizontal" Margin="{StaticResource spaceMargin}" -->
+                                <!-- IsEnabled="{Binding CheckForUpdates}" VerticalAlignment="Center"> -->
+                            <!-- <Label Content="{lex:Loc CheckEvery}" VerticalAlignment="Center" /> -->
                             <!--<TextBox Text="0" VerticalAlignment="Center" />-->
-                            <xctk:IntegerUpDown d:IsHidden="True" Value="{Binding CheckEvery}" MinWidth="30" Margin="8,0,0,0"
-                                            ButtonSpinnerLocation="Right" Increment="1" Maximum="30" Minimum="0" />
-                            <ComboBox SelectedIndex="{Binding CheckEveryUnit,FallbackValue=1}" Margin="8,0,0,0" Foreground="{DynamicResource ForegroundColor}" MinWidth="60">
-                                <ComboBoxItem Content="{lex:Loc Hours}" />
-                                <ComboBoxItem Content="{lex:Loc Days}" />
-                            </ComboBox>
-                        </StackPanel>
-                        <GroupBox Header="{lex:Loc OscServerHeading}" Padding="0,10,0,0" Margin="{StaticResource spaceMargin}">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" MinHeight="20">
-                                    <CheckBox x:Name="useOscServerCk" Content="{lex:Loc EnableOscServer}" IsChecked="{Binding UseOSCServer}" Click="UseOscServerCk_Click" VerticalAlignment="Center" />
-                                    <Label Content="Port" Padding="0" VerticalAlignment="Center" Margin="20,0,0,0" />
-                                    <xctk:IntegerUpDown d:IsHidden="False" x:Name="oscPortNum" IsEnabled="{Binding UseOSCServer}" MinWidth="20" Margin="8,0,0,0"
-                                        Value="{Binding OscPort, UpdateSourceTrigger=LostFocus,FallbackValue='9000'}" ButtonSpinnerLocation="Right" Increment="1" Maximum="65535" Minimum="0" />
-                                </StackPanel>
+                            <!-- <xctk:IntegerUpDown d:IsHidden="True" Value="{Binding CheckEvery}" MinWidth="30" Margin="8,0,0,0" -->
+                                            <!-- ButtonSpinnerLocation="Right" Increment="1" Maximum="30" Minimum="0"  -->
+                                            <!-- VerticalAlignment="Center"/> -->
+                            <!-- <ComboBox SelectedIndex="{Binding CheckEveryUnit,FallbackValue=1}" Margin="8,0,0,0" Foreground="{DynamicResource ForegroundColor}" MinWidth="60" -->
+                                      <!-- VerticalAlignment="Center" -->
+                                      <!-- VerticalContentAlignment="Center"> -->
+                                <!-- <ComboBoxItem Content="{lex:Loc Hours}" HorizontalContentAlignment="Center" /> -->
+                                <!-- <ComboBoxItem Content="{lex:Loc Days}" HorizontalContentAlignment="Center" /> -->
+                            <!-- </ComboBox> -->
+                        <!-- </StackPanel> -->
+						
+						<GroupBox Header="{lex:Loc OscServerHeading}" Padding="0,10,0,0" Margin="{StaticResource spaceMargin}">
+							<StackPanel>
+								<!-- 第一行：OSC Server -->
+								<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+									<CheckBox x:Name="useOscServerCk" Content="{lex:Loc EnableOscServer}" IsChecked="{Binding UseOSCServer}" Click="UseOscServerCk_Click" VerticalAlignment="Center" />
+									<Label Content="Port" Padding="0" VerticalAlignment="Center" Margin="20,0,0,0" />
+									<xctk:IntegerUpDown d:IsHidden="False" x:Name="oscPortNum" IsEnabled="{Binding UseOSCServer}" MinWidth="20" Margin="8,0,0,0"
+														Value="{Binding OscPort, UpdateSourceTrigger=LostFocus,FallbackValue='9000'}" ButtonSpinnerLocation="Right" Increment="1" Maximum="65535" Minimum="0" 
+														VerticalAlignment="Center" Height="22" />
+								</StackPanel>
 
-                                <CheckBox x:Name="interpretingOscMonitoringCk" Content="{lex:Loc EnableInterpretingOscMonitoring}" Margin="0,4,0,10" IsChecked="{Binding InterpretingOscMonitoring}" IsEnabled="{Binding UseOSCServer}" />
-                                
-                                <StackPanel Orientation="Horizontal" MinHeight="20">
-                                    <CheckBox x:Name="useOscSenderCk" Content="{lex:Loc EnableOscSender}" IsChecked="{Binding UseOSCSender}" Click="UseOscSenderCk_Click" VerticalAlignment="Center" />
-                                    <TextBox x:Name="oscSenderTxt" IsEnabled="{Binding UseOSCSender,Mode=OneWay}" Text="{Binding OscSenderAddress, UpdateSourceTrigger=LostFocus,FallbackValue='127.0.0.1'}"
-                                 Margin="8,0,0,0" />
-                                    <Label Content="Port" Padding="0" Margin="20,0,0,0" VerticalAlignment="Center"/>
-                                    <xctk:IntegerUpDown d:IsHidden="False" x:Name="oscSendPort" IsEnabled="{Binding UseOSCSender}" MinWidth="20" Margin="8,0,0,0"
-                                            Value="{Binding OscSendPort, UpdateSourceTrigger=LostFocus,FallbackValue='9000'}" ButtonSpinnerLocation="Right" Increment="1" Maximum="65535" Minimum="0" />
-                                </StackPanel>
-                            </StackPanel>
-                        </GroupBox>
-                        <GroupBox Header="{lex:Loc UDPServer}" Padding="0,10,0,0" Margin="{StaticResource spaceMargin}">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" MinHeight="20">
-                                    <CheckBox x:Name="useUdpServerCk" Content="{lex:Loc MainWin.EnableServer}" IsChecked="{Binding UseUDPServer}" Click="UseUdpServerCk_Click" VerticalAlignment="Center" />
-                                    <TextBox x:Name="udpServerTxt" IsEnabled="{Binding UseUDPServer,Mode=OneWay}" Text="{Binding UdpIpAddress, UpdateSourceTrigger=LostFocus,FallbackValue='127.0.0.1'}"
-                                 Margin="8,0,0,0" />
-                                    <Label Content="{lex:Loc Port}" Padding="0" Margin="20,0,0,0" VerticalAlignment="Center" />
-                                    <!--<TextBox x:Name="updPortNum" IsEnabled="{Binding UseUDPServer}" Text="{Binding UdpPort, UpdateSourceTrigger=LostFocus,FallbackValue='26760'}" />-->
-                                    <xctk:IntegerUpDown d:IsHidden="True" x:Name="updPortNum" IsEnabled="{Binding UseUDPServer}" MinWidth="20" Margin="8,0,0,0"
-                                            Value="{Binding UdpPort, UpdateSourceTrigger=LostFocus,FallbackValue='26760'}" ButtonSpinnerLocation="Right" Increment="1" Maximum="65535" Minimum="0" />
-                                </StackPanel>
+								<!-- 复选框：Interpreting OSC Monitoring -->
+								<CheckBox x:Name="interpretingOscMonitoringCk" Content="{lex:Loc EnableInterpretingOscMonitoring}" Margin="0,4,0,10" 
+										  IsChecked="{Binding InterpretingOscMonitoring}" IsEnabled="{Binding UseOSCServer}" />
 
-                                <CheckBox Content="{lex:Loc UseSmoothing}" IsChecked="{Binding UseUdpSmoothing,FallbackValue='False'}" IsEnabled="{Binding UseUDPServer,Mode=OneWay}" Margin="0,4,0,10" />
-                                <StackPanel x:Name="udpEuroPanel" Orientation="Horizontal" Margin="{StaticResource spaceMargin}" Visibility="{Binding UdpServerOneEuroPanelVisibility,FallbackValue='Collapsed'}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Label Content="{lex:Loc MainWin.OneEuroMinCutoff}" />
-                                        <xctk:DoubleUpDown d:IsHidden="True" FormatString="F5" Value="{Binding UdpSmoothMinCutoff,FallbackValue=1.0,UpdateSourceTrigger=LostFocus}"
-                                                           Minimum="0.00001" Maximum="100.0" Increment="0.1" MinWidth="60" />
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="30,0,0,0">
-                                        <Label Content="{lex:Loc MainWin.OneEuroBeta}" />
-                                        <xctk:DoubleUpDown  d:IsHidden="True" FormatString="F5" Value="{Binding UdpSmoothBeta,FallbackValue=0.0,UpdateSourceTrigger=LostFocus}"
-                                                           Minimum="0.0" Maximum="1.0" Increment="0.1" MinWidth="60" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
+								<!-- 第二行：OSC Sender -->
+								<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+									<CheckBox x:Name="useOscSenderCk" Content="{lex:Loc EnableOscSender}" IsChecked="{Binding UseOSCSender}" Click="UseOscSenderCk_Click" VerticalAlignment="Center" />
+									<TextBox x:Name="oscSenderTxt" IsEnabled="{Binding UseOSCSender,Mode=OneWay}" Text="{Binding OscSenderAddress, UpdateSourceTrigger=LostFocus,FallbackValue='127.0.0.1'}"
+											 Margin="8,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" Height="22" />
+									<Label Content="Port" Padding="0" Margin="20,0,0,0" VerticalAlignment="Center" />
+									<xctk:IntegerUpDown d:IsHidden="False" x:Name="oscSendPort" IsEnabled="{Binding UseOSCSender}" MinWidth="20" Margin="8,0,0,0"
+														Value="{Binding OscSendPort, UpdateSourceTrigger=LostFocus,FallbackValue='9000'}" ButtonSpinnerLocation="Right" Increment="1" Maximum="65535" Minimum="0" 
+														VerticalAlignment="Center" Height="22" />
+								</StackPanel>
+							</StackPanel>
+						</GroupBox>
 
-                        </GroupBox>
+						<GroupBox Header="{lex:Loc UDPServer}" Padding="0,10,0,-5" Margin="{StaticResource spaceMargin}">
+							<StackPanel>
+								<!-- UDP Server 第一行 -->
+								<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+									<CheckBox x:Name="useUdpServerCk" Content="{lex:Loc MainWin.EnableServer}" IsChecked="{Binding UseUDPServer}" Click="UseUdpServerCk_Click" VerticalAlignment="Center" />
+									<TextBox x:Name="udpServerTxt" IsEnabled="{Binding UseUDPServer,Mode=OneWay}" Text="{Binding UdpIpAddress, UpdateSourceTrigger=LostFocus,FallbackValue='127.0.0.1'}"
+											 Margin="8,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" Height="22" />
+									<Label Content="{lex:Loc Port}" Padding="0" Margin="20,0,0,0" VerticalAlignment="Center" />
+									<xctk:IntegerUpDown d:IsHidden="True" x:Name="updPortNum" IsEnabled="{Binding UseUDPServer}" MinWidth="20" Margin="8,0,0,0"
+														Value="{Binding UdpPort, UpdateSourceTrigger=LostFocus,FallbackValue='26760'}" ButtonSpinnerLocation="Right" Increment="1" Maximum="65535" Minimum="0" 
+														VerticalAlignment="Center" Height="22" />
+								</StackPanel>
+
+								<!-- Use Smoothing 复选框 -->
+								<CheckBox Content="{lex:Loc UseSmoothing}" IsChecked="{Binding UseUdpSmoothing,FallbackValue='False'}" 
+										  IsEnabled="{Binding UseUDPServer,Mode=OneWay}" Margin="0,4,0,10" />
+
+								<!-- OneEuro 参数行 -->
+								<StackPanel x:Name="udpEuroPanel" Orientation="Horizontal" Margin="{StaticResource spaceMargin}" 
+											Visibility="{Binding UdpServerOneEuroPanelVisibility,FallbackValue='Collapsed'}" VerticalAlignment="Center">
+									<StackPanel Orientation="Horizontal">
+										<Label Content="{lex:Loc MainWin.OneEuroMinCutoff}" VerticalAlignment="Center" />
+										<xctk:DoubleUpDown d:IsHidden="True" FormatString="F5" Value="{Binding UdpSmoothMinCutoff,FallbackValue=1.0,UpdateSourceTrigger=LostFocus}"
+														   Minimum="0.00001" Maximum="100.0" Increment="0.1" MinWidth="60"
+														   VerticalAlignment="Center" Height="22" />
+									</StackPanel>
+									<StackPanel Orientation="Horizontal" Margin="30,0,0,0">
+										<Label Content="{lex:Loc MainWin.OneEuroBeta}" VerticalAlignment="Center" />
+										<xctk:DoubleUpDown d:IsHidden="True" FormatString="F5" Value="{Binding UdpSmoothBeta,FallbackValue=0.0,UpdateSourceTrigger=LostFocus}"
+														   Minimum="0.0" Maximum="1.0" Increment="0.1" MinWidth="60"
+														   VerticalAlignment="Center" Height="22" />
+									</StackPanel>
+								</StackPanel>
+							</StackPanel>
+						</GroupBox>
 
                         <!--<StackPanel Orientation="Horizontal">
                         <Label Content="Use language pack" />
@@ -451,31 +491,42 @@
                         </ComboBox>
                     </StackPanel>
                     -->
-                        <local:LanguagePackControl Margin="{StaticResource spaceMargin}" />
-                        <StackPanel Margin="{StaticResource spaceMargin}">
-                            <CheckBox x:Name="customSteamCk" Content="{lex:Loc UseCustomSteamFolder}" Margin="{StaticResource spaceMargin}"
-                                  IsChecked="{Binding UseCustomSteamFolder}" />
-                            <TextBox x:Name="customSteamTxt" Text="{Binding CustomSteamFolder, UpdateSourceTrigger=LostFocus}"
-                                 IsEnabled="{Binding UseCustomSteamFolder}" />
-                        </StackPanel>
-                        <DockPanel Margin="{StaticResource spaceMargin}">
-                            <Label Content="{lex:Loc CustomExeName}" />
-                            <Button x:Name="fakeExeNameExplainBtn" DockPanel.Dock="Right" Margin="8,0,0,0" Click="FakeExeNameExplainBtn_Click">
-                                <Image Source="{Binding QuestionMarkSource, Mode=OneTime}"
-                                   Width="20" Height="20" Stretch="UniformToFill" />
-                            </Button>
-                            <TextBox x:Name="fakeExeNameTxt" Text="{Binding FakeExeName, UpdateSourceTrigger=LostFocus}" MinWidth="200" />
-                        </DockPanel>
+						<local:LanguagePackControl Margin="{StaticResource spaceMargin}" VerticalAlignment="Center" />
 
-                        <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                            <Label Content="{lex:Loc ProcessPriority}" ContentStringFormat="{}{0}:"/>
-                            <ComboBox x:Name="ProcessPriorityComboBox" Margin="10,0,0,0" SelectedIndex="{Binding ProcessPriorityIndex}" SelectionChanged="ProcessPriorityComboBox_OnSelectionChanged" />
-                        </StackPanel>
+						<GroupBox Header="{lex:Loc UseCustomSteamFolder}" Padding="0,8,0,4" Margin="{StaticResource spaceMargin}">
+							<DockPanel LastChildFill="True" Margin="0,0,8,0">
+								<CheckBox x:Name="customSteamCk" 
+										  IsChecked="{Binding UseCustomSteamFolder}" 
+										  VerticalAlignment="Center" 
+										  Margin="0,0,8,0"
+										  DockPanel.Dock="Left"/>
+								<TextBox x:Name="customSteamTxt" 
+										 Text="{Binding CustomSteamFolder, UpdateSourceTrigger=LostFocus}"
+										 IsEnabled="{Binding UseCustomSteamFolder}" 
+										 Height="22" 
+										 VerticalContentAlignment="Center" />
+							</DockPanel>
+						</GroupBox>
 
-                        <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}">
-                            <Label Content="{lex:Loc MainWin.AbsDisplayMonitor}" ContentStringFormat="{}{0}:" />
-                            <ComboBox ItemsSource="{Binding AbsMonitorChoices}" DisplayMemberPath="DisplayItemString" SelectedValuePath="EDID"
-                                      SelectedValue="{Binding AbsMonitorSettingEDID}" Margin="10,0,0,0">
+						<DockPanel Margin="{StaticResource spaceMargin}" LastChildFill="True">
+							<Label Content="{lex:Loc CustomExeName}" VerticalAlignment="Center" />
+							<Button x:Name="fakeExeNameExplainBtn" DockPanel.Dock="Right" Margin="8,0,0,0" Click="FakeExeNameExplainBtn_Click"
+									VerticalAlignment="Center" Width="20" Height="20" Padding="0">
+								<Image Source="{Binding QuestionMarkSource, Mode=OneTime}"
+									   Width="18" Height="18" Stretch="Uniform" />
+							</Button>
+							<TextBox x:Name="fakeExeNameTxt" Text="{Binding FakeExeName, UpdateSourceTrigger=LostFocus}" MinWidth="200"
+									 Height="22" VerticalContentAlignment="Center" />
+						</DockPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="{StaticResource spaceMargin}" VerticalAlignment="Center">
+                            <Label Content="{lex:Loc ProcessPriority}" ContentStringFormat="{}{0}:" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="ProcessPriorityComboBox" Margin="10,0,0,0" 
+                                      SelectedIndex="{Binding ProcessPriorityIndex}" 
+                                      SelectionChanged="ProcessPriorityComboBox_OnSelectionChanged"
+                                      VerticalAlignment="Center"
+                                      VerticalContentAlignment="Center">
+                                <!-- ItemsSource 在代码中动态绑定，此处无需设置 ItemTemplate -->
                             </ComboBox>
                         </StackPanel>
 

@@ -344,7 +344,7 @@
     <value>HidNinja</value>
   </data>
   <data name="CustomExeName" xml:space="preserve">
-    <value>自定义可执行文件名称</value>
+    <value>自定义程序名称</value>
   </data>
   <data name="CustomExeNameInfo" xml:space="preserve">
     <value>一些游戏如果测到DS4Windows.exe 或 InputMapper.exe 正在运行，则会忽略 DS4 的输入。对于这些游戏，解决方法是将 DS4Windows.exe 重命名，以规避检测。在这样自定义可执行文件的名称以允许 DS4Updater 自动更新已被重命名的DS4Windows。请不要输入扩展名（即 .exe)。&#10;&#10;- 名称示例: whyme_DS4Windows</value>
@@ -588,13 +588,13 @@
     <value>设备类型</value>
   </data>
   <data name="DisconnectFromBtWhenStopping" xml:space="preserve">
-    <value>停止时断开蓝牙连接</value>
+    <value>停止时蓝牙断开</value>
   </data>
   <data name="Dynamic" xml:space="preserve">
     <value>动态</value>
   </data>
   <data name="FlashLightbarAtHighLatency" xml:space="preserve">
-    <value>高延迟时使灯条闪烁</value>
+    <value>高延迟灯条闪烁</value>
   </data>
   <data name="HideDS4Controller" xml:space="preserve">
     <value>隐藏 DS4 控制器</value>
@@ -1388,8 +1388,8 @@
   <data name="RealTimeNoAdmin" xml:space="preserve">
     <value>选择实时优先级，需要在管理模式下运行程序。</value>
   </data>
-  <data name="ProfileSwitchNotification" xml:space="preserve">
-    <value>配置切换通知</value>
+  <data name="AllWithProfileSwitch" xml:space="preserve">
+    <value>全部+配置切换</value>
   </data>
   <data name="LightbarMode" xml:space="preserve">
     <value>灯条模式</value>

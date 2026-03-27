@@ -4214,7 +4214,7 @@ namespace DS4Windows
                                         (device + 1).ToString(), action.details, $"{d.Battery}");
 
                                     AppLogger.LogToGui(prolog, false);
-                                    if (Global.ProfileChangedNotification) AppLogger.LogToTray(prolog);
+                                    if (Global.Notifications == 3) AppLogger.LogToTray(prolog); // 只有模式为 3 时才显示配置文件切换通知
                                     Task.Run(() =>
                                     {
                                         d.HaltReportingRunAction(() =>

@@ -1637,12 +1637,6 @@ namespace DS4Windows
             get { return m_Config.notifications; }
         }
 
-        public static bool ProfileChangedNotification
-        {
-            get => m_Config.profileChangedNotification;
-            set => m_Config.profileChangedNotification = value;
-        }
-
         public static bool DCBTatStop
         {
             set { m_Config.disconnectBTAtStop = value; }
@@ -3843,7 +3837,6 @@ namespace DS4Windows
 
         public const int DEFAULT_NOTIFICATIONS = 2;
         public int notifications = DEFAULT_NOTIFICATIONS;
-        public bool profileChangedNotification;
         public bool disconnectBTAtStop = false;
 
         public const bool DEFAULT_SWIPE_PROFILES = true;

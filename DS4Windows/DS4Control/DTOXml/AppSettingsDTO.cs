@@ -296,19 +296,6 @@ namespace DS4WinWPF.DS4Control.DTOXml
             get; private set;
         }
 
-        [XmlElement("ProfileChangedNotification")]
-        public string ProfileChangedNotificationString
-        {
-            get => ProfileChangedNotification.ToString();
-            set
-            {
-                if (bool.TryParse(value, out var input))
-                {
-                    ProfileChangedNotification = input;
-                }
-            }
-        }
-
         [XmlIgnore]
         public bool DisconnectBTAtStop
         {
@@ -846,7 +833,6 @@ namespace DS4WinWPF.DS4Control.DTOXml
             CheckWhen = source.CheckWhen;
             LastVersionChecked = source.lastVersionChecked;
             Notifications = source.notifications;
-            ProfileChangedNotification = source.profileChangedNotification;
             DisconnectBTAtStop = source.disconnectBTAtStop;
             SwipeProfiles = source.swipeProfiles;
             QuickCharge = source.quickCharge;
@@ -943,7 +929,6 @@ namespace DS4WinWPF.DS4Control.DTOXml
             destination.CheckWhen = CheckWhen;
             destination.lastVersionChecked = LastVersionChecked;
             destination.notifications = Notifications;
-            destination.profileChangedNotification = ProfileChangedNotification;
             destination.disconnectBTAtStop = DisconnectBTAtStop;
             destination.swipeProfiles = SwipeProfiles;
             destination.quickCharge = QuickCharge;

@@ -1,4 +1,4 @@
-﻿// MainWindow.xaml.cs
+﻿﻿// MainWindow.xaml.cs
 /*
 DS4Windows
 Copyright (C) 2023  Travis Nickles
@@ -82,6 +82,8 @@ namespace DS4WinWPF.DS4Forms
         private Size oldSize;
         private bool contextclose;
         private bool startMinimized;
+        // ===== 新增：记录启动时是否需要最小化（用于后续强制隐藏到托盘）=====
+        private bool _startMinimized;
 
         public ProfileList ProfileListHolder { get => profileListHolder; }
 
@@ -156,6 +158,8 @@ namespace DS4WinWPF.DS4Forms
             }
 
             startMinimized = Global.StartMinimized || parser.Mini;
+            // ===== 新增：保存启动最小化标志 =====
+            _startMinimized = startMinimized;
 
             bool isElevated = Global.IsAdministrator();
             if (isElevated)
@@ -192,6 +196,38 @@ namespace DS4WinWPF.DS4Forms
             timerThread.Start();
             // Wait for thread tasks to finish before continuing
             timerThread.Join();
+        }
+
+        /// <summary>
+        /// 隐藏窗口到系统托盘（不关闭窗口）
+        /// </summary>
+        private void HideToTray()
+        {
+            if (Visibility == Visibility.Visible)
+            {
+                Hide();
+            }
+            showAppInTaskbar = false;
+        }
+
+        /// <summary>
+        /// 从系统托盘显示窗口，并激活到前台
+        /// </summary>
+        private void ShowFromTray()
+        {
+            // 如果窗口已隐藏，则显示
+            if (Visibility != Visibility.Visible)
+            {
+                Show();
+            }
+            // 如果窗口处于最小化状态，恢复为正常状态
+            if (WindowState == WindowState.Minimized)
+            {
+                WindowState = WindowState.Normal;
+            }
+            // 激活窗口，使其获得焦点并置于最前
+            Activate();
+            showAppInTaskbar = true;
         }
 
         private void SetupLocalizedPriorityComboBox()
@@ -233,37 +269,37 @@ namespace DS4WinWPF.DS4Forms
 
             // Log exceptions that might occur
             Util.LogAssistBackgroundTask(tempTask);
-#if !BETA_VERSION
-            tempTask = Task.Delay(100).ContinueWith(_ =>
-            {
-                int checkwhen = Global.CheckWhen;
-                if (checkwhen > 0 && DateTime.Now >= Global.LastChecked + TimeSpan.FromHours(checkwhen))
-                {
-                    try
-                    {
-                        if (Changelog.CheckNewerVersionExists(out var version, false))
-                        {
-                            DisplayUpdaterWindow(version.ToString());
-                        }
-                    }
-                    catch
-                    {
-                        Dispatcher.Invoke(() => MessageBox.Show(Strings.FailedToRetrieveLatestVersion, "DS4Windows Updater"));
-                        // bubble the exception up to allow to see what's wrong in the log
-                        throw;
-                    }
+// #if !BETA_VERSION
+            // tempTask = Task.Delay(100).ContinueWith(_ =>
+            // {
+                // int checkwhen = Global.CheckWhen;
+                // if (checkwhen > 0 && DateTime.Now >= Global.LastChecked + TimeSpan.FromHours(checkwhen))
+                // {
+                    // try
+                    // {
+                        // if (Changelog.CheckNewerVersionExists(out var version, false))
+                        // {
+                            // DisplayUpdaterWindow(version.ToString());
+                        // }
+                    // }
+                    // catch
+                    // {
+                        // Dispatcher.Invoke(() => MessageBox.Show(Strings.FailedToRetrieveLatestVersion, "DS4Windows Updater"));
+                        // // bubble the exception up to allow to see what's wrong in the log
+                        // throw;
+                    // }
 
-                    Global.LastChecked = DateTime.Now;
-                }
+                    // Global.LastChecked = DateTime.Now;
+                // }
 
-                // Check if main window closing was requested from app update.
-                // Quit task early
-                //if (contextclose)
-                //{
-                //    return;
-                //}
-            });
-#endif
+                // // Check if main window closing was requested from app update.
+                // // Quit task early
+                // //if (contextclose)
+                // //{
+                // //    return;
+                // //}
+            // });
+// #endif
             Util.LogAssistBackgroundTask(tempTask);
         }
 
@@ -388,7 +424,7 @@ namespace DS4WinWPF.DS4Forms
 
         private void TrayIconVM_RequestMinimize(object sender, EventArgs e)
         {
-            this.WindowState = WindowState.Minimized;
+            HideToTray();
         }
 
         private void TrayIconVM_ProfileSelected(TrayIconViewModel sender,
@@ -723,12 +759,7 @@ Suspend support not enabled.", true);
 
         private void TrayIconVM_RequestOpen(object sender, EventArgs e)
         {
-            if (!showAppInTaskbar)
-            {
-                Show();
-            }
-
-            WindowState = WindowState.Normal;
+            ShowFromTray();
         }
 
         private void TrayIconVM_RequestShutdown(object sender, EventArgs e)
@@ -1090,7 +1121,17 @@ Suspend support not enabled.", true);
             }
             else if (Global.CloseMini)
             {
-                WindowState = WindowState.Minimized;
+                // 关闭时最小化，根据 MinimizeToTaskbar 设置决定去向
+                if (Global.MinToTaskbar)
+                {
+                    // 最小化到任务栏
+                    WindowState = WindowState.Minimized;
+                }
+                else
+                {
+                    // 隐藏到系统托盘
+                    HideToTray();
+                }
                 e.Cancel = true;
                 return;
             }
@@ -1146,6 +1187,16 @@ Suspend support not enabled.", true);
             HwndSource source = PresentationSource.FromVisual(this) as HwndSource;
             HookWindowMessages(source);
             source.AddHook(WndProc);
+
+            // ===== 新增：如果启动时需要最小化，则强制隐藏到系统托盘 =====
+            if (_startMinimized)
+            {
+                // 等待窗口完全加载后再隐藏，避免闪烁
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    HideToTray();
+                }), System.Windows.Threading.DispatcherPriority.Background);
+            }
         }
 
         private bool inHotPlug = false;
@@ -1699,18 +1750,16 @@ Suspend support not enabled.", true);
             CheckMinStatus();
         }
 
+        /// <summary>
+        /// 检查窗口最小化状态
+        /// 注意：最小化按钮始终最小化到任务栏，不再受 MinimizeToTaskbar 设置影响。
+        /// </summary>
         public void CheckMinStatus()
         {
-            bool minToTask = Global.MinToTaskbar;
-            if (WindowState == WindowState.Minimized && !minToTask)
+            if (WindowState == WindowState.Normal)
             {
-                Hide();
-                showAppInTaskbar = false;
-            }
-            else if (WindowState == WindowState.Normal && !minToTask)
-            {
-                Show();
-                showAppInTaskbar = true;
+                // 窗口恢复正常时，确保显示并更新状态
+                ShowFromTray();
             }
         }
 
@@ -1735,6 +1784,24 @@ Suspend support not enabled.", true);
         {
             contextclose = true;
             Close();
+        }
+
+        /// <summary>
+        /// 托盘图标双击事件：正常状态双击隐藏到托盘，否则恢复显示并激活
+        /// </summary>
+        private void NotifyIcon_TrayMouseDoubleClick(object sender, RoutedEventArgs e)
+        {
+            // 判断窗口当前是否可见且处于正常状态（即未被最小化且未隐藏）
+            if (Visibility == Visibility.Visible && WindowState == WindowState.Normal)
+            {
+                // 窗口正常显示中，双击则隐藏到系统托盘
+                HideToTray();
+            }
+            else
+            {
+                // 窗口已隐藏或处于最小化状态，双击则恢复显示并激活
+                ShowFromTray();
+            }
         }
 
         private void SwipeTouchCk_Click(object sender, RoutedEventArgs e)
@@ -1817,16 +1884,6 @@ Suspend support not enabled.", true);
             {
                 conLvViewModel.ControllerCol[devnum].ChangeSelectedProfile(profile);
             }
-        }
-
-        private void NotifyIcon_TrayMouseDoubleClick(object sender, RoutedEventArgs e)
-        {
-            if (!showAppInTaskbar)
-            {
-                Show();
-            }
-
-            WindowState = WindowState.Normal;
         }
 
         private void ProfilesListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)

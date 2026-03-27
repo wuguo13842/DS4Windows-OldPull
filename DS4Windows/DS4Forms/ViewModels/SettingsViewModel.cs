@@ -1,4 +1,4 @@
-﻿/*
+﻿﻿/*
 DS4Windows
 Copyright (C) 2023  Travis Nickles
 
@@ -34,23 +34,46 @@ using static DS4Windows.Util;
 using Microsoft.Win32;
 using DS4WinWPF.Translations;
 using DS4Windows.InputDevices;
-using System.Text.RegularExpressions; 
+using System.Text.RegularExpressions;
 using System.Management;
 using System.Text;
+using System.ComponentModel; // 添加 INotifyPropertyChanged 支持
 
 namespace DS4WinWPF.DS4Forms.ViewModels
 {
-    public class SettingsViewModel
+    public class SettingsViewModel : INotifyPropertyChanged
     {
+        // INotifyPropertyChanged 实现
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
         // Re-Enable Ex Mode
         public bool HideDS4Controller
         {
             get => DS4Windows.Global.UseExclusiveMode;
-            set => DS4Windows.Global.UseExclusiveMode = value;
+            set
+            {
+                if (DS4Windows.Global.UseExclusiveMode != value)
+                {
+                    DS4Windows.Global.UseExclusiveMode = value;
+                    OnPropertyChanged(nameof(HideDS4Controller));
+                }
+            }
         }
 
-        public bool SwipeTouchSwitchProfile { get => DS4Windows.Global.SwipeProfiles;
-            set => DS4Windows.Global.SwipeProfiles = value; }
+        public bool SwipeTouchSwitchProfile
+        {
+            get => DS4Windows.Global.SwipeProfiles;
+            set
+            {
+                if (DS4Windows.Global.SwipeProfiles != value)
+                {
+                    DS4Windows.Global.SwipeProfiles = value;
+                    OnPropertyChanged(nameof(SwipeTouchSwitchProfile));
+                }
+            }
+        }
 
         private bool runAtStartup;
         public bool RunAtStartup
@@ -60,6 +83,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             {
                 runAtStartup = value;
                 RunAtStartupChanged?.Invoke(this, EventArgs.Empty);
+                OnPropertyChanged(nameof(RunAtStartup));
             }
         }
         public event EventHandler RunAtStartupChanged;
@@ -72,6 +96,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             {
                 runStartProg = value;
                 RunStartProgChanged?.Invoke(this, EventArgs.Empty);
+                OnPropertyChanged(nameof(RunStartProg));
             }
         }
         public event EventHandler RunStartProgChanged;
@@ -84,6 +109,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             {
                 runStartTask = value;
                 RunStartTaskChanged?.Invoke(this, EventArgs.Empty);
+                OnPropertyChanged(nameof(RunStartTask));
             }
         }
         public event EventHandler RunStartTaskChanged;
@@ -98,56 +124,130 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         public ImageSource QuestionMarkSource { get => questionMarkSource; }
 
         private Visibility showRunStartPanel = Visibility.Collapsed;
-        public Visibility ShowRunStartPanel {
+        public Visibility ShowRunStartPanel
+        {
             get => showRunStartPanel;
             set
             {
                 if (showRunStartPanel == value) return;
                 showRunStartPanel = value;
                 ShowRunStartPanelChanged?.Invoke(this, EventArgs.Empty);
+                OnPropertyChanged(nameof(ShowRunStartPanel));
             }
         }
 
         public event EventHandler ShowRunStartPanelChanged;
 
-        private Visibility _isProfileChangedCheckVisible;
-
-        public Visibility IsProfileChangedCheckVisible
-        {
-            get => _isProfileChangedCheckVisible;
-            private set
-            {
-                _isProfileChangedCheckVisible = value;
-                IsProfileChangedCheckVisibleChanged?.Invoke(this, EventArgs.Empty);
-            }
-        }
-
-        public event EventHandler IsProfileChangedCheckVisibleChanged;
-
-        public bool ProfileChangedNotification
-        {
-            get => Global.ProfileChangedNotification;
-            set => Global.ProfileChangedNotification = value;
-        }
-
+        /// <summary>
+        /// 通知显示索引（对应下拉框的四个选项）
+        /// 0: 无通知
+        /// 1: 仅警告
+        /// 2: 所有通知
+        /// 3: 所有通知 + 配置文件切换通知
+        /// </summary>
         public int ShowNotificationsIndex
         {
-            get => DS4Windows.Global.Notifications;
+            get => Global.Notifications; // 因为 Global.Notifications 现在直接存储 0-3 的值
             set
             {
-                Global.Notifications = value;
-                // display only when all notifications are on
-                IsProfileChangedCheckVisible = value == 2 ? Visibility.Visible : Visibility.Collapsed;
+                if (Global.Notifications != value)
+                {
+                    Global.Notifications = value;
+                    OnPropertyChanged(nameof(ShowNotificationsIndex));
+                }
             }
         }
 
-        public bool DisconnectBTStop { get => DS4Windows.Global.DCBTatStop; set => DS4Windows.Global.DCBTatStop = value; }
-        public bool FlashHighLatency { get => DS4Windows.Global.FlashWhenLate; set => DS4Windows.Global.FlashWhenLate = value; }
-        public int FlashHighLatencyAt { get => DS4Windows.Global.FlashWhenLateAt; set => DS4Windows.Global.FlashWhenLateAt = value; }
-        public bool StartMinimize { get => DS4Windows.Global.StartMinimized; set => DS4Windows.Global.StartMinimized = value; }
-        public bool MinimizeToTaskbar { get => DS4Windows.Global.MinToTaskbar; set => DS4Windows.Global.MinToTaskbar = value; }
-        public bool CloseMinimizes { get => DS4Windows.Global.CloseMini; set => DS4Windows.Global.CloseMini = value; }
-        public bool QuickCharge { get => DS4Windows.Global.QuickCharge; set => DS4Windows.Global.QuickCharge = value; }
+        public bool DisconnectBTStop
+        {
+            get => DS4Windows.Global.DCBTatStop;
+            set
+            {
+                if (DS4Windows.Global.DCBTatStop != value)
+                {
+                    DS4Windows.Global.DCBTatStop = value;
+                    OnPropertyChanged(nameof(DisconnectBTStop));
+                }
+            }
+        }
+
+        public bool FlashHighLatency
+        {
+            get => DS4Windows.Global.FlashWhenLate;
+            set
+            {
+                if (DS4Windows.Global.FlashWhenLate != value)
+                {
+                    DS4Windows.Global.FlashWhenLate = value;
+                    OnPropertyChanged(nameof(FlashHighLatency));
+                }
+            }
+        }
+
+        public int FlashHighLatencyAt
+        {
+            get => DS4Windows.Global.FlashWhenLateAt;
+            set
+            {
+                if (DS4Windows.Global.FlashWhenLateAt != value)
+                {
+                    DS4Windows.Global.FlashWhenLateAt = value;
+                    OnPropertyChanged(nameof(FlashHighLatencyAt));
+                }
+            }
+        }
+
+        public bool StartMinimize
+        {
+            get => DS4Windows.Global.StartMinimized;
+            set
+            {
+                if (DS4Windows.Global.StartMinimized != value)
+                {
+                    DS4Windows.Global.StartMinimized = value;
+                    OnPropertyChanged(nameof(StartMinimize));
+                }
+            }
+        }
+
+        public bool MinimizeToTaskbar
+        {
+            get => DS4Windows.Global.MinToTaskbar;
+            set
+            {
+                if (DS4Windows.Global.MinToTaskbar != value)
+                {
+                    DS4Windows.Global.MinToTaskbar = value;
+                    OnPropertyChanged(nameof(MinimizeToTaskbar));
+                }
+            }
+        }
+
+        public bool CloseMinimizes
+        {
+            get => DS4Windows.Global.CloseMini;
+            set
+            {
+                if (DS4Windows.Global.CloseMini != value)
+                {
+                    DS4Windows.Global.CloseMini = value;
+                    OnPropertyChanged(nameof(CloseMinimizes));
+                }
+            }
+        }
+
+        public bool QuickCharge
+        {
+            get => DS4Windows.Global.QuickCharge;
+            set
+            {
+                if (DS4Windows.Global.QuickCharge != value)
+                {
+                    DS4Windows.Global.QuickCharge = value;
+                    OnPropertyChanged(nameof(QuickCharge));
+                }
+            }
+        }
 
         public int IconChoiceIndex
         {
@@ -158,6 +258,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 if (temp == value) return;
                 DS4Windows.Global.UseIconChoice = (DS4Windows.TrayIconChoice)value;
                 IconChoiceIndexChanged?.Invoke(this, EventArgs.Empty);
+                OnPropertyChanged(nameof(IconChoiceIndex));
             }
         }
         public event EventHandler IconChoiceIndexChanged;
@@ -171,72 +272,10 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 if (temp == value) return;
                 DS4Windows.Global.UseCurrentTheme = (DS4Windows.AppThemeChoice)value;
                 AppChoiceIndexChanged?.Invoke(this, EventArgs.Empty);
+                OnPropertyChanged(nameof(AppChoiceIndex));
             }
         }
         public event EventHandler AppChoiceIndexChanged;
-
-        public bool CheckForUpdates
-        {
-            get => DS4Windows.Global.CheckWhen > 0;
-            set
-            {
-                DS4Windows.Global.CheckWhen = value ? 24 : 0;
-                CheckForNoUpdatesWhen();
-            }
-        }
-        public event EventHandler CheckForUpdatesChanged;
-
-        public int CheckEvery
-        {
-            get
-            {
-                int temp = DS4Windows.Global.CheckWhen;
-                if (temp > 23)
-                {
-                    temp = temp / 24;
-                }
-                return temp;
-            }
-            set
-            {
-                int temp;
-                if (checkEveryUnitIdx == 0 && value < 24)
-                {
-                    temp = DS4Windows.Global.CheckWhen;
-                    if (temp != value)
-                    {
-                        DS4Windows.Global.CheckWhen = value;
-                        CheckForNoUpdatesWhen();
-                    }
-                }
-                else if (checkEveryUnitIdx == 1)
-                {
-                    temp = DS4Windows.Global.CheckWhen / 24;
-                    if (temp != value)
-                    {
-                        DS4Windows.Global.CheckWhen = value * 24;
-                        CheckForNoUpdatesWhen();
-                    }
-                }
-            }
-        }
-        public event EventHandler CheckEveryChanged;
-
-        private int checkEveryUnitIdx = 1;
-        public int CheckEveryUnit
-        {
-            get
-            {
-                return checkEveryUnitIdx;
-            }
-            set
-            {
-                if (checkEveryUnitIdx == value) return;
-                checkEveryUnitIdx = value;
-                CheckEveryUnitChanged?.Invoke(this, EventArgs.Empty);
-            }
-        }
-        public event EventHandler CheckEveryUnitChanged;
 
         public bool UseOSCServer
         {
@@ -246,12 +285,35 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 if (DS4Windows.Global.isUsingOSCServer() == value) return;
                 DS4Windows.Global.setUsingOSCServer(value);
                 UseOSCServerChanged?.Invoke(this, EventArgs.Empty);
+                OnPropertyChanged(nameof(UseOSCServer));
             }
         }
         public event EventHandler UseOSCServerChanged;
-        public int OscPort { get => DS4Windows.Global.getOSCServerPortNum(); set => DS4Windows.Global.setOSCServerPort(value); }
-        
-        public bool InterpretingOscMonitoring { get => DS4Windows.Global.isInterpretingOscMonitoring(); set => DS4Windows.Global.setInterpretingOscMonitoring(value); }
+        public int OscPort
+        {
+            get => DS4Windows.Global.getOSCServerPortNum();
+            set
+            {
+                if (DS4Windows.Global.getOSCServerPortNum() != value)
+                {
+                    DS4Windows.Global.setOSCServerPort(value);
+                    OnPropertyChanged(nameof(OscPort));
+                }
+            }
+        }
+
+        public bool InterpretingOscMonitoring
+        {
+            get => DS4Windows.Global.isInterpretingOscMonitoring();
+            set
+            {
+                if (DS4Windows.Global.isInterpretingOscMonitoring() != value)
+                {
+                    DS4Windows.Global.setInterpretingOscMonitoring(value);
+                    OnPropertyChanged(nameof(InterpretingOscMonitoring));
+                }
+            }
+        }
 
         public bool UseOSCSender
         {
@@ -261,15 +323,34 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 if (DS4Windows.Global.isUsingOSCSender() == value) return;
                 DS4Windows.Global.setUsingOSCSender(value);
                 UseOSCSenderChanged?.Invoke(this, EventArgs.Empty);
+                OnPropertyChanged(nameof(UseOSCSender));
             }
         }
         public event EventHandler UseOSCSenderChanged;
-        public int OscSendPort { get => DS4Windows.Global.getOSCSenderPortNum(); set => DS4Windows.Global.setOSCSenderPort(value); }
+        public int OscSendPort
+        {
+            get => DS4Windows.Global.getOSCSenderPortNum();
+            set
+            {
+                if (DS4Windows.Global.getOSCSenderPortNum() != value)
+                {
+                    DS4Windows.Global.setOSCSenderPort(value);
+                    OnPropertyChanged(nameof(OscSendPort));
+                }
+            }
+        }
 
         public string OscSenderAddress
         {
             get => DS4Windows.Global.getOSCSenderAddress();
-            set => DS4Windows.Global.setOSCSenderAddress(value);
+            set
+            {
+                if (DS4Windows.Global.getOSCSenderAddress() != value)
+                {
+                    DS4Windows.Global.setOSCSenderAddress(value);
+                    OnPropertyChanged(nameof(OscSenderAddress));
+                }
+            }
         }
 
 
@@ -281,13 +362,36 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 if (DS4Windows.Global.isUsingUDPServer() == value) return;
                 DS4Windows.Global.setUsingUDPServer(value);
                 UseUDPServerChanged?.Invoke(this, EventArgs.Empty);
+                OnPropertyChanged(nameof(UseUDPServer));
+                OnPropertyChanged(nameof(UdpServerOneEuroPanelVisibility)); // 因为该属性依赖 UseUDPServer
             }
         }
         public event EventHandler UseUDPServerChanged;
 
-        public string UdpIpAddress { get => DS4Windows.Global.getUDPServerListenAddress();
-            set => DS4Windows.Global.setUDPServerListenAddress(value); }
-        public int UdpPort { get => DS4Windows.Global.getUDPServerPortNum(); set => DS4Windows.Global.setUDPServerPort(value); }
+        public string UdpIpAddress
+        {
+            get => DS4Windows.Global.getUDPServerListenAddress();
+            set
+            {
+                if (DS4Windows.Global.getUDPServerListenAddress() != value)
+                {
+                    DS4Windows.Global.setUDPServerListenAddress(value);
+                    OnPropertyChanged(nameof(UdpIpAddress));
+                }
+            }
+        }
+        public int UdpPort
+        {
+            get => DS4Windows.Global.getUDPServerPortNum();
+            set
+            {
+                if (DS4Windows.Global.getUDPServerPortNum() != value)
+                {
+                    DS4Windows.Global.setUDPServerPort(value);
+                    OnPropertyChanged(nameof(UdpPort));
+                }
+            }
+        }
 
         public bool UseUdpSmoothing
         {
@@ -298,6 +402,8 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 if (temp == value) return;
                 DS4Windows.Global.UseUDPSeverSmoothing = value;
                 UseUdpSmoothingChanged?.Invoke(this, EventArgs.Empty);
+                OnPropertyChanged(nameof(UseUdpSmoothing));
+                OnPropertyChanged(nameof(UdpServerOneEuroPanelVisibility)); // 因为该属性依赖 UseUdpSmoothing
             }
         }
         public event EventHandler UseUdpSmoothingChanged;
@@ -317,6 +423,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 if (temp == value) return;
                 DS4Windows.Global.UDPServerSmoothingMincutoff = value;
                 UdpSmoothMinCutoffChanged?.Invoke(this, EventArgs.Empty);
+                OnPropertyChanged(nameof(UdpSmoothMinCutoff));
             }
         }
         public event EventHandler UdpSmoothMinCutoffChanged;
@@ -330,6 +437,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 if (temp == value) return;
                 DS4Windows.Global.UDPServerSmoothingBeta = value;
                 UdpSmoothBetaChanged?.Invoke(this, EventArgs.Empty);
+                OnPropertyChanged(nameof(UdpSmoothBeta));
             }
         }
         public event EventHandler UdpSmoothBetaChanged;
@@ -339,8 +447,12 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             get => DS4Windows.Global.UseCustomSteamFolder;
             set
             {
-                DS4Windows.Global.UseCustomSteamFolder = value;
-                UseCustomSteamFolderChanged?.Invoke(this, EventArgs.Empty);
+                if (DS4Windows.Global.UseCustomSteamFolder != value)
+                {
+                    DS4Windows.Global.UseCustomSteamFolder = value;
+                    UseCustomSteamFolderChanged?.Invoke(this, EventArgs.Empty);
+                    OnPropertyChanged(nameof(UseCustomSteamFolder));
+                }
             }
         }
         public event EventHandler UseCustomSteamFolderChanged;
@@ -355,6 +467,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 if (Directory.Exists(value) || value == string.Empty)
                 {
                     DS4Windows.Global.CustomSteamFolder = value;
+                    OnPropertyChanged(nameof(CustomSteamFolder));
                 }
             }
         }
@@ -367,6 +480,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             {
                 viewEnabled = value;
                 ViewEnabledChanged?.Invoke(this, EventArgs.Empty);
+                OnPropertyChanged(nameof(ViewEnabled));
             }
         }
         public event EventHandler ViewEnabledChanged;
@@ -381,6 +495,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 DS4Windows.Global.FakeExeName = value;
                 FakeExeNameChanged?.Invoke(this, EventArgs.Empty);
                 FakeExeNameChangeCompare?.Invoke(this, temp, value);
+                OnPropertyChanged(nameof(FakeExeName));
             }
         }
         public event EventHandler FakeExeNameChanged;
@@ -409,7 +524,14 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         public string AbsMonitorSettingEDID
         {
             get => Global.AbsoluteDisplayEDID;
-            set => Global.AbsoluteDisplayEDID = value;
+            set
+            {
+                if (Global.AbsoluteDisplayEDID != value)
+                {
+                    Global.AbsoluteDisplayEDID = value;
+                    OnPropertyChanged(nameof(AbsMonitorSettingEDID));
+                }
+            }
         }
 
         public int ProcessPriorityIndex
@@ -417,24 +539,115 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             get => Global.ProcessPriority;
             set
             {
-                Global.ProcessPriority = value;
-                ProcessPriorityIndexChanged?.Invoke(this, EventArgs.Empty);
+                if (Global.ProcessPriority != value)
+                {
+                    Global.ProcessPriority = value;
+                    ProcessPriorityIndexChanged?.Invoke(this, EventArgs.Empty);
+                    OnPropertyChanged(nameof(ProcessPriorityIndex));
+                }
             }
-
         }
 
         public event EventHandler ProcessPriorityIndexChanged;
 
+
+        // public bool CheckForUpdates
+        // {
+            // get => DS4Windows.Global.CheckWhen > 0;
+            // set
+            // {
+                // DS4Windows.Global.CheckWhen = value ? 24 : 0;
+                // CheckForNoUpdatesWhen();
+                // OnPropertyChanged(nameof(CheckForUpdates));
+            // }
+        // }
+        // public event EventHandler CheckForUpdatesChanged;
+
+        // public int CheckEvery
+        // {
+            // get
+            // {
+                // int temp = DS4Windows.Global.CheckWhen;
+                // if (temp > 23)
+                // {
+                    // temp = temp / 24;
+                // }
+                // return temp;
+            // }
+            // set
+            // {
+                // int temp;
+                // if (checkEveryUnitIdx == 0 && value < 24)
+                // {
+                    // temp = DS4Windows.Global.CheckWhen;
+                    // if (temp != value)
+                    // {
+                        // DS4Windows.Global.CheckWhen = value;
+                        // CheckForNoUpdatesWhen();
+                        // OnPropertyChanged(nameof(CheckEvery));
+                    // }
+                // }
+                // else if (checkEveryUnitIdx == 1)
+                // {
+                    // temp = DS4Windows.Global.CheckWhen / 24;
+                    // if (temp != value)
+                    // {
+                        // DS4Windows.Global.CheckWhen = value * 24;
+                        // CheckForNoUpdatesWhen();
+                        // OnPropertyChanged(nameof(CheckEvery));
+                    // }
+                // }
+            // }
+        // }
+        // public event EventHandler CheckEveryChanged;
+
+        // private int checkEveryUnitIdx = 1;
+        // public int CheckEveryUnit
+        // {
+            // get
+            // {
+                // return checkEveryUnitIdx;
+            // }
+            // set
+            // {
+                // if (checkEveryUnitIdx == value) return;
+                // checkEveryUnitIdx = value;
+                // CheckEveryUnitChanged?.Invoke(this, EventArgs.Empty);
+                // OnPropertyChanged(nameof(CheckEveryUnit));
+            // }
+        // }
+        // public event EventHandler CheckEveryUnitChanged;
+
+        // private void SettingsViewModel_CheckForUpdatesChanged(object sender, EventArgs e)
+        // {
+            // if (!CheckForUpdates)
+            // {
+                // CheckEveryChanged?.Invoke(this, EventArgs.Empty);
+                // CheckEveryUnitChanged?.Invoke(this, EventArgs.Empty);
+            // }
+        // }
+
+        // private void CheckForNoUpdatesWhen()
+        // {
+            // if (DS4Windows.Global.CheckWhen == 0)
+            // {
+                // checkEveryUnitIdx = 1;
+            // }
+
+            // CheckForUpdatesChanged?.Invoke(this, EventArgs.Empty);
+            // CheckEveryChanged?.Invoke(this, EventArgs.Empty);
+            // CheckEveryUnitChanged?.Invoke(this, EventArgs.Empty);
+        // }
+
         public SettingsViewModel()
         {
-            checkEveryUnitIdx = 1;
-            IsProfileChangedCheckVisible = Global.Notifications == 2 ? Visibility.Visible : Visibility.Collapsed;
+            // checkEveryUnitIdx = 1;
 
-            int checklapse = DS4Windows.Global.CheckWhen;
-            if (checklapse < 24 && checklapse > 0)
-            {
-                checkEveryUnitIdx = 0;
-            }
+            // int checklapse = DS4Windows.Global.CheckWhen;
+            // if (checklapse < 24 && checklapse > 0)
+            // {
+                // checkEveryUnitIdx = 0;
+            // }
 
             CheckStartupOptions();
 
@@ -614,15 +827,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             }
         }
 
-        private void SettingsViewModel_CheckForUpdatesChanged(object sender, EventArgs e)
-        {
-            if (!CheckForUpdates)
-            {
-                CheckEveryChanged?.Invoke(this, EventArgs.Empty);
-                CheckEveryUnitChanged?.Invoke(this, EventArgs.Empty);
-            }
-        }
-
         private void CheckStartupOptions()
         {
             bool lnkExists = File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\DS4Windows.lnk");
@@ -634,18 +838,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             {
                 runAtStartup = false;
             }
-        }
-
-        private void CheckForNoUpdatesWhen()
-        {
-            if (DS4Windows.Global.CheckWhen == 0)
-            {
-                checkEveryUnitIdx = 1;
-            }
-
-            CheckForUpdatesChanged?.Invoke(this, EventArgs.Empty);
-            CheckEveryChanged?.Invoke(this, EventArgs.Empty);
-            CheckEveryUnitChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public void CreateFakeExe(string filename)
@@ -669,76 +861,76 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             HidHideClientFoundChanged?.Invoke(this, EventArgs.Empty);
         }
 
-		private void RefreshMonitorChoices()
-		{
-			absMonitorChoices.Clear();
-			absMonitorChoices.Add(new MonitorChoiceListing()
-			{
-				DisplayName = Strings.AllMonitors,
-				EDID = string.Empty,
-				Index = 0,
-			});
+        private void RefreshMonitorChoices()
+        {
+            absMonitorChoices.Clear();
+            absMonitorChoices.Add(new MonitorChoiceListing()
+            {
+                DisplayName = Strings.AllMonitors,
+                EDID = string.Empty,
+                Index = 0,
+            });
 
-			int idx = 1;
-			foreach (DISPLAY_DEVICE tempDis in Global.GrabCurrentMonitors())
-			{
-				string deviceId = tempDis.DeviceID ?? "";
-				string displayName = ExtractHardwareId(deviceId);
+            int idx = 1;
+            foreach (DISPLAY_DEVICE tempDis in Global.GrabCurrentMonitors())
+            {
+                string deviceId = tempDis.DeviceID ?? "";
+                string displayName = ExtractHardwareId(deviceId);
 
-				// 如果提取失败，尝试使用 DeviceString（即使它是通用名称）
-				if (string.IsNullOrEmpty(displayName))
-				{
-					displayName = tempDis.DeviceString;
-				}
+                // 如果提取失败，尝试使用 DeviceString（即使它是通用名称）
+                if (string.IsNullOrEmpty(displayName))
+                {
+                    displayName = tempDis.DeviceString;
+                }
 
-				// 如果仍然为空，使用 Unknown
-				if (string.IsNullOrWhiteSpace(displayName))
-				{
-					displayName = Strings.Unknown;
-				}
+                // 如果仍然为空，使用 Unknown
+                if (string.IsNullOrWhiteSpace(displayName))
+                {
+                    displayName = Strings.Unknown;
+                }
 
-				// 调试输出：查看 DeviceID 和提取结果
-				System.Diagnostics.Debug.WriteLine($"DeviceID: {deviceId} -> DisplayName: {displayName}");
+                // 调试输出：查看 DeviceID 和提取结果
+                System.Diagnostics.Debug.WriteLine($"DeviceID: {deviceId} -> DisplayName: {displayName}");
 
-				absMonitorChoices.Add(new MonitorChoiceListing()
-				{
-					DisplayName = displayName,
-					EDID = tempDis.DeviceID,
-					Index = idx,
-				});
+                absMonitorChoices.Add(new MonitorChoiceListing()
+                {
+                    DisplayName = displayName,
+                    EDID = tempDis.DeviceID,
+                    Index = idx,
+                });
 
-				idx++;
-			}
+                idx++;
+            }
 
-			AbsMonitorChoicesChanged?.Invoke(this, EventArgs.Empty);
-		}
+            AbsMonitorChoicesChanged?.Invoke(this, EventArgs.Empty);
+        }
 
-		private string ExtractHardwareId(string deviceId)
-		{
-			if (string.IsNullOrEmpty(deviceId)) return null;
+        private string ExtractHardwareId(string deviceId)
+        {
+            if (string.IsNullOrEmpty(deviceId)) return null;
 
-			// 格式1: \\?\DISPLAY#AOC2369#...
-			var match = Regex.Match(deviceId, @"#([^#]+)#");
-			if (match.Success)
-				return match.Groups[1].Value;
+            // 格式1: \\?\DISPLAY#AOC2369#...
+            var match = Regex.Match(deviceId, @"#([^#]+)#");
+            if (match.Success)
+                return match.Groups[1].Value;
 
-			// 格式2: DISPLAY\AOC2369\...
-			match = Regex.Match(deviceId, @"DISPLAY\\([^\\]+)");
-			if (match.Success)
-				return match.Groups[1].Value;
+            // 格式2: DISPLAY\AOC2369\...
+            match = Regex.Match(deviceId, @"DISPLAY\\([^\\]+)");
+            if (match.Success)
+                return match.Groups[1].Value;
 
-			// 格式3: MONITOR\AOC2369\...
-			match = Regex.Match(deviceId, @"MONITOR\\([^\\]+)");
-			if (match.Success)
-				return match.Groups[1].Value;
+            // 格式3: MONITOR\AOC2369\...
+            match = Regex.Match(deviceId, @"MONITOR\\([^\\]+)");
+            if (match.Success)
+                return match.Groups[1].Value;
 
-			// 格式4: 简单分割取第二部分（适用于传统格式）
-			string[] parts = deviceId.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
-			if (parts.Length >= 2)
-				return parts[1];
+            // 格式4: 简单分割取第二部分（适用于传统格式）
+            string[] parts = deviceId.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length >= 2)
+                return parts[1];
 
-			return null;
-		}
+            return null;
+        }
     }
 
     public struct MonitorChoiceListing
