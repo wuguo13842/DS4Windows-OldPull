@@ -722,6 +722,12 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             }
 
             PopulateToolText();
+			
+			// 同步刷新托盘菜单，确保设备移除后菜单立即更新
+			Application.Current.Dispatcher.Invoke(new Action(() =>
+			{
+				PopulateContextMenu();
+			}));
         }
 
         private void HookEvents(object sender, EventArgs e)
