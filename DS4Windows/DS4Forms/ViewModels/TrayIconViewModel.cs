@@ -26,6 +26,7 @@ using System.Windows.Controls;
 using DS4Windows;
 using WPFLocalizeExtension.Extensions;
 using DS4WinWPF.Translations; // 添加此命名空间以使用 Strings
+using System.Linq;
 
 namespace DS4WinWPF.DS4Forms.ViewModels
 {
@@ -209,89 +210,79 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         /// 构建托盘图标右键菜单
         /// 将配置文件切换、断开连接、陀螺仪校准功能整合到每个控制器的子菜单中
         /// </summary>
-        public void PopulateContextMenu()
-        {
-            contextMenu.Items.Clear();
-            ItemCollection items = contextMenu.Items;
+		public void PopulateContextMenu()
+		{
+			contextMenu.Items.Clear();
+			ItemCollection items = contextMenu.Items;
 			
-			// 将“打开程序文件夹”放在最上面
 			items.Add(openProgramItem);
 			
-            int idx = 0;
+			using (ReadLocker locker = new ReadLocker(_colLocker))
+			{
+				foreach (ControllerHolder holder in controllerList)
+				{
+					DS4Device currentDev = holder.Device;
+					string macAddress = currentDev.MacAddress; // 唯一标识
+					
+					MenuItem controllerItem = new MenuItem() 
+					{ 
+						Header = GetLocalizedString("Controllers") + " " + (holder.Index + 1)
+					};
+					controllerItem.Tag = macAddress; // 存储 MAC 地址
+					ItemCollection subitems = controllerItem.Items;
 
-            using (ReadLocker locker = new ReadLocker(_colLocker))
-            {
-                // 为每个控制器创建独立的子菜单
-                foreach (ControllerHolder holder in controllerList)
-                {
-                    DS4Device currentDev = holder.Device;
-                    
-                    // 创建控制器主菜单项
-                    MenuItem controllerItem = new MenuItem() 
-                    { 
-                        Header = GetLocalizedString("Controllers") + " " + (idx + 1) 
-                    };
-                    controllerItem.Tag = idx;
-                    ItemCollection subitems = controllerItem.Items;
+					// 配置文件子菜单
+					string currentProfile = Global.ProfilePath[holder.Index];
+					foreach (ProfileEntity entry in profileListHolder.ProfileListCol)
+					{
+						string name = entry.Name;
+						name = Regex.Replace(name, "_{1}", "__");
+						MenuItem profileItem = new MenuItem() { Header = name };
+						profileItem.Tag = macAddress; // 存储 MAC 地址
+						profileItem.Click += ProfileItem_Click;
+						if (entry.Name == currentProfile)
+						{
+							profileItem.IsChecked = true;
+						}
+						subitems.Add(profileItem);
+					}
 
-                    // 1. 添加配置文件切换子菜单项
-                    string currentProfile = Global.ProfilePath[idx];
-                    foreach (ProfileEntity entry in profileListHolder.ProfileListCol)
-                    {
-                        string name = entry.Name;
-                        name = Regex.Replace(name, "_{1}", "__");
-                        MenuItem profileItem = new MenuItem() { Header = name };
-                        profileItem.Tag = idx;
-                        profileItem.Click += ProfileItem_Click;
-                        if (entry.Name == currentProfile)
-                        {
-                            profileItem.IsChecked = true;
-                        }
-                        subitems.Add(profileItem);
-                    }
+					if (profileListHolder.ProfileListCol.Count > 0)
+					{
+						subitems.Add(new Separator());
+					}
 
-                    // 2. 如果有配置文件列表，添加分隔符
-                    if (profileListHolder.ProfileListCol.Count > 0)
-                    {
-                        subitems.Add(new Separator());
-                    }
-
-                    // 3. 添加断开连接菜单项（仅当设备支持断开时显示）
-                    if (currentDev.Synced && !currentDev.Charging)
-                    {
-                        MenuItem disconnectItem = new MenuItem() 
-                        { 
+					// 断开连接菜单项
+					if (currentDev.Synced && !currentDev.Charging)
+					{
+						MenuItem disconnectItem = new MenuItem() 
+						{ 
 							Header = GetLocalizedString("Disconnect") + GetLocalizedString("Controllers")
-                        };
-                        disconnectItem.Click += DisconnectMenuItem_Click;
-                        disconnectItem.Tag = idx;
-                        subitems.Add(disconnectItem);
-                    }
+						};
+						disconnectItem.Click += DisconnectMenuItem_Click;
+						disconnectItem.Tag = macAddress;
+						subitems.Add(disconnectItem);
+					}
 
-                    // 4. 添加陀螺仪校准菜单项（仅当设备支持陀螺仪时显示）
-                    if (currentDev?.SixAxis != null)
-                    {
-                        MenuItem gyroItem = new MenuItem() 
-                        { 
-                            Header = GetLocalizedString("GyroCalibration")
-                        };
-                        gyroItem.Click += CalibrateGyroMenuItem_Click;
-                        gyroItem.Tag = idx;
-                        subitems.Add(gyroItem);
-                    }
+					// 陀螺仪校准菜单项
+					if (currentDev?.SixAxis != null)
+					{
+						MenuItem gyroItem = new MenuItem() 
+						{ 
+							Header = GetLocalizedString("GyroCalibration")
+						};
+						gyroItem.Click += CalibrateGyroMenuItem_Click;
+						gyroItem.Tag = macAddress;
+						subitems.Add(gyroItem);
+					}
 
-                    // 将控制器菜单项添加到主菜单
-                    items.Add(controllerItem);
-                    idx++;
-                }
+					items.Add(controllerItem);
+				}
 
-                // 添加分隔符
-                items.Add(new Separator());
-                
-                // 添加静态菜单项（服务控制、打开、最小化、打开程序文件夹、退出）
-                PopulateStaticItems();
-            }
-        }
+				items.Add(new Separator());
+				PopulateStaticItems();
+			}
+		}
 
         private void ChangeControlServiceItem_Click(object sender, System.Windows.RoutedEventArgs e)
         {
@@ -316,58 +307,89 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             RequestMinimize?.Invoke(this, EventArgs.Empty);
         }
 
-        private void ProfileItem_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            MenuItem item = sender as MenuItem;
-            int idx = Convert.ToInt32(item.Tag);
-            ControllerHolder holder = controllerList[idx];
-            string tempProfileName = Regex.Replace(item.Header.ToString(), "_{2}", "_");
-            ProfileSelected?.Invoke(this, holder, tempProfileName);
-        }
+		private void ProfileItem_Click(object sender, System.Windows.RoutedEventArgs e)
+		{
+			MenuItem item = sender as MenuItem;
+			string macAddress = item.Tag as string;
+			if (string.IsNullOrEmpty(macAddress))
+				return;
 
-        private void DisconnectMenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            MenuItem item = sender as MenuItem;
-            int idx = Convert.ToInt32(item.Tag);
-            ControllerHolder holder = controllerList[idx];
-            DS4Device tempDev = holder?.Device;
-            if (tempDev != null && tempDev.Synced && !tempDev.Charging)
-            {
-                if (tempDev.ConnectionType == ConnectionType.BT)
-                {
-                    tempDev.DisconnectBT();
-                }
-                else if (tempDev.ConnectionType == ConnectionType.SONYWA)
-                {
-                    tempDev.DisconnectDongle();
-                }
-            }
-        }
+			ControllerHolder holder = null;
+			using (ReadLocker locker = new ReadLocker(_colLocker))
+			{
+				holder = controllerList.FirstOrDefault(h => h.Device.MacAddress == macAddress);
+			}
 
-        /// <summary>
-        /// 陀螺仪校准菜单项点击事件
-        /// </summary>
-        private void CalibrateGyroMenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            MenuItem item = sender as MenuItem;
-            int idx = Convert.ToInt32(item.Tag);
-            ControllerHolder holder = controllerList[idx];
-            DS4Device device = holder?.Device;
-            if (device != null)
-            {
-                // 发送系统通知（普通通知）
-                string message = string.Format(Strings.GyroCalibrationStarted, idx + 1);
-                AppLogger.LogToTray(message, false);
+			if (holder == null) return;
 
-                // 执行陀螺仪校准重置
-                device.SixAxis.ResetContinuousCalibration();
-                if (device.JointDeviceSlotNumber != DS4Device.DEFAULT_JOINT_SLOT_NUMBER)
-                {
-                    DS4Device tempDev = controlService.DS4Controllers[device.JointDeviceSlotNumber];
-                    tempDev?.SixAxis.ResetContinuousCalibration();
-                }
-            }
-        }
+			int idx = holder.Index;
+			string tempProfileName = Regex.Replace(item.Header.ToString(), "_{2}", "_");
+			ProfileSelected?.Invoke(this, holder, tempProfileName);
+		}
+
+		private void DisconnectMenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
+		{
+			MenuItem item = sender as MenuItem;
+			string macAddress = item.Tag as string;
+			if (string.IsNullOrEmpty(macAddress))
+				return;
+
+			ControllerHolder holder = null;
+			using (ReadLocker locker = new ReadLocker(_colLocker))
+			{
+				holder = controllerList.FirstOrDefault(h => h.Device.MacAddress == macAddress);
+			}
+
+			if (holder == null) return;
+
+			DS4Device tempDev = holder.Device;
+			if (tempDev != null && tempDev.Synced && !tempDev.Charging)
+			{
+				if (tempDev.ConnectionType == ConnectionType.BT)
+					tempDev.DisconnectBT();
+				else if (tempDev.ConnectionType == ConnectionType.SONYWA)
+					tempDev.DisconnectDongle();
+			}
+		}
+
+				/// <summary>
+				/// 陀螺仪校准菜单项点击事件
+				/// </summary>
+		private void CalibrateGyroMenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
+		{
+			MenuItem item = sender as MenuItem;
+			string macAddress = item.Tag as string;
+			if (string.IsNullOrEmpty(macAddress))
+				return;
+
+			ControllerHolder holder = null;
+			using (ReadLocker locker = new ReadLocker(_colLocker))
+			{
+				holder = controllerList.FirstOrDefault(h => h.Device.MacAddress == macAddress);
+			}
+
+			if (holder == null)
+			{
+				PopulateContextMenu();
+				System.Diagnostics.Debug.WriteLine($"校准失败：未找到设备 {macAddress}");
+				return;
+			}
+
+			DS4Device device = holder.Device;
+			int idx = holder.Index;
+			if (device != null)
+			{
+				string message = string.Format(Strings.GyroCalibrationStarted, idx + 1);
+				AppLogger.LogToTray(message, false);
+
+				device.SixAxis.ResetContinuousCalibration();
+				if (device.JointDeviceSlotNumber != DS4Device.DEFAULT_JOINT_SLOT_NUMBER)
+				{
+					DS4Device tempDev = controlService.DS4Controllers[device.JointDeviceSlotNumber];
+					tempDev?.SixAxis.ResetContinuousCalibration();
+				}
+			}
+		}
 
         private void PopulateControllerList()
         {
