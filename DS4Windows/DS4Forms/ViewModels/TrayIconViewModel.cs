@@ -469,7 +469,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                         blinkTimer.Start();                 // 启动闪烁定时器
                         blinkTimeoutTimer.Stop();
                         blinkTimeoutTimer.Start();          // 启动6秒超时
-                        DS4Windows.AppLogger.LogToGui("托盘闪烁启动", false);
+                        System.Diagnostics.Debug.WriteLine("托盘闪烁启动", false);
                     }
                 }
             }));
@@ -491,7 +491,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                         isBlinking = false;
                         // 恢复为当前设置的图标（从设置中读取），确保与用户设置一致
                         IconSource = Global.iconChoiceResources[Global.UseIconChoice];
-                        DS4Windows.AppLogger.LogToGui("托盘闪烁停止", false);
+                        System.Diagnostics.Debug.WriteLine("托盘闪烁停止", false);
                     }
                 }
             }));
@@ -510,7 +510,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     {
                         blinkTimeoutTimer.Stop();
                         blinkTimeoutTimer.Start();
-                        DS4Windows.AppLogger.LogToGui("重置超时定时器", false);
+                        System.Diagnostics.Debug.WriteLine("重置超时定时器", false);
                     }
                 }
             }));
@@ -526,7 +526,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             DS4Device dev = sender as DS4Device;
             if (dev == null)
             {
-                DS4Windows.AppLogger.LogToGui("校准开始: sender为空，忽略", true);
+                System.Diagnostics.Debug.WriteLine("校准开始: sender为空，忽略", true);
                 return;
             }
 
@@ -535,7 +535,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 // 尝试将设备加入集合
                 if (_calibratingDevices.Add(dev))
                 {
-                    DS4Windows.AppLogger.LogToGui($"校准开始: 设备={dev.MacAddress}, 当前校准设备数={_calibratingDevices.Count}", false);
+                    System.Diagnostics.Debug.WriteLine($"校准开始: 设备={dev.MacAddress}, 当前校准设备数={_calibratingDevices.Count}", false);
                         
                     if (_calibratingDevices.Count == 1 && !isBlinking)
                     {
@@ -550,7 +550,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 }
                 else
                 {
-                    DS4Windows.AppLogger.LogToGui($"校准开始: 设备={dev.MacAddress} 已在校准集合中，忽略", true);
+                    System.Diagnostics.Debug.WriteLine($"校准开始: 设备={dev.MacAddress} 已在校准集合中，忽略", true);
                 }
             }
         }
@@ -563,7 +563,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             DS4Device dev = sender as DS4Device;
             if (dev == null)
             {
-                DS4Windows.AppLogger.LogToGui("校准停止: sender为空，忽略", true);
+                System.Diagnostics.Debug.WriteLine("校准停止: sender为空，忽略", true);
                 return;
             }
 
@@ -571,7 +571,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             {
                 if (_calibratingDevices.Remove(dev))
                 {
-                    DS4Windows.AppLogger.LogToGui($"校准停止: 设备={dev.MacAddress}, 剩余校准设备数={_calibratingDevices.Count}", false);
+                    System.Diagnostics.Debug.WriteLine($"校准停止: 设备={dev.MacAddress}, 剩余校准设备数={_calibratingDevices.Count}", false);
                         
                     if (_calibratingDevices.Count == 0 && isBlinking)
                     {
@@ -586,7 +586,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 }
                 else
                 {
-                    DS4Windows.AppLogger.LogToGui($"校准停止: 设备={dev.MacAddress} 不在校准集合中，无法移除", false);
+                    System.Diagnostics.Debug.WriteLine($"校准停止: 设备={dev.MacAddress} 不在校准集合中，无法移除", false);
                 }
             }
         }
