@@ -1770,17 +1770,18 @@ namespace DS4Windows
             device.Report += tempEvnt;
         }
 
-        private void CheckQuickCharge(object sender, EventArgs e)
-        {
-            DS4Device device = sender as DS4Device;
-            if (device.ConnectionType == ConnectionType.BT && getQuickCharge() &&
-                device.Charging)
-            {
-                // Set disconnect flag here. Later Hotplug event will check
-                // for presence of flag and remove the device then
-                device.ReadyQuickChargeDisconnect = true;
-            }
-        }
+		private void CheckQuickCharge(object sender, EventArgs e)
+		{
+			DS4Device device = sender as DS4Device;
+			if (device == null || device.ConnectionType != ConnectionType.BT || !device.Charging)
+				return;
+
+			// 仅处理非 PC 充电场景（因为 PC 连接场景由 HotPlug 中的替换逻辑处理）
+			if (getQuickCharge())
+			{
+				device.DisconnectBT(true);
+			}
+		}
 
         public void PrepareAbort()
         {
@@ -2029,6 +2030,16 @@ namespace DS4Windows
                             }
 
                             DS4Controllers[Index] = device;
+							
+							if (device.ConnectionType == ConnectionType.USB)
+							{
+								var btDevice = DS4Devices.FindDeviceByMac(device.MacAddress, ConnectionType.BT);
+								if (btDevice != null && !btDevice.IsRemoving && btDevice.Synced)
+								{
+									btDevice.DisconnectBT(true);
+								}
+							}
+							
                             device.DeviceSlotNumber = Index;
                             PrepareConnectedInputControllerSettingEvents(numControllers, device, Index);
 
