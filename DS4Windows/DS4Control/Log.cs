@@ -60,7 +60,7 @@ namespace DS4Windows
             // string message = string.Format(Strings.GyroCalibrationStarted, deviceIndex + 1);
             // LogToTray(message, false, true);
         // }
-        public static void LogGyroCalibrationStarted(int deviceIndex)
+        public static void LogGyroCalibrationStarted(int? deviceIndex = null)
         {
             lock (notificationLock)
             {

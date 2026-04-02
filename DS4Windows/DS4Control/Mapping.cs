@@ -4400,9 +4400,6 @@ namespace DS4Windows
 								{
 									var d = ctrl.DS4Controllers[device];
 
-									// 添加系统通知（仅手动校准时触发）
-									AppLogger.LogGyroCalibrationStarted(device);
-
 									// d.SixAxis.ResetContinuousCalibration();
 									d.SixAxis.ForceResetContinuousCalibration(); // GyroMacData
 									if (d.JointDeviceSlotNumber != DS4Device.DEFAULT_JOINT_SLOT_NUMBER)

@@ -46,8 +46,8 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         private int? prevBattery = null;
 
         // 闪烁相关字段 - 使用设备级 GyroCalibrationBlinker
-        private string gyroIcon;                     // 陀螺校准图标路径
-        private string batteryIcon;                  // 当前电池图标
+        private string gyroIcon;
+        private string batteryIcon;
         private Dictionary<DS4Device, Action<bool>> _deviceCallbacks = new Dictionary<DS4Device, Action<bool>>();
 
         public string TooltipText
@@ -180,30 +180,22 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
         private void BuildControllerList(object sender, EventArgs e) => PopulateControllerList();
 
-        /// <summary>
-        /// 构建托盘图标右键菜单
-        /// 将配置文件切换、断开连接、陀螺仪校准功能整合到每个控制器的子菜单中
-        /// </summary>
         public void PopulateContextMenu()
         {
             contextMenu.Items.Clear();
             ItemCollection items = contextMenu.Items;
-            
-            // 将“打开程序文件夹”放在最上面
-            // items.Add(openProgramItem);
-            
+
             using (ReadLocker locker = new ReadLocker(_colLocker))
             {
                 foreach (ControllerHolder holder in controllerList)
                 {
                     DS4Device currentDev = holder.Device;
-                    string macAddress = currentDev.MacAddress; // 唯一标识
-                    
+                    string macAddress = currentDev.MacAddress;
+
                     MenuItem controllerItem = new MenuItem() { Header = GetLocalizedString("Controllers") + " " + (holder.Index + 1) };
-                    controllerItem.Tag = macAddress; // 存储 MAC 地址
+                    controllerItem.Tag = macAddress;
                     ItemCollection subitems = controllerItem.Items;
 
-                    // 配置文件子菜单
                     string currentProfile = Global.ProfilePath[holder.Index];
                     foreach (ProfileEntity entry in profileListHolder.ProfileListCol)
                     {
@@ -225,7 +217,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                         subitems.Add(disconnectItem);
                     }
 
-                    // 陀螺仪校准菜单项
                     if (currentDev?.SixAxis != null)
                     {
                         MenuItem gyroItem = new MenuItem() { Header = GetLocalizedString("GyroCalibration") };
@@ -236,7 +227,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
                     items.Add(controllerItem);
                 }
-                // 仅当有手柄时才添加分隔符
+
                 if (controllerList.Count > 0) items.Add(new Separator());
                 PopulateStaticItems();
             }
@@ -289,7 +280,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             if (holder == null) return;
 
             DS4Device tempDev = holder.Device;
-            // 修改：使用 CanDisconnect 属性（无线且同步即可，不检查充电）
             if (tempDev != null && tempDev.CanDisconnect)
             {
                 if (tempDev.ConnectionType == ConnectionType.BT) tempDev.DisconnectBT();
@@ -297,9 +287,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             }
         }
 
-        /// <summary>
-        /// 陀螺仪校准菜单项点击事件
-        /// </summary>
         private void CalibrateGyroMenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             MenuItem item = sender as MenuItem;
@@ -323,7 +310,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             {
                 string message = string.Format(Strings.GyroCalibrationStarted, holder.Index + 1);
                 AppLogger.LogToTray(message, false);
-                // 使用 ForceResetCalibration 强制重新校准
                 device.CalibrationBlinker?.ForceResetCalibration();
             }
         }
@@ -407,7 +393,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             device.ChargingChanged -= UpdateForBattery;
             device.Removal -= CurrentDev_Removal;
 
-            // 注销回调
             var blinker = device.CalibrationBlinker;
             if (blinker != null)
             {
@@ -441,7 +426,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             ControllerHolder item = null;
             int idx = 0;
 
-            // 注销回调并清理
             if (currentDev != null)
             {
                 var blinker = currentDev.CalibrationBlinker;
@@ -462,11 +446,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             {
                 foreach (ControllerHolder holder in controllerList)
                 {
-                    if (currentDev == holder.Device)
-                    {
-                        item = holder;
-                        break;
-                    }
+                    if (currentDev == holder.Device) { item = holder; break; }
                     idx++;
                 }
                 if (item != null)
@@ -477,8 +457,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             }
 
             PopulateToolText();
-            
-            // 同步刷新托盘菜单，确保设备移除后菜单立即更新
             Application.Current.Dispatcher.Invoke(() => PopulateContextMenu());
         }
 
@@ -488,16 +466,12 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
         private void ClearToolText(object sender, EventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => TooltipText = "DS4Windows");
 
-        /// <summary>
-        /// 添加静态菜单项（服务控制、打开、最小化、打开程序文件夹、退出）
-        /// </summary>
         private void PopulateStaticItems()
         {
             ItemCollection items = contextMenu.Items;
             items.Add(changeServiceItem);
             items.Add(openItem);
             items.Add(minimizeItem);
-            // items.Add(openProgramItem);
             items.Add(new Separator());
             items.Add(closeItem);
         }
@@ -506,7 +480,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         {
             contextMenu.Items.Clear();
             PopulateContextMenu();
-            // 注销所有回调
             foreach (var kvp in _deviceCallbacks)
             {
                 kvp.Key.CalibrationBlinker?.UnregisterCallback(kvp.Value);
@@ -514,9 +487,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             _deviceCallbacks.Clear();
         }
 
-        /// <summary>
-        /// 恢复托盘图标到用户设置的默认状态
-        /// </summary>
         private void RestoreTrayIcon()
         {
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
@@ -532,9 +502,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             }));
         }
 
-        /// <summary>
-        /// 更新托盘图标为电池电量对应图标
-        /// </summary>
         private void UpdateTrayBattery(object sender, byte percentage)
         {
             string newIcon = percentage switch
@@ -553,9 +520,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 _ => $"{Global.RESOURCES_PREFIX}/DS4W.ico"
             };
             batteryIcon = newIcon;
-
-            // 如果没有设备在校准，立即恢复图标
-            // 注意：由于校准状态通过回调管理，这里简单恢复即可
             RestoreTrayIcon();
         }
 
