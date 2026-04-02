@@ -25,9 +25,9 @@ using System.Windows;
 using System.Windows.Controls;
 using DS4Windows;
 using WPFLocalizeExtension.Extensions;
-using DS4WinWPF.Translations; // 添加此命名空间以使用 Strings
+using DS4WinWPF.Translations;
 using System.Linq;
-using DS4WinWPF.DS4Forms; // 添加此引用以使用 GyroCalibrationBlinker
+using DS4WinWPF.DS4Forms;
 
 namespace DS4WinWPF.DS4Forms.ViewModels
 {
@@ -45,11 +45,10 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         private MenuItem closeItem;
         private int? prevBattery = null;
 
-        // 闪烁相关字段 - 使用 GyroCalibrationBlinker
-        private GyroCalibrationBlinker _blinker; // 陀螺校准管理器
+        // 闪烁相关字段 - 使用设备级 GyroCalibrationBlinker
         private string gyroIcon;                     // 陀螺校准图标路径
-        private readonly object calibrationLock = new object(); // 保护 _calibratingDevices
-        private HashSet<DS4Device> _calibratingDevices = new HashSet<DS4Device>(); // 记录正在校准的设备（用于闪烁）
+        private string batteryIcon;                  // 当前电池图标
+        private Dictionary<DS4Device, Action<bool>> _deviceCallbacks = new Dictionary<DS4Device, Action<bool>>();
 
         public string TooltipText
         {
@@ -93,8 +92,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         private ProfileList profileListHolder;
         private ControlService controlService;
 
-        public delegate void ProfileSelectedHandler(TrayIconViewModel sender,
-            ControllerHolder item, string profile);
+        public delegate void ProfileSelectedHandler(TrayIconViewModel sender, ControllerHolder item, string profile);
         public event ProfileSelectedHandler ProfileSelected;
 
         public TrayIconViewModel(ControlService service, ProfileList profileListHolder)
@@ -103,24 +101,22 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             this.controlService = service;
             contextMenu = new ContextMenu();
             iconSource = Global.iconChoiceResources[Global.UseIconChoice];
-            gyroIcon = $"{Global.RESOURCES_PREFIX}/gyro.ico"; // 假设 gyro.ico 位于 Resources 文件夹
+            gyroIcon = $"{Global.RESOURCES_PREFIX}/gyro.ico";
             Global.BatteryChanged += UpdateTrayBattery;
 
-            // 初始化菜单项
             changeServiceItem = new MenuItem()
             {
                 Header = GetLocalizedString("ServiceStart"),
                 IsEnabled = false
             };
             changeServiceItem.Click += ChangeControlServiceItem_Click;
-            openItem = new MenuItem() {  Header = GetLocalizedString("MenuOpen"),
-                FontWeight = FontWeights.Bold };
+            openItem = new MenuItem() { Header = GetLocalizedString("MenuOpen"), FontWeight = FontWeights.Bold };
             openItem.Click += OpenMenuItem_Click;
             minimizeItem = new MenuItem() { Header = GetLocalizedString("MenuMinimize") };
             minimizeItem.Click += MinimizeMenuItem_Click;
             openProgramItem = new MenuItem() { Header = GetLocalizedString("MenuOpenProgramFolder") };
             openProgramItem.Click += OpenProgramFolderItem_Click;
-            closeItem = new MenuItem()  { Header = GetLocalizedString("MenuExit") };
+            closeItem = new MenuItem() { Header = GetLocalizedString("MenuExit") };
             closeItem.Click += ExitMenuItem_Click;
 
             PopulateControllerList();
@@ -139,10 +135,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             service.HotplugController += Service_HotplugController;
         }
 
-        private string GetLocalizedString(string key)
-        {
-            return LocExtension.GetLocalizedValue<string>(key);
-        }
+        private string GetLocalizedString(string key) => LocExtension.GetLocalizedValue<string>(key);
 
         private void Service_RunningChanged(object sender, EventArgs e)
         {
@@ -180,16 +173,12 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             _colLocker.ExitWriteLock();
         }
 
-        private void ProfileListCol_CollectionChanged(object sender,
-            System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void ProfileListCol_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             PopulateContextMenu();
         }
 
-        private void BuildControllerList(object sender, EventArgs e)
-        {
-            PopulateControllerList();
-        }
+        private void BuildControllerList(object sender, EventArgs e) => PopulateControllerList();
 
         /// <summary>
         /// 构建托盘图标右键菜单
@@ -210,10 +199,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     DS4Device currentDev = holder.Device;
                     string macAddress = currentDev.MacAddress; // 唯一标识
                     
-                    MenuItem controllerItem = new MenuItem() 
-                    { 
-                        Header = GetLocalizedString("Controllers") + " " + (holder.Index + 1)
-                    };
+                    MenuItem controllerItem = new MenuItem() { Header = GetLocalizedString("Controllers") + " " + (holder.Index + 1) };
                     controllerItem.Tag = macAddress; // 存储 MAC 地址
                     ItemCollection subitems = controllerItem.Items;
 
@@ -221,30 +207,19 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     string currentProfile = Global.ProfilePath[holder.Index];
                     foreach (ProfileEntity entry in profileListHolder.ProfileListCol)
                     {
-                        string name = entry.Name;
-                        name = Regex.Replace(name, "_{1}", "__");
+                        string name = Regex.Replace(entry.Name, "_{1}", "__");
                         MenuItem profileItem = new MenuItem() { Header = name };
-                        profileItem.Tag = macAddress; // 存储 MAC 地址
+                        profileItem.Tag = macAddress;
                         profileItem.Click += ProfileItem_Click;
-                        if (entry.Name == currentProfile)
-                        {
-                            profileItem.IsChecked = true;
-                        }
+                        if (entry.Name == currentProfile) profileItem.IsChecked = true;
                         subitems.Add(profileItem);
                     }
 
-                    if (profileListHolder.ProfileListCol.Count > 0)
-                    {
-                        subitems.Add(new Separator());
-                    }
+                    if (profileListHolder.ProfileListCol.Count > 0) subitems.Add(new Separator());
 
-                    // 断开连接菜单项
                     if (currentDev.CanDisconnect)
                     {
-                        MenuItem disconnectItem = new MenuItem() 
-                        { 
-                            Header = GetLocalizedString("Disconnect")
-                        };
+                        MenuItem disconnectItem = new MenuItem() { Header = GetLocalizedString("Disconnect") };
                         disconnectItem.Click += DisconnectMenuItem_Click;
                         disconnectItem.Tag = macAddress;
                         subitems.Add(disconnectItem);
@@ -253,10 +228,7 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     // 陀螺仪校准菜单项
                     if (currentDev?.SixAxis != null)
                     {
-                        MenuItem gyroItem = new MenuItem() 
-                        { 
-                            Header = GetLocalizedString("GyroCalibration")
-                        };
+                        MenuItem gyroItem = new MenuItem() { Header = GetLocalizedString("GyroCalibration") };
                         gyroItem.Click += CalibrateGyroMenuItem_Click;
                         gyroItem.Tag = macAddress;
                         subitems.Add(gyroItem);
@@ -264,12 +236,8 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
                     items.Add(controllerItem);
                 }
-                
                 // 仅当有手柄时才添加分隔符
-                if (controllerList.Count > 0)
-                {
-                    items.Add(new Separator());
-                }
+                if (controllerList.Count > 0) items.Add(new Separator());
                 PopulateStaticItems();
             }
         }
@@ -287,32 +255,22 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             using (Process temp = Process.Start(startInfo)) { }
         }
 
-        private void OpenMenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            RequestOpen?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void MinimizeMenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            RequestMinimize?.Invoke(this, EventArgs.Empty);
-        }
+        private void OpenMenuItem_Click(object sender, System.Windows.RoutedEventArgs e) => RequestOpen?.Invoke(this, EventArgs.Empty);
+        private void MinimizeMenuItem_Click(object sender, System.Windows.RoutedEventArgs e) => RequestMinimize?.Invoke(this, EventArgs.Empty);
 
         private void ProfileItem_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             MenuItem item = sender as MenuItem;
             string macAddress = item.Tag as string;
-            if (string.IsNullOrEmpty(macAddress))
-                return;
+            if (string.IsNullOrEmpty(macAddress)) return;
 
             ControllerHolder holder = null;
             using (ReadLocker locker = new ReadLocker(_colLocker))
             {
                 holder = controllerList.FirstOrDefault(h => h.Device.MacAddress == macAddress);
             }
-
             if (holder == null) return;
 
-            int idx = holder.Index;
             string tempProfileName = Regex.Replace(item.Header.ToString(), "_{2}", "_");
             ProfileSelected?.Invoke(this, holder, tempProfileName);
         }
@@ -321,25 +279,21 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         {
             MenuItem item = sender as MenuItem;
             string macAddress = item.Tag as string;
-            if (string.IsNullOrEmpty(macAddress))
-                return;
+            if (string.IsNullOrEmpty(macAddress)) return;
 
             ControllerHolder holder = null;
             using (ReadLocker locker = new ReadLocker(_colLocker))
             {
                 holder = controllerList.FirstOrDefault(h => h.Device.MacAddress == macAddress);
             }
-
             if (holder == null) return;
 
             DS4Device tempDev = holder.Device;
             // 修改：使用 CanDisconnect 属性（无线且同步即可，不检查充电）
             if (tempDev != null && tempDev.CanDisconnect)
             {
-                if (tempDev.ConnectionType == ConnectionType.BT)
-                    tempDev.DisconnectBT();
-                else if (tempDev.ConnectionType == ConnectionType.SONYWA)
-                    tempDev.DisconnectDongle();
+                if (tempDev.ConnectionType == ConnectionType.BT) tempDev.DisconnectBT();
+                else if (tempDev.ConnectionType == ConnectionType.SONYWA) tempDev.DisconnectDongle();
             }
         }
 
@@ -350,36 +304,27 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         {
             MenuItem item = sender as MenuItem;
             string macAddress = item.Tag as string;
-            if (string.IsNullOrEmpty(macAddress))
-                return;
+            if (string.IsNullOrEmpty(macAddress)) return;
 
             ControllerHolder holder = null;
             using (ReadLocker locker = new ReadLocker(_colLocker))
             {
                 holder = controllerList.FirstOrDefault(h => h.Device.MacAddress == macAddress);
             }
-
             if (holder == null)
             {
                 PopulateContextMenu();
-                System.Diagnostics.Debug.WriteLine($"校准失败：未找到设备 {macAddress}");
+                Debug.WriteLine($"校准失败：未找到设备 {macAddress}");
                 return;
             }
 
             DS4Device device = holder.Device;
-            int idx = holder.Index;
             if (device != null)
             {
-                string message = string.Format(Strings.GyroCalibrationStarted, idx + 1);
+                string message = string.Format(Strings.GyroCalibrationStarted, holder.Index + 1);
                 AppLogger.LogToTray(message, false);
-
-                // 使用 ForceResetContinuousCalibration 强制重新校准
-                device.SixAxis.ForceResetContinuousCalibration();
-                if (device.JointDeviceSlotNumber != DS4Device.DEFAULT_JOINT_SLOT_NUMBER)
-                {
-                    DS4Device tempDev = controlService.DS4Controllers[device.JointDeviceSlotNumber];
-                    tempDev?.SixAxis.ForceResetContinuousCalibration();
-                }
+                // 使用 ForceResetCalibration 强制重新校准
+                device.CalibrationBlinker?.ForceResetCalibration();
             }
         }
 
@@ -395,18 +340,11 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             _colLocker.ExitWriteLock();
         }
 
-        private void StartPopulateText(object sender, EventArgs e)
-        {
-            Application.Current.Dispatcher.BeginInvoke(() =>
-            {
-                PopulateToolText();
-            });
-        }
+        private void StartPopulateText(object sender, EventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => PopulateToolText());
 
         private void PopulateToolText()
         {
-            List<string> items = new List<string>();
-            items.Add(trayTitle);
+            List<string> items = new List<string> { trayTitle };
             int idx = 1;
             _colLocker.EnterReadLock();
             foreach (ControllerHolder holder in controllerList)
@@ -430,38 +368,38 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             _colLocker.ExitReadLock();
         }
 
-		private void SetupDeviceEvents(DS4Device device)
-		{
-			device.BatteryChanged += UpdateForBattery;
-			device.ChargingChanged += UpdateForBattery;
-			device.Removal += CurrentDev_Removal;
+        private void SetupDeviceEvents(DS4Device device)
+        {
+            device.BatteryChanged += UpdateForBattery;
+            device.ChargingChanged += UpdateForBattery;
+            device.Removal += CurrentDev_Removal;
 
-			if (device?.SixAxis != null)
-			{
-				Application.Current.Dispatcher.Invoke(() =>
-				{
-					var blinker = new GyroCalibrationBlinker(device,
-						onBlinkUpdate: (visible) =>
-						{
-							// 交替闪烁：visible 为 true 时显示陀螺图标，false 时透明（null）
-							if (visible)
-								IconSource = gyroIcon;
-							else
-								IconSource = null;
-						},
-						onStopped: () =>
-						{
-							// 校准完全停止，恢复为设置中选定的图标
-							IconSource = Global.iconChoiceResources[Global.UseIconChoice];
-						}
-					);
-					lock (_deviceBlinkers)
-					{
-						_deviceBlinkers[device] = blinker;
-					}
-				});
-			}
-		}
+            // 订阅校准开始事件用于发送系统通知
+            device.SixAxis.CalibrationStarted += (s, e) =>
+            {
+                int idx = GetDeviceIndex(device);
+                if (idx >= 0) AppLogger.LogGyroCalibrationStarted(idx);
+            };
+
+            // 订阅校准停止事件，恢复托盘图标
+            device.SixAxis.CalibrationStopped += (s, e) =>
+            {
+                RestoreTrayIcon();
+            };
+
+            // 注册闪烁回调
+            var blinker = device.CalibrationBlinker;
+            if (blinker != null)
+            {
+                Action<bool> callback = (visible) =>
+                {
+                    if (visible) IconSource = gyroIcon;
+                    else IconSource = null;
+                };
+                blinker.RegisterCallback(callback);
+                lock (_deviceCallbacks) { _deviceCallbacks[device] = callback; }
+            }
+        }
 
         private void RemoveDeviceEvents(DS4Device device)
         {
@@ -469,24 +407,33 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             device.ChargingChanged -= UpdateForBattery;
             device.Removal -= CurrentDev_Removal;
 
-            if (device.SixAxis != null)
+            // 注销回调
+            var blinker = device.CalibrationBlinker;
+            if (blinker != null)
             {
-                // 释放闪烁管理器资源
-                lock (_deviceBlinkers)
+                lock (_deviceCallbacks)
                 {
-                    if (_deviceBlinkers.TryGetValue(device, out var blinker))
+                    if (_deviceCallbacks.TryGetValue(device, out var callback))
                     {
-                        blinker.Dispose();
-                        _deviceBlinkers.Remove(device);
+                        blinker.UnregisterCallback(callback);
+                        _deviceCallbacks.Remove(device);
                     }
                 }
             }
         }
 
-        // ==================== 闪烁控制核心方法 ====================
-
-        // 存储每个设备的闪烁管理器
-        private Dictionary<DS4Device, GyroCalibrationBlinker> _deviceBlinkers = new Dictionary<DS4Device, GyroCalibrationBlinker>();
+        private int GetDeviceIndex(DS4Device device)
+        {
+            if (device == null) return -1;
+            using (ReadLocker locker = new ReadLocker(_colLocker))
+            {
+                for (int i = 0; i < controllerList.Count; i++)
+                {
+                    if (controllerList[i].Device == device) return i;
+                }
+            }
+            return -1;
+        }
 
         private void CurrentDev_Removal(object sender, EventArgs e)
         {
@@ -494,15 +441,19 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             ControllerHolder item = null;
             int idx = 0;
 
-            // 清理闪烁管理器
+            // 注销回调并清理
             if (currentDev != null)
             {
-                lock (_deviceBlinkers)
+                var blinker = currentDev.CalibrationBlinker;
+                if (blinker != null)
                 {
-                    if (_deviceBlinkers.TryGetValue(currentDev, out var blinker))
+                    lock (_deviceCallbacks)
                     {
-                        blinker.Dispose();
-                        _deviceBlinkers.Remove(currentDev);
+                        if (_deviceCallbacks.TryGetValue(currentDev, out var callback))
+                        {
+                            blinker.UnregisterCallback(callback);
+                            _deviceCallbacks.Remove(currentDev);
+                        }
                     }
                 }
             }
@@ -518,7 +469,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                     }
                     idx++;
                 }
-
                 if (item != null)
                 {
                     controllerList.RemoveAt(idx);
@@ -529,32 +479,14 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             PopulateToolText();
             
             // 同步刷新托盘菜单，确保设备移除后菜单立即更新
-            Application.Current.Dispatcher.Invoke(new Action(() =>
-            {
-                PopulateContextMenu();
-            }));
+            Application.Current.Dispatcher.Invoke(() => PopulateContextMenu());
         }
 
-        private void HookEvents(object sender, EventArgs e)
-        {
-            SetupEvents();
-        }
+        private void HookEvents(object sender, EventArgs e) => SetupEvents();
 
-        private void UpdateForBattery(object sender, EventArgs e)
-        {
-            Application.Current.Dispatcher.BeginInvoke(() =>
-            {
-                PopulateToolText();
-            });
-        }
+        private void UpdateForBattery(object sender, EventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => PopulateToolText());
 
-        private void ClearToolText(object sender, EventArgs e)
-        {
-            Application.Current.Dispatcher.BeginInvoke(() =>
-            {
-                TooltipText = "DS4Windows";
-            });
-        }
+        private void ClearToolText(object sender, EventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => TooltipText = "DS4Windows");
 
         /// <summary>
         /// 添加静态菜单项（服务控制、打开、最小化、打开程序文件夹、退出）
@@ -574,15 +506,30 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         {
             contextMenu.Items.Clear();
             PopulateContextMenu();
-            // 停止所有闪烁管理器
-            lock (_deviceBlinkers)
+            // 注销所有回调
+            foreach (var kvp in _deviceCallbacks)
             {
-                foreach (var blinker in _deviceBlinkers.Values)
-                {
-                    blinker.Dispose();
-                }
-                _deviceBlinkers.Clear();
+                kvp.Key.CalibrationBlinker?.UnregisterCallback(kvp.Value);
             }
+            _deviceCallbacks.Clear();
+        }
+
+        /// <summary>
+        /// 恢复托盘图标到用户设置的默认状态
+        /// </summary>
+        private void RestoreTrayIcon()
+        {
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (Global.UseIconChoice == TrayIconChoice.Battery)
+                {
+                    IconSource = batteryIcon ?? Global.iconChoiceResources[TrayIconChoice.Default];
+                }
+                else
+                {
+                    IconSource = Global.iconChoiceResources[Global.UseIconChoice];
+                }
+            }));
         }
 
         /// <summary>
@@ -605,18 +552,14 @@ namespace DS4WinWPF.DS4Forms.ViewModels
                 100 => $"{Global.RESOURCES_PREFIX}/100.ico",
                 _ => $"{Global.RESOURCES_PREFIX}/DS4W.ico"
             };
+            batteryIcon = newIcon;
 
-            if (!_deviceBlinkers.Any() || !_deviceBlinkers.Values.Any(b => true))
-            {
-                // 没有设备在校准时，直接更新图标
-                IconSource = newIcon;
-            }
+            // 如果没有设备在校准，立即恢复图标
+            // 注意：由于校准状态通过回调管理，这里简单恢复即可
+            RestoreTrayIcon();
         }
 
-        private void ExitMenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            RequestShutdown?.Invoke(this, EventArgs.Empty);
-        }
+        private void ExitMenuItem_Click(object sender, System.Windows.RoutedEventArgs e) => RequestShutdown?.Invoke(this, EventArgs.Empty);
     }
 
     public class ControllerHolder
@@ -625,7 +568,6 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         private int index;
         public DS4Device Device { get => device; }
         public int Index { get => index; }
-
         public ControllerHolder(DS4Device device, int index)
         {
             this.device = device;

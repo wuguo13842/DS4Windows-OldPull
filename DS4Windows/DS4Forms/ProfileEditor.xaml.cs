@@ -1841,17 +1841,13 @@ namespace DS4WinWPF.DS4Forms
 			int deviceNum = profileSettingsVM.FuncDevNum;
 			if (deviceNum < ControlService.CURRENT_DS4_CONTROLLER_LIMIT)
 			{
-				// 发送系统通知（仅手动校准时触发）
-				AppLogger.LogGyroCalibrationStarted(deviceNum);
-
 				DS4Device d = App.rootHub.DS4Controllers[deviceNum];
-				// d.SixAxis.ResetContinuousCalibration();
-				d.SixAxis.ForceResetContinuousCalibration();
-				if (d.JointDeviceSlotNumber != DS4Device.DEFAULT_JOINT_SLOT_NUMBER)
+				// 使用设备级 Blinker 的强制重置方法
+				d?.CalibrationBlinker?.ForceResetCalibration();
+				if (d?.JointDeviceSlotNumber != DS4Device.DEFAULT_JOINT_SLOT_NUMBER)
 				{
 					DS4Device tempDev = App.rootHub.DS4Controllers[d.JointDeviceSlotNumber];
-					// tempDev?.SixAxis.ResetContinuousCalibration();
-					tempDev?.SixAxis.ForceResetContinuousCalibration();
+					tempDev?.CalibrationBlinker?.ForceResetCalibration();
 				}
 			}
 		}

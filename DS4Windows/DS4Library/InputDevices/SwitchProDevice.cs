@@ -388,9 +388,6 @@ namespace DS4Windows.InputDevices
                 long deltaCheckElapsed;
                 double lastCheckElapsed;
                 double lastCheckTimeElapsed;
-				
-				// 等待事件订阅完成（确保 UI 已订阅校准事件）
-				Global.EventsSubscribedEvent.Wait();
 
                 // Run continuous calibration on Gyro when starting input loop
                 sixAxis.ResetContinuousCalibration();

@@ -342,39 +342,39 @@ namespace DS4Windows
 
                         bool validSerial = !serial.Equals(DS4Device.BLANK_SERIAL);
                         bool newdev = true;
-						if (validSerial && deviceSerials.Contains(serial))
-						{
-							// 获取已存在的设备（可能是蓝牙或 USB）
-							DS4Device existingDevice = serialDevices[serial];
+                        if (validSerial && deviceSerials.Contains(serial))
+                        {
+                            // 获取已存在的设备（可能是蓝牙或 USB）
+                            DS4Device existingDevice = serialDevices[serial];
 
-							// 判断当前设备是否为 USB，已存在设备是否为蓝牙
-							bool currentIsUsb = metainfo.checkConnection(hDevice) == ConnectionType.USB;
-							bool existingIsBt = existingDevice.ConnectionType == ConnectionType.BT;
+                            // 判断当前设备是否为 USB，已存在设备是否为蓝牙
+                            bool currentIsUsb = metainfo.checkConnection(hDevice) == ConnectionType.USB;
+                            bool existingIsBt = existingDevice.ConnectionType == ConnectionType.BT;
 
-							if (currentIsUsb && existingIsBt)
-							{
-								// 情况：USB 设备插入，已有蓝牙设备 → 断开蓝牙，替换为 USB
-								System.Diagnostics.Debug.WriteLine($"USB device {serial} detected while BT exists. Disconnecting BT.");
-								existingDevice.DisconnectBT(true);   // 断开蓝牙
-								// 移除旧的蓝牙设备
-								InnerRemoveDevice(existingDevice);
-								// 允许将 USB 设备添加为新的设备
-								newdev = true;
-								// 注意：这里需要将 existingDevice 从字典中移除，但 InnerRemoveDevice 已做
-								// 后续会创建新的 DS4Device 并添加到字典
-							}
-							else if (isExclusiveMode && hDevice.IsExclusive && !DisabledDevices.Contains(hDevice))
-							{
-								// 原有处理：独占模式下的备用设备（如充电时保持隐藏）
-								DisabledDevices.Add(hDevice);
-								newdev = false;
-							}
-							else
-							{
-								// 其他情况：忽略重复设备
-								newdev = false;
-							}
-						}
+                            if (currentIsUsb && existingIsBt)
+                            {
+                                // 情况：USB 设备插入，已有蓝牙设备 → 断开蓝牙，替换为 USB
+                                System.Diagnostics.Debug.WriteLine($"USB device {serial} detected while BT exists. Disconnecting BT.");
+                                existingDevice.DisconnectBT(true);   // 断开蓝牙
+                                // 移除旧的蓝牙设备
+                                InnerRemoveDevice(existingDevice);
+                                // 允许将 USB 设备添加为新的设备
+                                newdev = true;
+                                // 注意：这里需要将 existingDevice 从字典中移除，但 InnerRemoveDevice 已做
+                                // 后续会创建新的 DS4Device 并添加到字典
+                            }
+                            else if (isExclusiveMode && hDevice.IsExclusive && !DisabledDevices.Contains(hDevice))
+                            {
+                                // 原有处理：独占模式下的备用设备（如充电时保持隐藏）
+                                DisabledDevices.Add(hDevice);
+                                newdev = false;
+                            }
+                            else
+                            {
+                                // 其他情况：忽略重复设备
+                                newdev = false;
+                            }
+                        }
 
                         if (newdev && validSerial)
                         {
@@ -415,40 +415,40 @@ namespace DS4Windows
                 return controllers;
             }
         }
-		
-		/// <summary>
-		/// 检查是否存在相同 MAC 地址的 USB 设备（即手柄已通过 USB 连接到 PC）
-		/// </summary>
-		public static bool HasUsbDeviceWithSameMac(DS4Device device)
-		{
-			lock (Devices)
-			{
-				foreach (var kvp in Devices)
-				{
-					var other = kvp.Value;
-					if (other != device && other.MacAddress == device.MacAddress && other.ConnectionType == ConnectionType.USB)
-						return true;
-				}
-			}
-			return false;
-		}
+        
+        /// <summary>
+        /// 检查是否存在相同 MAC 地址的 USB 设备（即手柄已通过 USB 连接到 PC）
+        /// </summary>
+        public static bool HasUsbDeviceWithSameMac(DS4Device device)
+        {
+            lock (Devices)
+            {
+                foreach (var kvp in Devices)
+                {
+                    var other = kvp.Value;
+                    if (other != device && other.MacAddress == device.MacAddress && other.ConnectionType == ConnectionType.USB)
+                        return true;
+                }
+            }
+            return false;
+        }
 
-		/// <summary>
-		/// 根据 MAC 地址和连接类型查找设备
-		/// </summary>
-		public static DS4Device FindDeviceByMac(string mac, ConnectionType type)
-		{
-			lock (Devices)
-			{
-				foreach (var kvp in Devices)
-				{
-					var dev = kvp.Value;
-					if (dev.MacAddress == mac && dev.ConnectionType == type)
-						return dev;
-				}
-			}
-			return null;
-		}
+        /// <summary>
+        /// 根据 MAC 地址和连接类型查找设备
+        /// </summary>
+        public static DS4Device FindDeviceByMac(string mac, ConnectionType type)
+        {
+            lock (Devices)
+            {
+                foreach (var kvp in Devices)
+                {
+                    var dev = kvp.Value;
+                    if (dev.MacAddress == mac && dev.ConnectionType == type)
+                        return dev;
+                }
+            }
+            return null;
+        }
 
         public static void stopControllers()
         {
@@ -493,9 +493,12 @@ namespace DS4Windows
         {
             if (device != null)
             {
-				// 主动触发校准停止事件
-				device.SixAxis?.StopCalibrationForDisconnect();
-				
+                // 主动触发校准停止事件
+                device.SixAxis?.StopCalibrationForDisconnect();
+                
+                // 释放陀螺仪校准 Blinker
+                device.DisposeCalibrationBlinker();
+                
                 device.HidDevice.CloseDevice();
                 Devices.Remove(device.HidDevice.DevicePath);
                 DevicePaths.Remove(device.HidDevice.DevicePath);

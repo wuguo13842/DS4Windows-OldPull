@@ -783,7 +783,6 @@ namespace DS4WinWPF
                 LogManager.Flush();
                 LogManager.Shutdown();
             }
-			DS4Windows.Global.EventsSubscribedEvent?.Dispose(); // 释放事件 “等待事件订阅完成（确保 UI 已订阅校准事件）”
         }
 		
 		private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)

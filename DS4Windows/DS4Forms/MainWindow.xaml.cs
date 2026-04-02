@@ -522,9 +522,6 @@ namespace DS4WinWPF.DS4Forms
                 AppLogger.LogToGui(@"Could not connect to Windows Management Instrumentation service.
 Suspend support not enabled.", true);
             }
-			
-			// 等待事件订阅完成（确保 UI 已订阅校准事件）
-			DS4Windows.Global.EventsSubscribedEvent.Set();
         }
 
         private void SettingsWrapVM_AppChoiceIndexChanged(object sender, EventArgs e)
@@ -1080,17 +1077,12 @@ Suspend support not enabled.", true);
 			DS4Device device = Program.rootHub.DS4Controllers[devIndex];
 			if (device != null)
 			{
-				// 发送系统通知（仅手动校准时触发）
-				AppLogger.LogGyroCalibrationStarted(devIndex);
-
-				// 调用陀螺仪校准重置（与 ProfileEditor 中的 GyroCalibration_Click 一致）
-				// device.SixAxis.ResetContinuousCalibration();
-				device.SixAxis.ForceResetContinuousCalibration(); // GyroMacData
+				// 使用设备级 Blinker 的强制重置方法
+				device.CalibrationBlinker?.ForceResetCalibration();
 				if (device.JointDeviceSlotNumber != DS4Device.DEFAULT_JOINT_SLOT_NUMBER)
 				{
 					DS4Device tempDev = Program.rootHub.DS4Controllers[device.JointDeviceSlotNumber];
-					// tempDev?.SixAxis.ResetContinuousCalibration();
-					tempDev?.SixAxis.ForceResetContinuousCalibration(); // GyroMacData
+					tempDev?.CalibrationBlinker?.ForceResetCalibration();
 				}
 			}
 		}

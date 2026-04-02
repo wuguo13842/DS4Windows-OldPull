@@ -1,4 +1,4 @@
-﻿/*
+﻿﻿/*
 DS4Windows
 Copyright (C) 2023  Travis Nickles
 
@@ -11,9 +11,6 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using System;
@@ -67,8 +64,9 @@ namespace DS4WinWPF.DS4Forms
         private sbyte rsDriftX;
         private sbyte rsDriftY;
 
-        // 闪烁相关字段 - 使用 GyroCalibrationBlinker
-        private GyroCalibrationBlinker _blinker;
+        // 闪烁相关字段 - 使用设备级 GyroCalibrationBlinker
+        private GyroCalibrationBlinker _currentBlinker;
+        private Action<bool> _currentCallback;
         private bool isUnloaded; // 标记控件是否已卸载，防止后续操作
 
         public double LsDeadX
@@ -298,47 +296,34 @@ namespace DS4WinWPF.DS4Forms
             Canvas.SetTop(lsDeadEllipse, CANVAS_MIDPOINT - (lsDeadY * CANVAS_WIDTH / 2.0));
         }
 
-		public void UseDevice(int index, int profileDevIdx)
-		{
-			if (isUnloaded) return;
+        public void UseDevice(int index, int profileDevIdx)
+        {
+            if (isUnloaded) return;
 
-			// 释放旧的 blinker
-			if (deviceNum >= 0 && deviceNum < Program.rootHub.DS4Controllers.Length)
-			{
-				var oldDev = Program.rootHub.DS4Controllers[deviceNum];
-				if (oldDev?.SixAxis != null)
-				{
-					_blinker?.Dispose();
-					_blinker = null;
-				}
-			}
+            // 取消旧设备的回调注册
+            if (_currentBlinker != null && _currentCallback != null)
+            {
+                _currentBlinker.UnregisterCallback(_currentCallback);
+                _currentBlinker = null;
+                _currentCallback = null;
+            }
 
-			deviceNum = index;
-			profileDeviceNum = profileDevIdx;
-			DeviceNumChanged?.Invoke(this, EventArgs.Empty);
+            deviceNum = index;
+            profileDeviceNum = profileDevIdx;
+            DeviceNumChanged?.Invoke(this, EventArgs.Empty);
 
-			var newDev = Program.rootHub.DS4Controllers[deviceNum];
-			if (newDev?.SixAxis != null)
-			{
-				// 确保在 UI 线程上创建 blinker
-				Action createBlinker = () =>
-				{
-					_blinker = new GyroCalibrationBlinker(newDev,
-						onBlinkUpdate: (visible) =>
-						{
-							// 闪烁过程中，visible 交替 true/false，直接控制椭圆可见性即可实现闪烁
-							gyroCalEllipse.Visibility = visible ? Visibility.Visible : Visibility.Hidden;
-						},
-						onStopped: null   // 不需要额外清理，因为最后一次 visible=false 会隐藏
-					);
-				};
-
-				if (Dispatcher.CheckAccess())
-					createBlinker();
-				else
-					Dispatcher.Invoke(createBlinker);
-			}
-		}
+            var newDev = Program.rootHub.DS4Controllers[deviceNum];
+            if (newDev?.CalibrationBlinker != null)
+            {
+                _currentBlinker = newDev.CalibrationBlinker;
+                _currentCallback = (visible) =>
+                {
+                    // 闪烁过程中，visible 交替 true/false，直接控制椭圆可见性即可实现闪烁
+                    gyroCalEllipse.Visibility = visible ? Visibility.Visible : Visibility.Hidden;
+                };
+                _currentBlinker.RegisterCallback(_currentCallback);
+            }
+        }
 
         public void EnableControl(bool state)
         {
@@ -359,7 +344,7 @@ namespace DS4WinWPF.DS4Forms
                 readingTimer.Stop();
 
                 // 停止闪烁并隐藏椭圆（blinker 会自行处理）
-                if (_blinker != null)
+                if (_currentBlinker != null)
                 {
                     // blinker 会在停止时隐藏椭圆
                 }
@@ -375,9 +360,13 @@ namespace DS4WinWPF.DS4Forms
             if (isUnloaded) return;
             isUnloaded = true;
 
-            // 释放闪烁管理器资源
-            _blinker?.Dispose();
-            _blinker = null;
+            // 释放回调注册
+            if (_currentBlinker != null && _currentCallback != null)
+            {
+                _currentBlinker.UnregisterCallback(_currentCallback);
+                _currentBlinker = null;
+                _currentCallback = null;
+            }
 
             if (readingTimer != null)
             {

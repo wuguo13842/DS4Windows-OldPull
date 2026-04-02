@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Threading;
 using DS4Windows;
@@ -6,165 +7,172 @@ using DS4Windows;
 namespace DS4WinWPF.DS4Forms
 {
     /// <summary>
-    /// 为指定的 DS4Device 管理陀螺仪校准时的 UI 闪烁效果。
-    /// 监听设备的 CalibrationStarted / CalibrationStopped 事件，控制闪烁定时器，
-    /// 并通过两个回调通知 UI：
-    /// - onBlinkUpdate：在校准过程中每 250ms 调用一次，参数为交替的 true/false，用于实现闪烁效果。
-    /// - onStopped：校准完全停止时调用一次，用于恢复 UI 到默认状态（如恢复托盘图标）。
-    /// 注意：所有 UI 更新都会通过 Dispatcher 封送到 UI 线程。
+    /// 设备级陀螺仪校准闪烁管理器。
+    /// 与 DS4Device 同时创建，内部订阅校准事件，维护当前校准状态。
+    /// UI 组件通过 RegisterCallback 注册自己的显示更新逻辑。
     /// </summary>
     public class GyroCalibrationBlinker : IDisposable
     {
         private readonly DS4Device _device;
-        private readonly Action<bool> _onBlinkUpdate;
-        private readonly Action _onStopped;
         private readonly Dispatcher _dispatcher;
         private DispatcherTimer _blinkTimer;
         private DispatcherTimer _blinkTimeoutTimer;
-        private bool _isBlinking;
-        private bool _blinkVisible;
+        private bool _isCalibrating;      // 当前是否正在校准
+        private bool _blinkVisible;       // 当前闪烁状态
         private bool _disposed;
-        private readonly object _timerLock = new object();
+        private readonly object _lock = new object();
+        private readonly List<Action<bool>> _callbacks = new List<Action<bool>>();
 
-        public GyroCalibrationBlinker(DS4Device device, Action<bool> onBlinkUpdate, Action onStopped = null)
+        public GyroCalibrationBlinker(DS4Device device)
         {
             _device = device ?? throw new ArgumentNullException(nameof(device));
-            _onBlinkUpdate = onBlinkUpdate ?? throw new ArgumentNullException(nameof(onBlinkUpdate));
-            _onStopped = onStopped;
 
-            // 获取 UI 线程的 Dispatcher
+            // 获取 UI 线程 Dispatcher
             if (Application.Current != null && Application.Current.Dispatcher != null)
                 _dispatcher = Application.Current.Dispatcher;
             else
                 _dispatcher = Dispatcher.CurrentDispatcher;
 
-            // 必须在 UI 线程上初始化定时器
-            if (!_dispatcher.CheckAccess())
-            {
-                _dispatcher.Invoke(new Action(InitializeTimers));
-            }
-            else
-            {
-                InitializeTimers();
-            }
-
-            // 订阅设备校准事件（这些事件可能从后台线程触发）
+            // 订阅设备校准事件
             _device.SixAxis.CalibrationStarted += OnCalibrationStarted;
             _device.SixAxis.CalibrationStopped += OnCalibrationStopped;
 
-            // 如果设备已经在校准中，立即启动闪烁
+            // 如果设备已经在校准中，立即同步状态
             if (_device.SixAxis.CntCalibrating > 0)
-            {
-                // 确保在 UI 线程上启动
-                if (!_dispatcher.CheckAccess())
-                    _dispatcher.BeginInvoke(new Action(StartBlinking));
-                else
-                    StartBlinking();
-            }
+                OnCalibrationStarted(null, null);
+
+            // 在 UI 线程初始化定时器
+            if (!_dispatcher.CheckAccess())
+                _dispatcher.Invoke(InitializeTimers);
+            else
+                InitializeTimers();
         }
 
         private void InitializeTimers()
         {
-            lock (_timerLock)
+            _blinkTimer = new DispatcherTimer(DispatcherPriority.Normal, _dispatcher)
             {
-                // 创建 UI 线程定时器 - 闪烁间隔 250ms
-                _blinkTimer = new DispatcherTimer(DispatcherPriority.Normal, _dispatcher)
-                {
-                    Interval = TimeSpan.FromMilliseconds(250)
-                };
-                _blinkTimer.Tick += BlinkTimer_Tick;
+                Interval = TimeSpan.FromMilliseconds(250)
+            };
+            _blinkTimer.Tick += BlinkTimer_Tick;
 
-                // 创建超时定时器 - 5.25 秒后强制停止闪烁
-                _blinkTimeoutTimer = new DispatcherTimer(DispatcherPriority.Normal, _dispatcher)
-                {
-                    Interval = TimeSpan.FromSeconds(5.25)
-                };
-                _blinkTimeoutTimer.Tick += (s, e) => StopBlinking();
-            }
+            _blinkTimeoutTimer = new DispatcherTimer(DispatcherPriority.Normal, _dispatcher)
+            {
+                Interval = TimeSpan.FromSeconds(5.25)
+            };
+            _blinkTimeoutTimer.Tick += (s, e) => StopCalibration();
         }
 
         private void BlinkTimer_Tick(object sender, EventArgs e)
         {
             if (_disposed) return;
-            if (!_isBlinking) return;
-
-            _blinkVisible = !_blinkVisible;
-            InvokeBlinkUpdate(_blinkVisible);
+            lock (_lock)
+            {
+                if (!_isCalibrating) return;
+                _blinkVisible = !_blinkVisible;
+                NotifyCallbacks(_blinkVisible);
+            }
         }
 
         private void OnCalibrationStarted(object sender, EventArgs e)
         {
-            // 确保在 UI 线程上启动闪烁
-            if (!_dispatcher.CheckAccess())
-                _dispatcher.BeginInvoke(new Action(StartBlinking));
-            else
-                StartBlinking();
+            if (_disposed) return;
+            lock (_lock)
+            {
+                if (_isCalibrating) return;
+                _isCalibrating = true;
+                _blinkVisible = true;
+                NotifyCallbacks(_blinkVisible);
+
+                // 启动定时器（必须在 UI 线程）
+                if (!_dispatcher.CheckAccess())
+                    _dispatcher.BeginInvoke(() => { _blinkTimer?.Start(); _blinkTimeoutTimer?.Start(); });
+                else
+                { _blinkTimer?.Start(); _blinkTimeoutTimer?.Start(); }
+            }
         }
 
         private void OnCalibrationStopped(object sender, EventArgs e)
         {
-            // 确保在 UI 线程上停止闪烁
-            if (!_dispatcher.CheckAccess())
-                _dispatcher.BeginInvoke(new Action(StopBlinking));
-            else
-                StopBlinking();
+            StopCalibration();
         }
 
-        private void StartBlinking()
+        private void StopCalibration()
         {
             if (_disposed) return;
-            if (_isBlinking) return;
-
-            _isBlinking = true;
-            _blinkVisible = true;
-            InvokeBlinkUpdate(_blinkVisible);
-
-            lock (_timerLock)
+            lock (_lock)
             {
-                if (_blinkTimer != null)
-                    _blinkTimer.Start();
-                if (_blinkTimeoutTimer != null)
-                    _blinkTimeoutTimer.Start();
+                if (!_isCalibrating) return;
+                _isCalibrating = false;
+
+                // 停止定时器
+                if (!_dispatcher.CheckAccess())
+                    _dispatcher.BeginInvoke(() => { _blinkTimer?.Stop(); _blinkTimeoutTimer?.Stop(); });
+                else
+                { _blinkTimer?.Stop(); _blinkTimeoutTimer?.Stop(); }
+
+                // 通知所有回调，校准结束（false 表示停止闪烁）
+                NotifyCallbacks(false);
             }
         }
 
-        private void StopBlinking()
+        /// <summary>
+        /// 注册回调，当校准状态变化时调用。
+        /// 注册时会立即返回当前校准状态（如果是 true，则返回当前闪烁状态，否则返回 false）。
+        /// </summary>
+        /// <param name="callback">回调委托，参数 true=显示闪烁/开始闪烁，false=隐藏/停止闪烁</param>
+        public void RegisterCallback(Action<bool> callback)
         {
-            if (_disposed) return;
-            if (!_isBlinking) return;
-
-            _isBlinking = false;
-
-            // 停止定时器
-            lock (_timerLock)
+            if (callback == null) return;
+            lock (_lock)
             {
-                if (_blinkTimer != null)
-                    _blinkTimer.Stop();
-                if (_blinkTimeoutTimer != null)
-                    _blinkTimeoutTimer.Stop();
+                _callbacks.Add(callback);
+                // 立即推送当前状态
+                if (_isCalibrating)
+                    callback(_blinkVisible);
+                else
+                    callback(false);
             }
-
-			// 关键修改：如果有停止回调，调用它恢复 UI；否则调用一次闪烁更新来隐藏
-			if (_onStopped != null) InvokeStopped();
-			else InvokeBlinkUpdate(false);
         }
 
-        private void InvokeBlinkUpdate(bool visible)
+        /// <summary>
+        /// 移除回调
+        /// </summary>
+        public void UnregisterCallback(Action<bool> callback)
         {
-            if (_disposed) return;
-            if (_dispatcher.CheckAccess())
-                _onBlinkUpdate(visible);
-            else
-                _dispatcher.BeginInvoke((Action)(() => _onBlinkUpdate(visible)));
+            if (callback == null) return;
+            lock (_lock)
+            {
+                _callbacks.Remove(callback);
+            }
         }
 
-        private void InvokeStopped()
+        private void NotifyCallbacks(bool visible)
         {
-            if (_disposed || _onStopped == null) return;
-            if (_dispatcher.CheckAccess())
-                _onStopped();
-            else
-                _dispatcher.BeginInvoke((Action)(() => _onStopped()));
+            Action<bool>[] callbacksCopy;
+            lock (_lock)
+            {
+                callbacksCopy = _callbacks.ToArray();
+            }
+            foreach (var cb in callbacksCopy)
+            {
+                try
+                {
+                    cb(visible);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"GyroCalibrationBlinker callback error: {ex.Message}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 强制重置校准（用于手动校准）
+        /// </summary>
+        public void ForceResetCalibration()
+        {
+            _device.SixAxis.ForceResetContinuousCalibration();
         }
 
         public void Dispose()
@@ -178,20 +186,22 @@ namespace DS4WinWPF.DS4Forms
                 _device.SixAxis.CalibrationStopped -= OnCalibrationStopped;
             }
 
-            StopBlinking();
+            StopCalibration();
 
-            lock (_timerLock)
+            if (_blinkTimer != null)
             {
-                if (_blinkTimer != null)
-                {
-                    _blinkTimer.Tick -= BlinkTimer_Tick;
-                    _blinkTimer = null;
-                }
-                if (_blinkTimeoutTimer != null)
-                {
-                    _blinkTimeoutTimer.Tick -= null;
-                    _blinkTimeoutTimer = null;
-                }
+                _blinkTimer.Tick -= BlinkTimer_Tick;
+                _blinkTimer = null;
+            }
+            if (_blinkTimeoutTimer != null)
+            {
+                _blinkTimeoutTimer.Tick -= null;
+                _blinkTimeoutTimer = null;
+            }
+
+            lock (_lock)
+            {
+                _callbacks.Clear();
             }
         }
     }

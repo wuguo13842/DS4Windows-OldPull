@@ -221,9 +221,10 @@ namespace DS4WinWPF.DS4Forms.ViewModels
         private int selectedIndex = -1;
         private int devIndex;
 
-        // 陀螺仪校准状态相关字段 - 使用 GyroCalibrationBlinker 简化后只保留属性
+        // 陀螺仪校准状态相关字段 - 使用设备级 GyroCalibrationBlinker
         private bool gyroCalibrationBlink;
-        private GyroCalibrationBlinker _blinker; // 新增：闪烁管理器
+        private GyroCalibrationBlinker _blinker; // 从设备获取的闪烁管理器
+        private Action<bool> _blinkCallback;     // 注册的回调
         private bool isCleaningUp; // 防止重复清理的标志
 
         public DS4Device Device { get => device; set => device = value; }
@@ -459,20 +460,14 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
             useCustomColor = Global.LightbarSettingsInfo[devIndex].ds4winSettings.useCustomLed;
 
-			// 在 CompositeDeviceModel 构造函数中
-			if (device?.SixAxis != null)
-			{
-				Application.Current.Dispatcher.Invoke(() =>
-				{
-					_blinker = new GyroCalibrationBlinker(device,
-						onBlinkUpdate: (visible) =>
-						{
-							GyroCalibrationBlink = visible;
-						},
-						onStopped: null
-					);
-				});
-			}
+            // 从设备获取校准 Blinker，注册回调
+            var blinker = device.CalibrationBlinker;
+            if (blinker != null)
+            {
+                _blinker = blinker;
+                _blinkCallback = (visible) => { GyroCalibrationBlink = visible; };
+                _blinker.RegisterCallback(_blinkCallback);
+            }
 
             // 订阅设备移除事件以清理资源
             device.Removal += OnDeviceRemoval;
@@ -508,9 +503,13 @@ namespace DS4WinWPF.DS4Forms.ViewModels
             if (isCleaningUp) return;
             isCleaningUp = true;
 
-            // 释放闪烁管理器资源
-            _blinker?.Dispose();
-            _blinker = null;
+            // 注销回调并释放闪烁管理器资源
+            if (_blinker != null && _blinkCallback != null)
+            {
+                _blinker.UnregisterCallback(_blinkCallback);
+                _blinker = null;
+                _blinkCallback = null;
+            }
 
             device.Removal -= OnDeviceRemoval;
         }
