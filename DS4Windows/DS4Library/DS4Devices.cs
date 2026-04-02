@@ -493,6 +493,9 @@ namespace DS4Windows
         {
             if (device != null)
             {
+				// 主动触发校准停止事件
+				device.SixAxis?.StopCalibrationForDisconnect();
+				
                 device.HidDevice.CloseDevice();
                 Devices.Remove(device.HidDevice.DevicePath);
                 DevicePaths.Remove(device.HidDevice.DevicePath);

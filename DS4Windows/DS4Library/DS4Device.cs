@@ -1796,6 +1796,9 @@ namespace DS4Windows
         {
             if (Mac != null)
             {
+				// 主动触发校准停止事件，避免托盘图标卡在闪烁状态
+				sixAxis?.StopCalibrationForDisconnect();
+				
                 // Wait for output report to be written
                 StopOutputUpdate();
                 Console.WriteLine("Trying to disconnect BT device " + Mac);
@@ -1857,6 +1860,9 @@ namespace DS4Windows
 
         public virtual bool DisconnectDongle(bool remove = false)
         {
+			// 主动触发校准停止事件
+			sixAxis?.StopCalibrationForDisconnect();
+			
             bool result = false;
             byte[] disconnectReport = new byte[SONYWA_FEATURE_REPORT_LENGTH];
             disconnectReport[0] = 0xe2;

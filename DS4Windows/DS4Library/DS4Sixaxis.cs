@@ -595,6 +595,17 @@ namespace DS4Windows
             // 触发停止事件
             CalibrationStopped?.Invoke(this, EventArgs.Empty);
         }
+		
+		/// <summary>
+		/// 强制停止校准（用于设备断开时）
+		/// </summary>
+		public void StopCalibrationForDisconnect()
+		{
+			if (gyroAverageTimer.IsRunning)
+			{
+				StopContinuousCalibration();  // 内部会触发 CalibrationStopped 事件
+			}
+		}
 
         public void ResetContinuousCalibration()
         {
